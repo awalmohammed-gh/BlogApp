@@ -191,9 +191,9 @@ const CommentSection = () => {
                 </div>
               ) : (
                 <div className="space-y-2 w-full">
-                  <div className="flex justify-between items-start">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-0">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-linear-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center shrink-0">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 bg-linear-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center shrink-0">
                         <User className="w-5 h-5 text-[#1E3A8A]" />
                       </div>
                       <div>
