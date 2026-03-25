@@ -190,7 +190,7 @@ const CommentSection = () => {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-2 w-full">
                   <div className="flex justify-between items-start">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 bg-linear-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center shrink-0">
