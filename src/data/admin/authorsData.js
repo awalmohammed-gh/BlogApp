@@ -1,0 +1,93 @@
+export const initialAuthors = [
+  {
+    id: "auth-1",
+    name: "Mohammed Awal",
+    email: "mohammed.awal@newsfront.com",
+    role: "Super Admin",
+    status: "Active",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    bio: "Senior Investigative Journalist & Managing Editor with over 14 years of newsroom leadership across West Africa.",
+    articlesCount: 14,
+    joinedDate: "January 12, 2023",
+    phone: "+233 24 555 0192",
+    desk: "Executive Desk"
+  },
+  {
+    id: "auth-2",
+    name: "Sarah Mensah",
+    email: "sarah.mensah@newsfront.com",
+    role: "Editor",
+    status: "Active",
+    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+    bio: "Chief Editorial Director overseeing sports, youth culture, and investigative long-form journalism.",
+    articlesCount: 19,
+    joinedDate: "March 4, 2023",
+    phone: "+233 20 888 4123",
+    desk: "Sports & Culture"
+  },
+  {
+    id: "auth-3",
+    name: "Abdul Gaffar",
+    email: "abdul.gaffar@newsfront.com",
+    role: "Editor",
+    status: "Active",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    bio: "Senior Technology and Business desk lead, covering fintech, commodities, and emerging African startups.",
+    articlesCount: 12,
+    joinedDate: "June 18, 2023",
+    phone: "+233 50 123 7890",
+    desk: "Technology & Business"
+  },
+  {
+    id: "auth-4",
+    name: "Gifty Opare",
+    email: "gifty.opare@newsfront.com",
+    role: "Author",
+    status: "Active",
+    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
+    bio: "Staff reporter focusing on parliamentary affairs, governance, public policy, and regional economic reforms.",
+    articlesCount: 9,
+    joinedDate: "September 1, 2023",
+    phone: "+233 24 777 9901",
+    desk: "Politics & Governance"
+  },
+  {
+    id: "auth-5",
+    name: "Ranco Carter",
+    email: "ranco.carter@newsfront.com",
+    role: "Author",
+    status: "Active",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+    bio: "Foreign correspondent and global affairs analyst covering African continental trade and international diplomacy.",
+    articlesCount: 8,
+    joinedDate: "November 15, 2023",
+    phone: "+233 26 333 4455",
+    desk: "Foreign Affairs"
+  },
+  {
+    id: "auth-6",
+    name: "Mohammed Hassan",
+    email: "mohammed.hassan@newsfront.com",
+    role: "Author",
+    status: "Active",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+    bio: "Digital commerce reporter tracking consumer markets, supply chain disruptions, and digital logistics across the continent.",
+    articlesCount: 11,
+    joinedDate: "January 20, 2024",
+    phone: "+233 55 999 1122",
+    desk: "E-commerce & Markets"
+  },
+  {
+    id: "auth-7",
+    name: "Eunice Boateng",
+    email: "eunice.boateng@newsfront.com",
+    role: "Author",
+    status: "Inactive",
+    avatar: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=150&auto=format&fit=crop&q=80",
+    bio: "Contributing lifestyle, wellness, and environmental features writer.",
+    articlesCount: 5,
+    joinedDate: "May 10, 2024",
+    phone: "+233 24 444 8877",
+    desk: "Lifestyle & Features"
+  }
+];

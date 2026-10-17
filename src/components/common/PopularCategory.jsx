@@ -1,55 +1,63 @@
-import { NavLink } from "react-router-dom";
-import {motion} from "motion/react"
-
+import { NavLink, Link } from "react-router-dom";
+import { Compass, ChevronRight } from "lucide-react";
 
 const PopularCategory = () => {
- const navLinks = [
-  // From original navLinks
-  { name: "Latest", path: "/latest" },
-  { name: "Politics", path: "/politics" },
-  { name: "Business", path: "/business" },
-  { name: "Technology", path: "/technology" },
-  { name: "Sports", path: "/sports" },
-  { name: "Entertainment", path: "/entertainment" },
-  { name: "Health", path: "/health" },
-  { name: "World", path: "/world" },
-  
-  // From article categories (excluding "All" and duplicates)
-  { name: "E-commerce", path: "/e-commerce" },
-  { name: "Trading", path: "/trading" },
-  { name: "Lifestyle", path: "/lifestyle" },
-  { name: "Local News", path: "/local-news" },
-  { name: "Foreign News", path: "/foreign-news" },
-];
+  const editorialDesks = [
+    { name: "Latest", path: "/latest" },
+    { name: "Sports", path: "/sports" },
+    { name: "Technology", path: "/technology" },
+    { name: "Local News", path: "/local-news" },
+    { name: "Foreign News", path: "/foreign-news" },
+    { name: "Business", path: "/business" },
+    { name: "E-commerce", path: "/e-commerce" },
+    { name: "Trading", path: "/trading" },
+    { name: "Lifestyle", path: "/lifestyle" },
+    { name: "Politics", path: "/politics" },
+    { name: "World", path: "/world" },
+  ];
 
   return (
-    <div className="my-18 flex flex-col items-center justify-center">
-      
-      {/* Title */}
-      <motion.h1 initial={{opacity:0, y:0}} animate={{opacity:1, y:-20}} transition={{duration:0.6, delay:0.2}} className="text-2xl sm:text-3xl md:text-5xl font-bold text-center">
-        Most Popular Categories
-      </motion.h1>
+    <section className="w-full border-y border-gray-200 bg-white sticky top-[60px] md:top-[85px] z-40 shadow-xs">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
+        
+        {/* Left Section Label */}
+        <div className="hidden md:flex items-center gap-2 pr-4 border-r border-gray-200 py-3 text-xs font-bold uppercase tracking-wider text-[#0B1B3D] shrink-0">
+          <Compass size={14} className="text-blue-600" />
+          <span>Sections</span>
+        </div>
 
-      {/* Links */}
-      <nav className="flex flex-wrap items-center justify-center gap-3 mt-8">
-        {navLinks.map((link, index) => (
-          <NavLink
-            key={index}
-            to={link.path}
-            className={({ isActive }) =>
-              isActive
-                ? "bg-[#1E3A8A] text-white px-5 py-3 rounded-xl transition"
-                : "bg-gray-100 text-gray-800 px-5 py-3 rounded-xl hover:bg-[#1E3A8A] hover:text-white transition"
-            }
+        {/* Scrollable Editorial Desks List */}
+        <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto py-2.5 px-1 sm:px-4 no-scrollbar scroll-smooth flex-1">
+          {editorialDesks.map((desk, idx) => (
+            <NavLink
+              key={idx}
+              to={desk.path}
+              className={({ isActive }) =>
+                `text-xs sm:text-[13px] font-medium px-3 py-1.5 rounded-lg whitespace-nowrap transition-all duration-150 ${
+                  isActive
+                    ? "bg-[#0B1B3D] text-white font-semibold shadow-xs"
+                    : "text-gray-700 hover:text-[#0B1B3D] hover:bg-gray-100/80"
+                }`
+              }
+            >
+              {desk.name}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Right Quick Link: Story Archive */}
+        <div className="hidden sm:flex items-center pl-4 border-l border-gray-200 py-3 shrink-0">
+          <Link
+            to="/blog"
+            className="text-xs font-semibold text-blue-700 hover:text-blue-900 flex items-center gap-1 transition-colors"
           >
-            {link.name}
-          </NavLink>
-        ))}
-      </nav>
+            <span>Archive</span>
+            <ChevronRight size={14} />
+          </Link>
+        </div>
 
-      {/* Divider */}
-      <div className="w-full max-w-4xl border-t border-gray-300 my-10" />
-    </div>
+      </div>
+    </section>
   );
 };
 

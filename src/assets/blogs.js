@@ -443,7 +443,7 @@ export const articles = [
     author: "Abdul Gaffar",
   },
   {
-    _id: "i9j0k1l2",
+    _id: "loc-accra-center-446",
     title: "Accra Community Center Upgraded",
     subTitle: "New Facilities for Youth and Seniors",
     category: "Local News",
@@ -456,7 +456,7 @@ export const articles = [
   },
   // Foreign News (5 objects)
   {
-    _id: "u1v2w3x4",
+    _id: "fn-summit-climate-459",
     title: "Global Summit Addresses Climate Crisis",
     subTitle: "World Leaders Set Targets",
     category: "Foreign News",
@@ -468,7 +468,7 @@ export const articles = [
     author: "Mohammed Hassan",
   },
   {
-    _id: "y5z6a7b8",
+    _id: "fn-trade-deal-471",
     title: "Country X Signs Trade Deal",
     subTitle: "Boosting Economic Ties",
     category: "Foreign News",
@@ -480,7 +480,7 @@ export const articles = [
     author: "Gifty Opare",
   },
   {
-    _id: "c9d0e1f2",
+    _id: "fn-space-mission-483",
     title: "International Space Mission Launched",
     subTitle: "Collaborative Mars Exploration",
     category: "Foreign News",
@@ -492,7 +492,7 @@ export const articles = [
     author: "Mohammed Awal",
   },
   {
-    _id: "i3j4k5l6",
+    _id: "fn-edu-summit-495",
     title: "Country Z Hosts Education Summit",
     subTitle: "Reforming Global Learning",
     category: "Foreign News",
@@ -504,7 +504,7 @@ export const articles = [
     author: "Abdul Gaffar",
   },
   {
-    _id: "m7n8o9p0",
+    _id: "fn-foreign-aid-507",
     title: "Foreign Aid Sent to Disaster Zone",
     subTitle: "Relief Efforts Intensify",
     category: "Foreign News",
