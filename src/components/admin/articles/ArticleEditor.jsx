@@ -17,6 +17,7 @@ import {
   Tag as TagIcon,
   AlertCircle,
   Loader2,
+  MessageSquare,
   ShieldAlert,
   History
 } from "lucide-react";
@@ -33,6 +34,7 @@ import StatusBadge from "../common/StatusBadge";
 import ArticlePreviewModal from "./ArticlePreviewModal";
 import ArticleRevisionsModal from "../editorial/ArticleRevisionsModal";
 import SubmitForReviewModal from "../editorial/SubmitForReviewModal";
+import { sanitizeHtml } from "../../../utils/sanitizeHtml";
 
 export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
   const { admin } = useAuth();
@@ -41,8 +43,19 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
   const navigate = useNavigate();
 
   const isAuthorRole = admin?.role === "author";
+  // Public article URLs are served by this frontend at /blog-details/:slug
+  const publicBaseUrl = `${window.location.origin}/blog-details/`;
 
-  // Active taxonomy states fetched from MongoDB Atlas
+  // The persisted MongoDB record this editor writes to. Set after the first
+  // successful create so later saves update the same article instead of
+  // creating duplicates; updatedAt guards against overwriting someone else's save.
+  const [savedArticle, setSavedArticle] = useState({
+    id: initialData?._id || null,
+    status: initialData?.status || "draft",
+    updatedAt: initialData?.updatedAt || null
+  });
+
+  // Active taxonomy states fetched from MongoDB
   const [categories, setCategories] = useState([]);
   const [availableTags, setAvailableTags] = useState([]);
   const [loadingTaxonomy, setLoadingTaxonomy] = useState(true);
@@ -58,7 +71,7 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
       initialData?.category?._id ||
       initialData?.category?.id ||
       (typeof initialData?.category === "string" ? initialData.category : ""),
-    author: initialData?.author?.name || initialData?.author || admin?.name || "NewsFront Desk",
+    author: initialData?.author?.name || admin?.name || "",
     image: initialData?.featuredImage?.url || initialData?.image || "",
     featuredImageData: initialData?.featuredImage || null,
     status: initialData?.status
@@ -73,17 +86,22 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
         : "Draft"
       : "Draft",
     scheduledFor: initialData?.scheduledAt
-      ? new Date(initialData.scheduledAt).toISOString().slice(0, 16)
+      ? new Date(new Date(initialData.scheduledAt).getTime() - new Date(initialData.scheduledAt).getTimezoneOffset() * 60000).toISOString().slice(0, 16)
       : "",
     isFeatured: initialData?.isFeatured || false,
     isBreaking: initialData?.isBreakingNews || initialData?.isBreaking || false,
+    commentsEnabled: initialData?.commentsEnabled !== false,
+    imageAlt: initialData?.featuredImage?.alt || "",
     tags: Array.isArray(initialData?.tags)
       ? initialData.tags.map((t) => (typeof t === "object" ? t.name : t))
       : [],
     seo: {
       metaTitle: initialData?.seo?.metaTitle || "",
       metaDescription: initialData?.seo?.metaDescription || "",
-      canonicalUrl: initialData?.seo?.canonicalUrl || ""
+      canonicalUrl: initialData?.seo?.canonicalUrl || "",
+      ogTitle: initialData?.seo?.ogTitle || "",
+      ogDescription: initialData?.seo?.ogDescription || "",
+      ogImage: initialData?.seo?.ogImage || ""
     }
   });
 
@@ -107,15 +125,9 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
         ]);
 
         if (isMounted) {
+          // No category is pre-selected: the writer chooses one explicitly
           if (catRes?.success && Array.isArray(catRes.data)) {
             setCategories(catRes.data);
-            // Default category if not already selected
-            if (!formData.category && catRes.data.length > 0) {
-              setFormData((prev) => ({
-                ...prev,
-                category: catRes.data[0]._id
-              }));
-            }
           }
           if (tagRes?.success && Array.isArray(tagRes.data)) {
             setAvailableTags(tagRes.data);
@@ -157,15 +169,22 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
     }
   };
 
-  // Add tag
+  // Add tag: only existing MongoDB tags can be attached (the API rejects unknown IDs)
   const handleAddTag = () => {
     const trimmed = tagInput.trim();
     if (!trimmed) return;
-    if (formData.tags.some((t) => t.toLowerCase() === trimmed.toLowerCase())) {
+    const match = availableTags.find(
+      (t) => t.name.toLowerCase() === trimmed.toLowerCase() || t.slug?.toLowerCase() === trimmed.toLowerCase()
+    );
+    if (!match) {
+      toast.error(`"${trimmed}" is not an existing tag. Create it under Tags first.`);
+      return;
+    }
+    if (formData.tags.some((t) => t.toLowerCase() === match.name.toLowerCase())) {
       toast.error("Tag already added");
       return;
     }
-    updateField("tags", [...formData.tags, trimmed]);
+    updateField("tags", [...formData.tags, match.name]);
     setTagInput("");
   };
 
@@ -250,7 +269,8 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
       subTitle: formData.subTitle?.trim() || "",
       slug: formData.slug?.trim() || undefined,
       excerpt: formData.excerpt?.trim() || "",
-      content: formData.description,
+      // Stored HTML is restricted to safe formatting before it reaches the API
+      content: sanitizeHtml(formData.description),
       category: selectedCategoryId || null,
       tags: resolvedTagIds,
       featuredImage: {
@@ -260,11 +280,12 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
         name: formData.featuredImageData?.name || "",
         width: formData.featuredImageData?.width || null,
         height: formData.featuredImageData?.height || null,
-        alt: formData.featuredImageData?.alt || formData.title || ""
+        alt: formData.imageAlt?.trim() || ""
       },
       status: finalStatusEnum,
       isFeatured: isAuthorRole ? false : Boolean(formData.isFeatured),
       isBreakingNews: isAuthorRole ? false : Boolean(formData.isBreaking),
+      commentsEnabled: Boolean(formData.commentsEnabled),
       scheduledAt:
         finalStatusEnum === "scheduled" && formData.scheduledFor
           ? new Date(formData.scheduledFor).toISOString()
@@ -272,35 +293,63 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
       seo: {
         metaTitle: formData.seo.metaTitle || formData.title,
         metaDescription: formData.seo.metaDescription || formData.excerpt,
-        canonicalUrl: formData.seo.canonicalUrl || ""
+        canonicalUrl: formData.seo.canonicalUrl?.trim() || "",
+        ogTitle: formData.seo.ogTitle?.trim() || "",
+        ogDescription: formData.seo.ogDescription?.trim() || "",
+        ogImage: formData.seo.ogImage?.trim() || ""
       }
     };
 
+    if (finalStatusEnum === "scheduled" && !payload.scheduledAt) {
+      setErrors((prev) => ({ ...prev, scheduledFor: "Choose a publication date and time." }));
+      toast.error("Choose a publication date and time before scheduling.");
+      return;
+    }
+
+    setIsSaving(true);
+    let articleId = savedArticle.id;
+    let persisted = false;
     try {
-      setIsSaving(true);
-      if (isEditMode && initialData?._id) {
-        await articleService.updateArticle(initialData._id, payload);
-        toast.success("Article updated successfully!");
-      } else {
-        await articleService.createArticle(payload);
-        toast.success(
-          finalStatusEnum === "published"
-            ? "Article published successfully to NewsFront!"
-            : finalStatusEnum === "pending_review"
-            ? "Article submitted for editorial review!"
-            : "Article saved as draft in database!"
-        );
-      }
+      // 1. Persist the content. The record stays a draft (or keeps its current
+      //    state); publication only happens through the dedicated actions below.
+      const existingStatus = savedArticle.status || "draft";
+      const recordStatus = ["published", "scheduled", "pending_review"].includes(finalStatusEnum) || (finalStatusEnum === "draft" && existingStatus === "published") ? existingStatus : finalStatusEnum;
+      const result = articleId
+        ? await articleService.updateArticle(articleId, {
+            ...payload,
+            status: recordStatus,
+            scheduledAt: initialData?.scheduledAt || null,
+            ...(savedArticle.updatedAt ? { expectedUpdatedAt: savedArticle.updatedAt } : {})
+          })
+        : await articleService.createArticle({ ...payload, status: "draft", scheduledAt: null });
+      articleId = result.data._id;
+      persisted = true;
+      setSavedArticle({ id: articleId, status: result.data.status, updatedAt: result.data.updatedAt });
       setIsDirty(false);
-      navigate("/admin/articles");
-    } catch (err) {
-      const serverMsg =
-        err?.response?.data?.message || err?.message || "Failed to save article";
-      const fieldErrors = err?.response?.data?.errors;
-      if (fieldErrors) {
-        setErrors(fieldErrors);
+
+      // 2. Workflow action, if one was requested
+      if (finalStatusEnum === "published") await articleService.publishArticle(articleId);
+      else if (finalStatusEnum === "scheduled") await articleService.scheduleArticle(articleId, payload.scheduledAt);
+      else if (finalStatusEnum === "pending_review" && existingStatus !== "pending_review") await articleService.submitArticle(articleId);
+
+      if (finalStatusEnum === "draft") {
+        toast.success("Draft saved.");
+        // Open the saved record so a refresh reloads it from MongoDB
+        if (!isEditMode) navigate(`/admin/articles/${articleId}/edit`, { replace: true });
+      } else {
+        toast.success(finalStatusEnum === "published" ? "Approved revision published." : finalStatusEnum === "scheduled" ? "Approved revision scheduled." : "Submitted for editorial review.");
+        navigate("/admin/articles");
       }
-      toast.error(serverMsg);
+    } catch (err) {
+      if (err?.errors && typeof err.errors === "object") setErrors(err.errors);
+      const message = err?.message || "Failed to save article";
+      if (persisted) {
+        // Content is safely stored; only the workflow step failed. Later saves update this same article.
+        toast.error(`Your changes were saved, but the next step failed: ${message}`);
+        if (!isEditMode) navigate(`/admin/articles/${articleId}/edit`, { replace: true });
+      } else {
+        toast.error(message);
+      }
     } finally {
       setIsSaving(false);
     }
@@ -373,7 +422,7 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
             type="button"
             disabled={isSaving}
             onClick={() => {
-              if (isEditMode && initialData?._id) {
+              if (isEditMode && initialData?._id && !isDirty) {
                 setShowSubmitModal(true);
               } else {
                 handleSave("Pending Review");
@@ -486,7 +535,7 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
             <div className="pt-2 border-t border-slate-100">
               <div className="flex items-center gap-2 text-xs text-slate-500">
                 <span className="font-semibold text-slate-600">Permalink:</span>
-                <span className="text-slate-400">newsfront.com/</span>
+                <span className="text-slate-400 truncate max-w-[45%]">{publicBaseUrl}</span>
                 <input
                   type="text"
                   value={formData.slug}
@@ -594,24 +643,62 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
                   />
                 </div>
 
-                {/* Simulated Google Search Result Card */}
+                <div>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">
+                    Canonical URL
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.seo.canonicalUrl}
+                    onChange={(e) => updateField("seo", { ...formData.seo, canonicalUrl: e.target.value })}
+                    placeholder="Leave empty unless the original copy of this story lives at another URL"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
+                  />
+                </div>
+
+                <div className="pt-3 border-t border-slate-100 space-y-3">
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Social Sharing (Open Graph)
+                  </div>
+                  <input
+                    type="text"
+                    value={formData.seo.ogTitle}
+                    onChange={(e) => updateField("seo", { ...formData.seo, ogTitle: e.target.value })}
+                    maxLength={100}
+                    placeholder="Social title (defaults to the SEO title)"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
+                  />
+                  <textarea
+                    rows={2}
+                    value={formData.seo.ogDescription}
+                    onChange={(e) => updateField("seo", { ...formData.seo, ogDescription: e.target.value })}
+                    maxLength={300}
+                    placeholder="Social description (defaults to the meta description)"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
+                  />
+                  <input
+                    type="url"
+                    value={formData.seo.ogImage}
+                    onChange={(e) => updateField("seo", { ...formData.seo, ogImage: e.target.value })}
+                    placeholder="Social image URL (defaults to the featured image)"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
+                  />
+                </div>
+
+                {/* Search result snippet preview */}
                 <div className="pt-2">
                   <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
                     Search Engine Result Preview
                   </div>
                   <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
                     <div className="text-[11px] text-emerald-800 flex items-center gap-1">
-                      <span>https://newsfront.com</span>
-                      <span>&rsaquo; news</span>
-                      <span>&rsaquo; {formData.slug || "article-slug"}</span>
+                      <span className="truncate">{publicBaseUrl}{formData.slug || "article-slug"}</span>
                     </div>
                     <div className="text-sm font-semibold text-blue-800 hover:underline mt-0.5 cursor-pointer">
-                      {formData.seo.metaTitle || formData.title || "Article Headline - NewsFront"}
+                      {formData.seo.metaTitle || formData.title || "Article headline"}
                     </div>
                     <div className="text-xs text-slate-600 mt-1 line-clamp-2">
-                      {formData.seo.metaDescription ||
-                        formData.excerpt ||
-                        "Read the complete investigative report and official news update on NewsFront."}
+                      {formData.seo.metaDescription || formData.excerpt || "Add an excerpt or meta description to control this snippet."}
                     </div>
                   </div>
                 </div>
@@ -659,6 +746,7 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
                   onChange={(e) => updateField("scheduledFor", e.target.value)}
                   className="w-full bg-white border border-indigo-300 rounded-lg p-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 />
+                {errors.scheduledFor && <p className="text-xs text-rose-600">{errors.scheduledFor}</p>}
               </div>
             )}
 
@@ -667,14 +755,24 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
               <label className="text-xs font-semibold text-slate-700 block mb-1.5">
                 Primary Category <span className="text-rose-500">*</span>
               </label>
-              {categories.length === 0 ? (
+              {loadingTaxonomy ? (
+                <div className="p-2.5 text-xs text-slate-400 flex items-center gap-1.5">
+                  <Loader2 size={13} className="animate-spin" /> Loading categories...
+                </div>
+              ) : categories.length === 0 ? (
                 <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-1">
                   <p className="font-semibold">No categories available</p>
                   <p className="text-[11px] text-amber-700">
-                    You need to create categories in the database.{" "}
-                    <Link to="/admin/categories" className="underline font-bold hover:text-amber-950">
-                      Manage Categories
-                    </Link>
+                    {isAuthorRole ? (
+                      "Ask an Editor to create a category before saving this article."
+                    ) : (
+                      <>
+                        Create one before saving this article.{" "}
+                        <Link to="/admin/categories" className="underline font-bold hover:text-amber-950">
+                          Manage Categories
+                        </Link>
+                      </>
+                    )}
                   </p>
                 </div>
               ) : (
@@ -709,6 +807,23 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
                 {formData.author} ({admin?.role ? admin.role.toUpperCase() : "STAFF"})
               </div>
             </div>
+
+            {/* Reader comments */}
+            <label className="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">
+              <div className="flex items-center gap-2">
+                <MessageSquare size={16} className="text-purple-500" />
+                <div>
+                  <div className="text-xs font-semibold text-slate-800">Comments Enabled</div>
+                  <div className="text-[10px] text-slate-400">Allow reader comments (the site-wide setting also applies)</div>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={formData.commentsEnabled}
+                onChange={(e) => updateField("commentsEnabled", e.target.checked)}
+                className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 h-4 w-4 cursor-pointer"
+              />
+            </label>
 
             {/* Editorial Toggles (Visible to Editors & Super Admins) */}
             {!isAuthorRole && (
@@ -757,9 +872,27 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
               onChange={(imgUrl, meta) => {
                 updateField("image", imgUrl);
                 if (meta) updateField("featuredImageData", meta);
+                // Reuse the media library's alt text unless the writer already wrote one
+                if (!imgUrl) updateField("imageAlt", "");
+                else if (meta?.alt && !formData.imageAlt) updateField("imageAlt", meta.alt);
               }}
               label="Featured Image (ImageKit)"
             />
+            {formData.image && (
+              <div className="mt-3">
+                <label className="text-xs font-semibold text-slate-700 block mb-1">
+                  Featured Image Alt Text
+                </label>
+                <input
+                  type="text"
+                  value={formData.imageAlt}
+                  onChange={(e) => updateField("imageAlt", e.target.value)}
+                  maxLength={200}
+                  placeholder="Describe the image for screen readers"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
+                />
+              </div>
+            )}
           </div>
 
           {/* Tags Box */}
@@ -787,6 +920,17 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
               ))}
             </div>
 
+            {!loadingTaxonomy && availableTags.length === 0 && (
+              <p className="text-[11px] text-slate-500">
+                No tags available.{" "}
+                {!isAuthorRole && (
+                  <Link to="/admin/tags" className="text-blue-600 font-semibold hover:underline">
+                    Create tags
+                  </Link>
+                )}
+              </p>
+            )}
+
             {/* Suggested / Available Tags Chips */}
             {availableTags.length > 0 && (
               <div className="pt-1">
@@ -811,8 +955,8 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
               </div>
             )}
 
-            {/* Add Custom Tag Input */}
-            <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+            {/* Add an existing tag by name */}
+            <div className={`flex items-center gap-2 pt-2 border-t border-slate-100 ${availableTags.length === 0 ? "hidden" : ""}`}>
               <input
                 type="text"
                 value={tagInput}
@@ -823,7 +967,7 @@ export const ArticleEditor = ({ initialData = null, isEditMode = false }) => {
                     handleAddTag();
                   }
                 }}
-                placeholder="Type tag & press enter..."
+                placeholder="Type an existing tag & press enter..."
                 className="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               />
               <button

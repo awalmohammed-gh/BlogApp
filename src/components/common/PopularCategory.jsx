@@ -17,7 +17,7 @@ const PopularCategory = () => {
   ];
 
   return (
-    <section className="w-full border-y border-gray-200 bg-white sticky top-[60px] md:top-[85px] z-40 shadow-xs">
+    <section className="w-full border-b border-slate-200/80 bg-white/85 backdrop-blur-md sticky top-[60px] md:top-[85px] z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
         
         {/* Left Section Label */}
@@ -33,10 +33,10 @@ const PopularCategory = () => {
               key={idx}
               to={desk.path}
               className={({ isActive }) =>
-                `text-xs sm:text-[13px] font-medium px-3 py-1.5 rounded-lg whitespace-nowrap transition-all duration-150 ${
+                `text-xs sm:text-[13px] font-medium px-3.5 py-1.5 rounded-full whitespace-nowrap border transition-all duration-150 ${
                   isActive
-                    ? "bg-[#0B1B3D] text-white font-semibold shadow-xs"
-                    : "text-gray-700 hover:text-[#0B1B3D] hover:bg-gray-100/80"
+                    ? "bg-slate-900 border-slate-900 text-white font-semibold"
+                    : "border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-200"
                 }`
               }
             >

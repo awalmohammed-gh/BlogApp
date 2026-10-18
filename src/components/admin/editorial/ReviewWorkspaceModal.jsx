@@ -23,6 +23,7 @@ import ReviewStatusBadge from "./ReviewStatusBadge";
 import RevisionComparisonModal from "./RevisionComparisonModal";
 import editorialService from "../../../services/admin/editorialService";
 import { articleService } from "../../../services/admin/articleService";
+import { sanitizeHtml } from "../../../utils/sanitizeHtml";
 
 export const ReviewWorkspaceModal = ({
   isOpen,
@@ -352,7 +353,7 @@ export const ReviewWorkspaceModal = ({
                     <div
                       className="max-h-96 overflow-y-auto custom-scrollbar p-4 bg-slate-50/50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 leading-relaxed prose prose-slate max-w-none"
                       dangerouslySetInnerHTML={{
-                        __html: revision.content || article.content || "<p>No content in snapshot.</p>"
+                        __html: sanitizeHtml(revision.content || article.content) || "<p>No content in snapshot.</p>"
                       }}
                     />
                   </div>

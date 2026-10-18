@@ -1,3 +1,5 @@
+import { engagementService } from "../services/public/engagementService";
+import { useSiteSettings } from "../context/SiteSettingsContext";
 import { useState, useEffect } from "react";
 import { 
   Mail, 
@@ -5,7 +7,6 @@ import {
   MapPin, 
   Send, 
   MessageSquare, 
-  Clock, 
   HelpCircle, 
   CheckCircle2, 
   AlertCircle 
@@ -15,6 +16,7 @@ import blog28 from "../assets/blog28.jpg";
 import { publicSiteContentService } from "../services/public/publicSiteContentService";
 
 const Contact = () => {
+  const { settings } = useSiteSettings();
   const [cmsSections, setCmsSections] = useState(null);
 
   useEffect(() => {
@@ -29,10 +31,10 @@ const Contact = () => {
     };
   }, []);
 
-  const heroCms = cmsSections?.find((s) => s.type === "hero")?.data;
   const contactCms = cmsSections?.find((s) => s.type === "contact_info")?.data;
 
   const [formData, setFormData] = useState({
+    website: "",
     name: "",
     email: "",
     subject: "",
@@ -41,53 +43,47 @@ const Contact = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Contact details come from the Website CMS contact page or General Settings only.
   const contactCards = [
     {
       icon: Mail,
       title: "Newsroom & Editorial Tips",
-      primary: contactCms?.primaryEmail || "tips@newsfront.com",
-      secondary: contactCms?.secondaryEmail || "newsroom@newsfront.com",
-      note: "Encrypted leads & press releases"
+      primary: contactCms?.primaryEmail || settings?.general.contactEmail || "",
+      secondary: contactCms?.secondaryEmail || "",
+      note: "Leads & press releases"
     },
     {
       icon: Phone,
-      title: "Direct Phone & WhatsApp",
-      primary: contactCms?.primaryPhone || "+233 241529904",
-      secondary: contactCms?.secondaryPhone || "+233 302001122",
-      note: contactCms?.hours || "Mon - Fri, 8:00 AM - 6:00 PM GMT"
+      title: "Phone",
+      primary: contactCms?.primaryPhone || settings?.general.contactPhone || "",
+      secondary: contactCms?.secondaryPhone || "",
+      note: contactCms?.hours || ""
     },
     {
       icon: MapPin,
-      title: "Headquarters",
-      primary: contactCms?.address || "Independence Avenue, Ridge",
-      secondary: "Accra, Ghana",
-      note: "Visits by appointment only"
-    },
-    {
-      icon: Clock,
-      title: "Live Operations Desk",
-      primary: "24/7 Digital Monitoring",
-      secondary: "Rapid Response Team",
-      note: "Instant coverage for breaking news"
+      title: "Address",
+      primary: contactCms?.address || settings?.general.address || "",
+      secondary: "",
+      note: ""
     }
-  ];
+  ].filter((card) => card.primary);
 
   const faqs = [
     {
       q: "How can I submit a confidential news tip or leak?",
-      a: "You can email tips@newsfront.com directly or mark your subject line as 'CONFIDENTIAL TIP'. Our investigative desk respects reporter-source confidentiality under Ghana's journalistic code of ethics."
+      a: "Use the form on this page or the newsroom email listed above, and mark your subject line as 'CONFIDENTIAL TIP'. Our investigative desk respects reporter-source confidentiality under Ghana's journalistic code of ethics."
     },
     {
-      q: "How do I advertise or sponsor content on NewsFront?",
-      a: "Select 'Advertising & Brand Partnerships' in the contact form or email ads@newsfront.com. Our commercial desk will share our media kit, readership analytics, and custom partnership packages."
+      q: "How do I advertise or sponsor content on Nsemra News?",
+      a: "Select 'Advertising & Brand Partnerships' in the contact form and our commercial desk will get back to you."
     },
     {
       q: "What is your policy regarding factual corrections?",
       a: "We strive for 100% accuracy. If you notice any factual discrepancy in any story, submit a message choosing 'Editorial Correction' with the article link, and our editors will review and update within hours."
     },
     {
-      q: "Can other publications syndicate or quote NewsFront articles?",
-      a: "Content may be quoted with clear hyperlinked attribution to NewsFront. For full syndication rights, contact syndication@newsfront.com."
+      q: "Can other publications syndicate or quote Nsemra News articles?",
+      a: "Content may be quoted with clear hyperlinked attribution to Nsemra News. For full syndication rights, contact us through the form on this page."
     }
   ];
 
@@ -98,7 +94,7 @@ const Contact = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
@@ -113,17 +109,13 @@ const Contact = () => {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      toast.success("Message sent successfully! Our desk will reply shortly.");
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        department: "newsroom",
-        message: ""
-      });
-    }, 800);
+    try {
+      const response = await engagementService.contact(formData);
+      toast.success(response.message);
+      setFormData({ name: "", email: "", subject: "", department: "newsroom", message: "", website: "" });
+    } catch (err) { toast.error(err.message || "Unable to submit your message. Please try again."); }
+    finally { setIsSubmitting(false); }
+
   };
 
   return (
@@ -136,7 +128,7 @@ const Contact = () => {
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <img
             src={blog28}
-            alt="NewsFront Communications Bureau"
+            alt="Nsemra News Communications Bureau"
             className="w-full h-full object-cover object-center scale-105"
           />
         </div>
@@ -152,27 +144,13 @@ const Contact = () => {
           </div>
 
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold font-serif-headline tracking-tight text-white mb-4">
-            Contact the NewsFront Newsroom
+            Contact the Nsemra News Newsroom
           </h1>
 
           <p className="text-sm sm:text-base md:text-lg text-blue-100/90 max-w-2xl mx-auto leading-relaxed font-light mb-8">
             Submit confidential news tips, reach bureau correspondents, propose editorial corrections, or discuss advertising partnerships.
           </p>
 
-          <div className="max-w-2xl mx-auto bg-[#07132B]/80 border border-blue-900/60 rounded-2xl p-4 backdrop-blur-md grid grid-cols-1 sm:grid-cols-3 gap-4 text-center divide-y sm:divide-y-0 sm:divide-x divide-blue-900/40">
-            <div className="pt-2 sm:pt-0">
-              <span className="text-lg font-bold text-white block">24/7 Monitored</span>
-              <span className="text-[11px] uppercase tracking-wider text-blue-300 font-medium">Breaking Tips</span>
-            </div>
-            <div className="pt-2 sm:pt-0">
-              <span className="text-lg font-bold text-emerald-400 block">100% Confidential</span>
-              <span className="text-[11px] uppercase tracking-wider text-blue-300 font-medium">Source Protection</span>
-            </div>
-            <div className="pt-2 sm:pt-0">
-              <span className="text-lg font-bold text-white block">&lt; 2 Hours</span>
-              <span className="text-[11px] uppercase tracking-wider text-blue-300 font-medium">Average Response</span>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -209,8 +187,8 @@ const Contact = () => {
                       <div>
                         <h3 className="font-semibold text-gray-900 text-sm">{card.title}</h3>
                         <p className="text-[#1E3A8A] font-medium text-sm mt-0.5">{card.primary}</p>
-                        <p className="text-gray-600 text-xs mt-0.5">{card.secondary}</p>
-                        <p className="text-gray-400 text-xs mt-1.5">{card.note}</p>
+                        {card.secondary && <p className="text-gray-600 text-xs mt-0.5">{card.secondary}</p>}
+                        {card.note && <p className="text-gray-400 text-xs mt-1.5">{card.note}</p>}
                       </div>
                     </div>
                   </div>
@@ -232,6 +210,7 @@ const Contact = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                <input aria-hidden="true" tabIndex={-1} autoComplete="off" className="hidden" name="website" value={formData.website} onChange={handleChange} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
@@ -240,7 +219,7 @@ const Contact = () => {
                     <input
                       type="text"
                       name="name"
-                      value={formData.name}
+                      maxLength={100} value={formData.name}
                       onChange={handleChange}
                       placeholder="e.g. Kwame Mensah"
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-[#1E3A8A] focus:border-transparent transition-all"
@@ -254,7 +233,7 @@ const Contact = () => {
                     <input
                       type="email"
                       name="email"
-                      value={formData.email}
+                      maxLength={254} value={formData.email}
                       onChange={handleChange}
                       placeholder="e.g. kwame@example.com"
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-[#1E3A8A] focus:border-transparent transition-all"
@@ -270,7 +249,7 @@ const Contact = () => {
                     <input
                       type="text"
                       name="subject"
-                      value={formData.subject}
+                      maxLength={200} value={formData.subject}
                       onChange={handleChange}
                       placeholder="Headline or topic summary"
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-[#1E3A8A] focus:border-transparent transition-all"
@@ -303,7 +282,7 @@ const Contact = () => {
                   <textarea
                     rows={5}
                     name="message"
-                    value={formData.message}
+                    maxLength={5000} value={formData.message}
                     onChange={handleChange}
                     placeholder="Provide full details, story lead, or inquiry..."
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-[#1E3A8A] focus:border-transparent transition-all resize-none"

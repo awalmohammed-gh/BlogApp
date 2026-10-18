@@ -1,7 +1,9 @@
+import BrandLogo from "../components/common/BrandLogo";
 import { NavLink, useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronUp, Menu, X, Search, Clock, TrendingUp } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useBlog } from "../context/BlogProvider";
+import { deskCounts } from "../utils/articleMeta";
 
 const Navbar = () => {
   const [openLink, setOpenLink] = useState(false);
@@ -13,6 +15,8 @@ const Navbar = () => {
   const searchInputRef = useRef(null);
   const navigate = useNavigate();
   const { articles } = useBlog();
+  // Desks with the most published stories (real data, not fixed topics)
+  const trendingDesks = deskCounts(articles).slice(0, 2);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -107,18 +111,23 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 text-blue-300">
-              <TrendingUp size={12} className="text-blue-400" />
-              <span className="text-gray-300">Trending:</span>
-              <NavLink to="/technology" className="text-white hover:underline">
-                Accra Tech Hub
-              </NavLink>
-              <span className="text-blue-400/50">&bull;</span>
-              <NavLink to="/sports" className="text-white hover:underline">
-                Olympic Qualifiers
-              </NavLink>
-            </div>
-            <span className="text-blue-400/50">&bull;</span>
+            {trendingDesks.length > 0 && (
+              <>
+                <div className="flex items-center gap-1.5 text-blue-300">
+                  <TrendingUp size={12} className="text-blue-400" />
+                  <span className="text-gray-300">Most covered:</span>
+                  {trendingDesks.map((desk, i) => (
+                    <span key={desk.slug} className="flex items-center gap-1.5">
+                      {i > 0 && <span className="text-blue-400/50">&bull;</span>}
+                      <NavLink to={`/${desk.slug}`} className="text-white hover:underline">
+                        {desk.name}
+                      </NavLink>
+                    </span>
+                  ))}
+                </div>
+                <span className="text-blue-400/50">&bull;</span>
+              </>
+            )}
             <NavLink to="/about" className="hover:text-white transition-colors">
               About Bureau
             </NavLink>
@@ -141,17 +150,7 @@ const Navbar = () => {
           
           {/* Logo / Brand */}
           <NavLink to="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-blue-500 to-[#1E3A8A] border border-blue-300/30 flex items-center justify-center font-serif text-white font-black text-xl shadow-sm group-hover:scale-105 transition-transform">
-              N
-            </div>
-            <div>
-              <span className="text-2xl font-bold tracking-tight text-white block leading-none font-serif-headline">
-                News<span className="text-blue-300 font-sans font-extrabold">Front</span>
-              </span>
-              <span className="text-[9px] uppercase tracking-widest text-blue-200 block font-medium mt-0.5">
-                The Accra & International Dispatch
-              </span>
-            </div>
+            <BrandLogo />
           </NavLink>
 
           {/* Desktop Nav Items */}

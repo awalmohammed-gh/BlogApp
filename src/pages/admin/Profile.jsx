@@ -20,6 +20,7 @@ import toast from "react-hot-toast";
 
 import { useAuth } from "../../context/admin/AuthContext";
 import profileService from "../../services/admin/profileService";
+import StaffAvatar from "../../components/admin/common/StaffAvatar";
 
 export const Profile = () => {
   const { admin, updateAdminState, logout } = useAuth();
@@ -68,9 +69,7 @@ export const Profile = () => {
             role: res.admin.role || "author",
             bio: res.admin.bio || "",
             phone: res.admin.phone || "",
-            avatar:
-              res.admin.avatar ||
-              "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+            avatar: res.admin.avatar || "",
             createdAt: res.admin.createdAt,
             lastLoginAt: res.admin.lastLoginAt
           });
@@ -204,10 +203,11 @@ export const Profile = () => {
         <div className="h-32 bg-linear-to-r from-[#0B1B3A] to-blue-900 p-6 flex items-end">
           <div className="flex items-center gap-4 translate-y-10">
             <div className="relative group">
-              <img
+              <StaffAvatar
                 src={profileData.avatar}
-                alt={profileData.name}
-                className="w-20 h-20 rounded-2xl object-cover ring-4 ring-white shadow-lg bg-white"
+                name={profileData.name}
+                className="w-20 h-20 rounded-2xl ring-4 ring-white shadow-lg"
+                textClassName="text-2xl"
               />
             </div>
             <div className="translate-y-2">

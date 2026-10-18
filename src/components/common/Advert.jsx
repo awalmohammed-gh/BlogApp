@@ -15,8 +15,8 @@ const Advert = ({ placement = "homepage_banner", className = "" }) => {
         if (isMounted && res?.success && res.data) {
           setAd(res.data);
         }
-      } catch (e) {
-        // Fallback gracefully
+      } catch {
+        // No advertisement is shown when the request fails
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -101,7 +101,7 @@ const Advert = ({ placement = "homepage_banner", className = "" }) => {
                 </Link>
               )}
               <p className="text-[10px] text-slate-400 text-right w-full">
-                Verified Commercial Placement &bull; NewsFront
+                Sponsored placement &bull; Nsemra News
               </p>
             </div>
           </div>
@@ -110,53 +110,8 @@ const Advert = ({ placement = "homepage_banner", className = "" }) => {
     );
   }
 
-  // If placement is article_inline and no ad exists, collapse cleanly
-  if (placement === "article_inline" || placement === "article_sidebar") {
-    return null;
-  }
-
-  // Canonical NewsFront Commercial Partnership Feature (House fallback for Homepage & All Stories)
-  return (
-    <section className={`w-full my-8 ${className}`}>
-      <div className="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 md:p-10 border border-slate-800 shadow-md relative overflow-hidden">
-        <div className="absolute -top-12 -right-12 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-6">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            Advertisement &bull; Commercial Partner Feature
-          </span>
-          <span className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">
-            NewsFront Media Solutions
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          <div className="md:col-span-8 space-y-2">
-            <h3 className="text-xl sm:text-2xl font-bold font-serif-headline text-white tracking-tight">
-              Connect Your Brand with Over 500,000 Discerning Decision-Makers Across Africa
-            </h3>
-            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-2xl">
-              From executive briefings to bespoke industry reports, NewsFront offers high-impact commercial partnerships that deliver your message directly to corporate leaders, policymakers, and forward-thinking consumers.
-            </p>
-          </div>
-
-          <div className="md:col-span-4 flex flex-col sm:flex-row md:flex-col items-start md:items-end justify-center gap-3">
-            <Link
-              to="/contact"
-              className="w-full sm:w-auto md:w-full text-center px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md transition-all duration-200 flex items-center justify-center gap-2 group"
-            >
-              <span>Explore Partnership Options</span>
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <p className="text-[10px] text-slate-400 text-right w-full">
-              Media kit &bull; Audience demographics available on request
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+  // No active campaign in MongoDB: render nothing rather than an invented placement
+  return null;
 };
 
 export default Advert;

@@ -15,6 +15,46 @@ html {
   font-family: "Newsreader", Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
+/* ---- Landing hero: spinning globe ---- */
+@keyframes globe-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes globe-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes globe-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.04); }
+}
+.globe-spin { animation: globe-spin 60s linear infinite; }
+.globe-orbit { animation: globe-spin 28s linear infinite; }
+.globe-orbit-reverse { animation: globe-spin 42s linear infinite reverse; }
+.globe-float { animation: globe-float 6s ease-in-out infinite; }
+.globe-glow { animation: globe-pulse 5s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .globe-spin, .globe-orbit, .globe-orbit-reverse, .globe-float, .globe-glow { animation: none; }
+}
+
+/* Faint star field + grid for the dark hero */
+.hero-starfield {
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(186, 230, 253, 0.7) 50%, transparent 51%),
+    radial-gradient(1px 1px at 28% 72%, rgba(186, 230, 253, 0.5) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 46% 12%, rgba(125, 211, 252, 0.6) 50%, transparent 51%),
+    radial-gradient(1px 1px at 63% 84%, rgba(186, 230, 253, 0.5) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 82% 26%, rgba(125, 211, 252, 0.7) 50%, transparent 51%),
+    radial-gradient(1px 1px at 92% 64%, rgba(186, 230, 253, 0.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 6% 52%, rgba(186, 230, 253, 0.45) 50%, transparent 51%);
+}
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(56, 189, 248, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse at 70% 40%, black 20%, transparent 70%);
+}
+
 .editorial-rule {
   border-color: #e2e8f0;
 }

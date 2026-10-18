@@ -29,6 +29,7 @@ import staffService from "../../services/admin/staffService";
 import Modal from "../../components/admin/common/Modal";
 import ConfirmDialog from "../../components/admin/common/ConfirmDialog";
 import EmptyState from "../../components/admin/common/EmptyState";
+import StaffAvatar from "../../components/admin/common/StaffAvatar";
 import StatusBadge from "../../components/admin/common/StatusBadge";
 import Pagination from "../../components/admin/common/Pagination";
 
@@ -154,11 +155,12 @@ export const Authors = () => {
         setShareLinkData({
           name: res.data.staff.name,
           email: res.data.staff.email,
-          url: res.data.inviteUrl
+          url: res.data.inviteUrl,
+          notice: res.data.notice, emailStatus: res.data.emailStatus
         });
         setCopiedLink(false);
         setIsShareLinkModalOpen(true);
-        toast.success(`Invitation created for ${res.data.staff.name}!`);
+        toast.success("Invitation created. See the email submission status below.");
         fetchStaff();
       }
     } catch (err) {
@@ -190,11 +192,12 @@ export const Authors = () => {
         setShareLinkData({
           name: staff.name,
           email: staff.email,
-          url: res.data.inviteUrl
+          url: res.data.inviteUrl,
+          notice: res.data.notice, emailStatus: res.data.emailStatus
         });
         setCopiedLink(false);
         setIsShareLinkModalOpen(true);
-        toast.success(`New invitation link generated for ${staff.name}!`);
+        toast.success("Invitation renewed. See the email submission status below.");
         fetchStaff();
       }
     } catch (err) {
@@ -469,13 +472,10 @@ export const Authors = () => {
                       {/* Name & Avatar */}
                       <td className="py-3.5 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
-                          <img
-                            src={
-                              staff.avatar ||
-                              "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80"
-                            }
-                            alt={staff.name}
-                            className="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-200 shrink-0"
+                          <StaffAvatar
+                            src={staff.avatar}
+                            name={staff.name}
+                            className="w-9 h-9 rounded-xl ring-1 ring-slate-200"
                           />
                           <div className="truncate">
                             <div className="font-bold text-slate-900 truncate flex items-center gap-1.5">
@@ -511,6 +511,7 @@ export const Authors = () => {
                       {/* Status */}
                       <td className="py-3.5 px-4">
                         <StatusBadge status={formatStatus(staff.status)} size="sm" />
+                        {staff.invitation && <p className="text-[10px] text-slate-500 mt-1">{staff.invitation.expired ? "Invitation expired" : staff.invitation.emailStatus.replaceAll("_", " ")} · {staff.invitation.emailAttempts} email attempts</p>}
                       </td>
 
                       {/* Date Joined */}
@@ -638,7 +639,7 @@ export const Authors = () => {
       >
         <form onSubmit={handleSubmitInvite} className="space-y-4">
           <p className="text-xs text-slate-500">
-            Invite an Editor or Author to join the NewsFront newsroom. They will receive a
+            Invite an Editor or Author to join the Nsemra News newsroom. They will receive a
             secure one-time link to set their password.
           </p>
 
@@ -668,7 +669,7 @@ export const Authors = () => {
             <input
               type="email"
               required
-              placeholder="e.g. kwame.mensah@newsfront.com"
+              placeholder="colleague@example.com"
               value={inviteForm.email}
               onChange={(e) =>
                 setInviteForm((prev) => ({ ...prev, email: e.target.value }))
@@ -732,9 +733,7 @@ export const Authors = () => {
           <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 flex items-start gap-2.5">
             <ShieldAlert size={18} className="text-amber-600 shrink-0 mt-0.5" />
             <div>
-              <strong>Email Service Notice:</strong> Outbound email delivery is not yet
-              configured. Please copy this secure invitation link and share it directly with{" "}
-              <strong>{shareLinkData.name}</strong>.
+              <strong>Email Service Notice:</strong> {shareLinkData.notice}
             </div>
           </div>
 

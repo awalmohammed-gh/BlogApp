@@ -1,3 +1,4 @@
+import BrandLogo from "../../components/common/BrandLogo";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import {
@@ -127,17 +128,7 @@ export const AcceptInvite = () => {
         {/* Brand Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-2xl bg-linear-to-tr from-blue-600 to-blue-500 text-white flex items-center justify-center font-black text-2xl shadow-xl shadow-blue-500/20 tracking-tighter">
-              NF
-            </div>
-            <div className="text-left">
-              <span className="block font-black text-2xl text-white tracking-tight">
-                NewsFront
-              </span>
-              <span className="block text-[11px] font-bold text-blue-400 uppercase tracking-widest">
-                Newsroom Onboarding
-              </span>
-            </div>
+            <BrandLogo />
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">

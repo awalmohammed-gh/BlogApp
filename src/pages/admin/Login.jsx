@@ -1,3 +1,4 @@
+import BrandLogo from "../../components/common/BrandLogo";
 import { useState } from "react";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import {
@@ -99,24 +100,14 @@ export const Login = () => {
         {/* Brand Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-2xl bg-linear-to-tr from-blue-600 to-blue-500 text-white flex items-center justify-center font-black text-2xl shadow-xl shadow-blue-500/20 tracking-tighter">
-              NF
-            </div>
-            <div className="text-left">
-              <span className="block font-black text-2xl text-white tracking-tight">
-                NewsFront
-              </span>
-              <span className="block text-[11px] font-bold text-blue-400 uppercase tracking-widest">
-                Newsroom Portal
-              </span>
-            </div>
+            <BrandLogo />
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             Welcome Back
           </h1>
           <p className="mt-2 text-sm text-slate-400">
-            Sign in to manage the NewsFront newsroom.
+            Sign in to manage the Nsemra News newsroom.
           </p>
         </div>
 
@@ -154,7 +145,7 @@ export const Login = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="admin@newsfront.com"
+                  placeholder="you@example.com"
                   className={`block w-full pl-10 pr-4 py-3 bg-slate-950/60 border rounded-xl text-sm text-white placeholder-slate-500 focus:outline-hidden transition-all ${
                     formErrors.email
                       ? "border-rose-500/80 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
@@ -254,7 +245,7 @@ export const Login = () => {
             href="/"
             className="text-xs text-slate-400 hover:text-white transition-colors"
           >
-            ← Return to public NewsFront portal
+            ← Return to public Nsemra News portal
           </a>
         </div>
       </div>

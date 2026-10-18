@@ -1,5 +1,6 @@
 import { Calendar, User, Clock, Tag, ExternalLink, X, ShieldAlert } from "lucide-react";
 import StatusBadge from "../common/StatusBadge";
+import { sanitizeHtml } from "../../../utils/sanitizeHtml";
 
 export const ArticlePreviewModal = ({ article, isOpen, onClose }) => {
   if (!isOpen || !article) return null;
@@ -17,7 +18,7 @@ export const ArticlePreviewModal = ({ article, isOpen, onClose }) => {
           <div className="flex items-center gap-3">
             <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              Live NewsFront Public Preview
+              Live Nsemra News Public Preview
             </span>
             <StatusBadge status={article.status} size="sm" />
           </div>
@@ -63,8 +64,7 @@ export const ArticlePreviewModal = ({ article, isOpen, onClose }) => {
                 {(article.author || "N").charAt(0)}
               </div>
               <div>
-                <div className="font-bold text-slate-900">{article.author || "NewsFront Desk"}</div>
-                <div className="text-[11px] text-slate-500">Accredited Correspondent</div>
+                <div className="font-bold text-slate-900">{article.author || "Nsemra News Desk"}</div>
               </div>
             </div>
 
@@ -101,7 +101,7 @@ export const ArticlePreviewModal = ({ article, isOpen, onClose }) => {
           {/* HTML Article Content */}
           <div
             className="prose prose-slate max-w-none text-sm sm:text-base leading-relaxed text-slate-800 prose-headings:font-serif-headline prose-headings:font-bold prose-h2:text-2xl prose-h3:text-xl prose-p:my-4 prose-blockquote:border-l-4 prose-blockquote:border-blue-600 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-slate-600"
-            dangerouslySetInnerHTML={{ __html: article.description || "<p>No content entered yet.</p>" }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.description) || "<p>No content entered yet.</p>" }}
           />
 
           {/* Tags */}

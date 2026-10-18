@@ -19,6 +19,7 @@ import {
 import toast from "react-hot-toast";
 import articleService from "../../../services/admin/articleService";
 import MediaPickerModal from "./MediaPickerModal";
+import { sanitizeHtml } from "../../../utils/sanitizeHtml";
 
 export const RichTextEditor = ({
   value = "",
@@ -35,7 +36,7 @@ export const RichTextEditor = ({
   useEffect(() => {
     if (editorRef.current && !isUpdatingRef.current) {
       if (editorRef.current.innerHTML !== value) {
-        editorRef.current.innerHTML = value || "";
+        editorRef.current.innerHTML = sanitizeHtml(value);
       }
     }
     setSourceCode(value || "");
@@ -124,9 +125,9 @@ export const RichTextEditor = ({
     if (isSourceMode) {
       // Switching from source to visual
       if (editorRef.current) {
-        editorRef.current.innerHTML = sourceCode;
+        editorRef.current.innerHTML = sanitizeHtml(sourceCode);
       }
-      onChange(sourceCode);
+      onChange(sanitizeHtml(sourceCode));
       setIsSourceMode(false);
     } else {
       // Switching from visual to source
@@ -326,7 +327,7 @@ export const RichTextEditor = ({
           </span>
         </div>
         <div className="text-slate-400 italic">
-          NewsFront Semantic Editorial Standard
+          Nsemra News Semantic Editorial Standard
         </div>
       </div>
 

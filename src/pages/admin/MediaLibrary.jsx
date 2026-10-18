@@ -533,9 +533,9 @@ export const MediaLibrary = () => {
       ) : mediaItems.length === 0 ? (
         <EmptyState
           icon={ImageIcon}
-          title={stats.total === 0 && !search ? "No media uploaded yet" : "No media assets found"}
+          title={stats.total === 0 && !searchQuery ? "No media uploaded yet" : "No media assets found"}
           description={
-            stats.total === 0 && !search
+            stats.total === 0 && !searchQuery
               ? "No media uploaded yet."
               : "We couldn't find any images matching your current filter criteria. Upload images to ImageKit for your newsroom."
           }

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { GitCompare, ArrowRight, Eye, Calendar, User, FileText, CheckCircle } from "lucide-react";
 import Modal from "../common/Modal";
 import editorialService from "../../../services/admin/editorialService";
+import { sanitizeHtml } from "../../../utils/sanitizeHtml";
 
 export const RevisionComparisonModal = ({
   isOpen,
@@ -137,7 +138,7 @@ export const RevisionComparisonModal = ({
               <div className="text-[10px] font-bold uppercase text-slate-400 mb-1">Article Body Content</div>
               <div
                 className="max-h-80 overflow-y-auto p-3 bg-white border border-slate-200 rounded-lg text-xs leading-relaxed text-slate-800 prose prose-slate max-w-none"
-                dangerouslySetInnerHTML={{ __html: leftRev?.content || "<p>No content</p>" }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(leftRev?.content) || "<p>No content</p>" }}
               />
             </div>
           </div>
@@ -214,7 +215,7 @@ export const RevisionComparisonModal = ({
               <div className="text-[10px] font-bold uppercase text-slate-400 mb-1">Article Body Content</div>
               <div
                 className="max-h-80 overflow-y-auto p-3 bg-white border border-blue-200 rounded-lg text-xs leading-relaxed text-slate-800 prose prose-slate max-w-none"
-                dangerouslySetInnerHTML={{ __html: rightRev?.content || "<p>No content</p>" }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(rightRev?.content) || "<p>No content</p>" }}
               />
             </div>
           </div>

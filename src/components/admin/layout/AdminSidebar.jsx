@@ -1,3 +1,4 @@
+import BrandLogo from "../../common/BrandLogo";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -22,16 +23,17 @@ import {
   ChevronRight,
   ShieldCheck
 } from "lucide-react";
-import toast from "react-hot-toast";
 import { useAdmin } from "../../../context/admin/AdminContext";
+import StaffAvatar from "../common/StaffAvatar";
+import { useNotifications } from "../../../context/admin/NotificationContext";
 import { useAuth } from "../../../context/admin/AuthContext";
 
 export const AdminSidebar = () => {
+  const { unreadCount } = useNotifications();
   const {
-    stats,
+    overview,
     currentAdminUser,
     isSidebarCollapsed,
-    toggleSidebarCollapsed,
     isMobileSidebarOpen,
     closeMobileSidebar
   } = useAdmin();
@@ -56,7 +58,7 @@ export const AdminSidebar = () => {
 
     if (currentRole === "editor") {
       // Editors cannot access staff team, advertisements, or settings
-      const forbidden = ["/admin/authors", "/admin/advertisements", "/admin/settings"];
+      const forbidden = ["/admin/authors", "/admin/advertisements", "/admin/settings", "/admin/subscribers"];
       return !forbidden.includes(path);
     }
 
@@ -89,7 +91,7 @@ export const AdminSidebar = () => {
           path: "/admin/articles",
           exact: true,
           icon: FileText,
-          badge: stats.totalArticles
+          badge: overview?.totalArticles ?? null
         },
         {
           name: "Create Article",
@@ -120,15 +122,21 @@ export const AdminSidebar = () => {
           name: "Editorial Workflow",
           path: "/admin/editorial",
           icon: GitPullRequest,
-          badge: stats.pendingReviews > 0 ? stats.pendingReviews : null,
+          badge: overview?.pendingReviews > 0 ? overview.pendingReviews : null,
           badgeColor: "bg-amber-500 text-slate-950 font-bold"
         },
         {
           name: "Comments",
           path: "/admin/comments",
           icon: MessageSquare,
-          badge: stats.pendingComments > 0 ? stats.pendingComments : null,
+          badge: overview?.pendingComments > 0 ? overview.pendingComments : null,
           badgeColor: "bg-rose-500 text-white"
+        },
+        {
+          name: "Contact Enquiries", path: "/admin/enquiries", icon: MessageSquare
+        },
+        {
+          name: "Newsletter Subscribers", path: "/admin/subscribers", icon: Users
         },
         {
           name: "Newsroom Team",
@@ -144,8 +152,6 @@ export const AdminSidebar = () => {
           name: "Advertisements",
           path: "/admin/advertisements",
           icon: Megaphone,
-          badge: stats.activeAds > 0 ? `${stats.activeAds} active` : null,
-          badgeColor: "bg-blue-600/60 text-blue-100"
         },
         {
           name: "Pages & Content",
@@ -171,7 +177,7 @@ export const AdminSidebar = () => {
           name: "Notifications",
           path: "/admin/notifications",
           icon: Bell,
-          badge: stats.unreadNotifications > 0 ? stats.unreadNotifications : null,
+          badge: unreadCount > 0 ? (unreadCount > 99 ? "99+" : unreadCount) : null,
           badgeColor: "bg-rose-500 text-white"
         },
         {
@@ -200,22 +206,7 @@ export const AdminSidebar = () => {
           onClick={closeMobileSidebar}
           className="flex items-center gap-3 overflow-hidden"
         >
-          <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-lg shadow-md shrink-0 tracking-tighter">
-            NF
-          </div>
-          {!isSidebarCollapsed && (
-            <div className="truncate">
-              <div className="font-black text-base tracking-tight text-white flex items-center gap-1.5">
-                <span>NewsFront</span>
-                <span className="text-[10px] font-bold px-1.5 py-0.2 bg-blue-600/30 text-blue-400 rounded border border-blue-500/30">
-                  Admin
-                </span>
-              </div>
-              <div className="text-[11px] text-slate-400 truncate tracking-wide">
-                Newsroom Workspace
-              </div>
-            </div>
-          )}
+          <BrandLogo compact={isSidebarCollapsed} />
         </Link>
 
         {/* Mobile close button */}
@@ -318,14 +309,10 @@ export const AdminSidebar = () => {
             isSidebarCollapsed ? "justify-center" : ""
           }`}
         >
-          <img
-            src={
-              admin?.avatar ||
-              currentAdminUser.avatar ||
-              "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
-            }
-            alt={admin?.name || currentAdminUser.name}
-            className="w-8 h-8 rounded-full object-cover ring-1 ring-slate-700 shrink-0"
+          <StaffAvatar
+            src={admin?.avatar || currentAdminUser.avatar}
+            name={admin?.name || currentAdminUser.name}
+            className="w-8 h-8 rounded-full ring-1 ring-slate-700"
           />
           {!isSidebarCollapsed && (
             <div className="truncate text-left flex-1">
@@ -349,7 +336,7 @@ export const AdminSidebar = () => {
           to="/"
           target="_blank"
           rel="noopener noreferrer"
-          title={isSidebarCollapsed ? "View Public NewsFront Website" : undefined}
+          title={isSidebarCollapsed ? "View Public Nsemra News Website" : undefined}
           className={`flex items-center gap-3 px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800/70 rounded-xl transition-colors ${
             isSidebarCollapsed ? "justify-center" : ""
           }`}

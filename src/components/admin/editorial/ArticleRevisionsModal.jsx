@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import Modal from "../common/Modal";
 import editorialService from "../../../services/admin/editorialService";
 import RevisionComparisonModal from "./RevisionComparisonModal";
+import { sanitizeHtml } from "../../../utils/sanitizeHtml";
 
 export const ArticleRevisionsModal = ({ isOpen, onClose, articleId, onRestored }) => {
   const [revisions, setRevisions] = useState([]);
@@ -177,7 +178,7 @@ export const ArticleRevisionsModal = ({ isOpen, onClose, articleId, onRestored }
                       <div
                         className="max-h-60 overflow-y-auto p-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-700 leading-relaxed prose prose-slate max-w-none"
                         dangerouslySetInnerHTML={{
-                          __html: selectedRevision.content || "<p>No content snapshot.</p>"
+                          __html: sanitizeHtml(selectedRevision.content) || "<p>No content snapshot.</p>"
                         }}
                       />
                     </div>

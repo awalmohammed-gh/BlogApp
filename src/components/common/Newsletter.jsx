@@ -1,7 +1,11 @@
+import { engagementService } from "../../services/public/engagementService";
 import { useState } from "react";
 import { Mail, CheckCircle2, ShieldCheck, Sparkles, Send, Loader2 } from "lucide-react";
 
-const Newsletter = () => {
+const Newsletter = ({ source = "homepage" }) => {
+  const [consent, setConsent] = useState(false);
+  const [website, setWebsite] = useState("");
+  const [confirmation, setConfirmation] = useState("");
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -12,7 +16,7 @@ const Newsletter = () => {
     return regex.test(val);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -26,17 +30,14 @@ const Newsletter = () => {
       return;
     }
 
+    if (!consent) { setError("Please consent to receiving the Nsemra News newsletter."); return; }
     setIsSubmitting(true);
+    try {
+      const result = await engagementService.subscribe({ email: email.trim(), consent, source, website });
+      setConfirmation(result.message); setIsSubmitted(true); setEmail("");
+    } catch (err) { setError(err.message || "Unable to save your request. Please try again."); }
+    finally { setIsSubmitting(false); }
 
-    // Simulated network submit
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      setEmail("");
-      setTimeout(() => {
-        setIsSubmitted(false);
-      }, 5000);
-    }, 600);
   };
 
   return (
@@ -50,7 +51,7 @@ const Newsletter = () => {
         {/* Eyebrow */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-xs font-semibold uppercase tracking-widest text-blue-200">
           <Sparkles className="w-3.5 h-3.5 text-blue-300" />
-          <span>The NewsFront Daily Briefing</span>
+          <span>The Nsemra News Daily Briefing</span>
         </div>
 
         {/* Heading */}
@@ -60,7 +61,7 @@ const Newsletter = () => {
 
         {/* Value Proposition */}
         <p className="text-sm sm:text-base text-blue-100/90 leading-relaxed max-w-xl mx-auto">
-          Join over 50,000 readers who rely on our 6:00 AM GMT morning dispatch covering major Ghanaian developments, Pan-African headlines, and global markets.
+          Request the Nsemra News briefing covering Ghanaian developments, Pan-African headlines, and global markets. Confirm your email before your subscription becomes active.
         </p>
 
         {/* Feature Pills */}
@@ -75,7 +76,7 @@ const Newsletter = () => {
           </span>
           <span className="flex items-center gap-1.5">
             <CheckCircle2 size={14} className="text-emerald-400" />
-            1-Click Unsubscribe
+            Unsubscribe by email link
           </span>
         </div>
 
@@ -84,10 +85,10 @@ const Newsletter = () => {
           <div className="p-4 bg-emerald-500/20 border border-emerald-400/40 rounded-2xl animate-fadeIn max-w-md mx-auto text-center space-y-1 mt-6">
             <div className="flex items-center justify-center gap-2 text-emerald-300 font-bold text-sm">
               <CheckCircle2 size={18} />
-              <span>You're officially subscribed!</span>
+              <span>Request recorded</span>
             </div>
             <p className="text-xs text-emerald-100">
-              Welcome aboard. Please check your inbox for tomorrow morning's 6:00 AM edition.
+              {confirmation}
             </p>
           </div>
         ) : (
@@ -95,11 +96,13 @@ const Newsletter = () => {
             onSubmit={handleSubmit}
             className="pt-4 max-w-lg mx-auto space-y-2"
           >
+            <input aria-hidden="true" tabIndex={-1} autoComplete="off" className="hidden" name="website" value={website} onChange={(e) => setWebsite(e.target.value)} />
+            <label className="flex items-start gap-2 text-xs text-left"><input type="checkbox" required checked={consent} onChange={(e) => setConsent(e.target.checked)} /> I agree to receive the Nsemra News newsletter. I can unsubscribe using the link in the verification email.</label>
             <div className="flex flex-col sm:flex-row items-center gap-2.5">
               <div className="relative w-full flex-1">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
-                  type="email"
+                  type="email" maxLength={254}
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);

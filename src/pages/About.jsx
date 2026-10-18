@@ -14,6 +14,36 @@ import {
 import { Link } from "react-router-dom";
 import blog34 from "../assets/blog34.jpg";
 import { publicSiteContentService } from "../services/public/publicSiteContentService";
+import { publicStatsService } from "../services/public/publicStatsService";
+
+const STATS_REFRESH_MS = 30000;
+const compact = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
+
+/** Live newsroom figures; refreshes while the tab is visible and when it regains focus. */
+const useLiveStats = () => {
+  const [stats, setStats] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    const load = () => {
+      if (document.visibilityState === "hidden") return;
+      publicStatsService
+        .getStats()
+        .then((res) => alive && res?.success && setStats(res.data))
+        .catch(() => {}); // keep the last known figures
+    };
+    load();
+    const timer = setInterval(load, STATS_REFRESH_MS);
+    window.addEventListener("focus", load);
+    document.addEventListener("visibilitychange", load);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+      window.removeEventListener("focus", load);
+      document.removeEventListener("visibilitychange", load);
+    };
+  }, []);
+  return stats;
+};
 
 const About = () => {
   const [cmsContent, setCmsContent] = useState(null);
@@ -33,38 +63,8 @@ const About = () => {
   const heroSection = cmsContent?.find((s) => s.type === "hero")?.data;
   const missionSection = cmsContent?.find((s) => s.type === "text_content")?.data;
   const charterSection = cmsContent?.find((s) => s.type === "custom_editorial")?.data;
-  const teamMembers = [
-    {
-      name: "Mohammed Awal",
-      role: "Editor-in-Chief & Senior Investigative Journalist",
-      bio: "Covering national affairs, economic policies, and governance across West Africa for over a decade.",
-      initials: "MA"
-    },
-    {
-      name: "Abdul Gaffar",
-      role: "Head of Global & Technology Desk",
-      bio: "Focuses on emerging innovations, digital transformation in emerging markets, and international diplomacy.",
-      initials: "AG"
-    },
-    {
-      name: "Ranco Carter",
-      role: "Culture, Lifestyle & Sports Correspondent",
-      bio: "Passionate about athletic excellence, grassroots arts, and community resilience stories.",
-      initials: "RC"
-    },
-    {
-      name: "Gifty Opare",
-      role: "Business & Markets Analyst",
-      bio: "Specializing in African trade pacts, commodities, fintech breakthroughs, and consumer trends.",
-      initials: "GO"
-    },
-    {
-      name: "Mohammed Hassan",
-      role: "Local Governance & Community Desk",
-      bio: "Amplifying voices from local districts, rural developments, and youth initiatives.",
-      initials: "MH"
-    }
-  ];
+  // Team profiles come only from a CMS "team" section; no placeholder staff are shown.
+  const teamMembers = (cmsContent?.find((s) => s.type === "team")?.data?.members || []).filter((m) => m?.name);
 
   const coreValues = [
     {
@@ -89,9 +89,12 @@ const About = () => {
     }
   ];
 
+  // Readers and desks are live figures; the last two are fixed newsroom commitments.
+  const liveStats = useLiveStats();
+  const live = (value) => (typeof value === "number" ? compact.format(value) : "—");
   const milestones = [
-    { number: "500K+", label: "Monthly Readers" },
-    { number: "35+", label: "Regional Desks" },
+    { number: live(liveStats?.monthlyReaders), label: "Monthly Readers", live: true },
+    { number: live(liveStats?.desks), label: "Regional Desks", live: true },
     { number: "99.8%", label: "Verified Accuracy" },
     { number: "24/7", label: "Real-time Updates" }
   ];
@@ -106,7 +109,7 @@ const About = () => {
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <img
             src={blog34}
-            alt="NewsFront Editorial Bureau"
+            alt="Nsemra News Editorial Bureau"
             className="w-full h-full object-cover object-center scale-105"
           />
         </div>
@@ -118,7 +121,7 @@ const About = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 text-center text-white z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 backdrop-blur-md mb-4 text-xs font-semibold uppercase tracking-widest text-blue-200">
             <BookOpen className="w-3.5 h-3.5 text-blue-300" />
-            <span>{heroSection?.kicker || "NewsFront Editorial Bureau & Press House"}</span>
+            <span>{heroSection?.kicker || "Nsemra News Editorial Bureau & Press House"}</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold font-serif-headline tracking-tight text-white mb-4">
@@ -132,7 +135,7 @@ const About = () => {
           <div className="max-w-3xl mx-auto bg-[#07132B]/80 border border-blue-900/60 rounded-2xl p-4 backdrop-blur-md grid grid-cols-2 sm:grid-cols-4 gap-4 text-center divide-y sm:divide-y-0 sm:divide-x divide-blue-900/40">
             {milestones.map((item, idx) => (
               <div key={idx} className="pt-2 sm:pt-0">
-                <span className="text-2xl font-black text-white block">{item.number}</span>
+                <span className="text-2xl font-black text-white block tabular-nums" aria-live={item.live ? "polite" : undefined}>{item.number}</span>
                 <span className="text-[11px] uppercase tracking-wider text-blue-300 font-medium">{item.label}</span>
               </div>
             ))}
@@ -151,7 +154,7 @@ const About = () => {
               {missionSection?.title || "Informing the public, fostering accountability, and celebrating progress."}
             </h2>
             <p className="text-gray-600 mt-4 leading-relaxed">
-              {missionSection?.body || "Founded with the vision to bridge local grassroots realities with continental and global perspectives, NewsFront delivers clear, credible, and context-rich coverage. Whether tracking legislative bills in Parliament, examining technological breakthroughs, or following sports championships, we put truth first."}
+              {missionSection?.body || "Founded with the vision to bridge local grassroots realities with continental and global perspectives, Nsemra News delivers clear, credible, and context-rich coverage. Whether tracking legislative bills in Parliament, examining technological breakthroughs, or following sports championships, we put truth first."}
             </p>
             <div className="mt-6 space-y-3">
               <div className="flex items-start gap-3">
@@ -178,7 +181,7 @@ const About = () => {
             </p>
             <div className="border-t border-white/10 pt-4 flex items-center justify-between text-xs text-blue-200">
               <span>{charterSection?.adoptedIn || "Adopted in Accra, Ghana"}</span>
-              <span>{charterSection?.board || "NewsFront Editorial Board"}</span>
+              <span>{charterSection?.board || "Nsemra News Editorial Board"}</span>
             </div>
           </div>
         </div>
@@ -189,7 +192,7 @@ const About = () => {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {milestones.map((item, idx) => (
             <div key={idx} className="space-y-1">
-              <p className="text-3xl sm:text-4xl font-extrabold text-[#1E3A8A]">{item.number}</p>
+              <p className="text-3xl sm:text-4xl font-extrabold text-[#1E3A8A] tabular-nums" data-stat={item.label}>{item.number}</p>
               <p className="text-gray-600 text-xs sm:text-sm font-medium">{item.label}</p>
             </div>
           ))}
@@ -206,7 +209,7 @@ const About = () => {
             Our Core Editorial Values
           </h2>
           <p className="text-gray-600 text-sm sm:text-base mt-2">
-            The principles that guide every headline, interview, and analysis published on NewsFront.
+            The principles that guide every headline, interview, and analysis published on Nsemra News.
           </p>
         </div>
 
@@ -230,6 +233,7 @@ const About = () => {
       </section>
 
       {/* Newsroom Team */}
+      {teamMembers.length > 0 && (
       <section className="bg-slate-50 py-16 md:py-20 border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="text-center max-w-2xl mx-auto mb-14">
@@ -240,7 +244,7 @@ const About = () => {
               Meet Our Newsroom Team
             </h2>
             <p className="text-gray-600 text-sm sm:text-base mt-2">
-              Our award-winning correspondents and analysts bringing you stories with depth and credibility.
+              The people behind our reporting.
             </p>
           </div>
 
@@ -252,7 +256,7 @@ const About = () => {
               >
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 bg-linear-to-br from-[#1E3A8A] to-[#2E4A9A] text-white rounded-full flex items-center justify-center font-bold text-base shadow-sm">
-                    {member.initials}
+                    {member.initials || member.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 text-base">{member.name}</h3>
@@ -267,6 +271,7 @@ const About = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* CTA Box */}
       <section className="max-w-7xl mx-auto px-6 py-16">

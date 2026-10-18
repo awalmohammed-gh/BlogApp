@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FileText,
@@ -9,14 +10,11 @@ import {
   MessageSquare,
   Plus,
   ArrowRight,
-  TrendingUp,
   FolderTree,
   UploadCloud,
   GitPullRequest,
-  ExternalLink,
   Edit,
-  Trash2,
-  Calendar
+  Trash2
 } from "lucide-react";
 import { useAdmin } from "../../context/admin/AdminContext";
 import StatCard from "../../components/admin/common/StatCard";
@@ -25,43 +23,44 @@ import ConfirmDialog from "../../components/admin/common/ConfirmDialog";
 import ViewsTimelineChart from "../../components/admin/charts/ViewsTimelineChart";
 import CategoryDistributionChart from "../../components/admin/charts/CategoryDistributionChart";
 import ArticlePreviewModal from "../../components/admin/articles/ArticlePreviewModal";
-import { analyticsService } from "../../services/admin/analyticsService";
 
 export const DashboardOverview = () => {
-  const { articles, stats: fallbackStats, deleteArticle } = useAdmin();
+  const { articles, overview, deleteArticle, refreshAdminData } = useAdmin();
   const navigate = useNavigate();
 
-  const [liveStats, setLiveStats] = useState(null);
   const [previewArticle, setPreviewArticle] = useState(null);
   const [articleToDelete, setArticleToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
+  // Always show current MongoDB counts when the dashboard opens
   useEffect(() => {
-    let isMounted = true;
-    const fetchStats = async () => {
-      try {
-        const res = await analyticsService.getOverview();
-        if (isMounted && res?.success && res.data) {
-          setLiveStats(res.data);
-        }
-      } catch {
-        // Fallback to context
-      }
-    };
+    refreshAdminData();
+  }, [refreshAdminData]);
 
-    fetchStats();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
+  // Real counts only. "—" means the overview could not be loaded; nothing is estimated.
+  const count = (value) => (typeof value === "number" ? value : "—");
   const stats = {
-    totalArticles: liveStats?.totalArticles ?? fallbackStats.totalArticles,
-    publishedArticles: liveStats?.publishedArticles ?? fallbackStats.publishedArticles,
-    draftArticles: liveStats?.draftArticles ?? fallbackStats.draftArticles,
-    pendingReviews: liveStats?.pendingReviews ?? fallbackStats.pendingReviews,
-    totalViews: liveStats?.totalArticleViews ?? fallbackStats.totalViews,
-    totalComments: liveStats?.approvedComments ?? fallbackStats.totalComments,
-    pendingComments: liveStats?.pendingComments ?? fallbackStats.pendingComments
+    totalArticles: count(overview?.totalArticles),
+    publishedArticles: count(overview?.publishedArticles),
+    draftArticles: count(overview?.draftArticles),
+    pendingReviews: count(overview?.pendingReviews),
+    totalViews: count(overview?.totalArticleViews),
+    totalComments: count(overview?.approvedComments),
+    pendingComments: overview?.pendingComments ?? 0
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!articleToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteArticle(articleToDelete._id);
+      toast.success("Article moved to the archive");
+    } catch (err) {
+      toast.error(err?.message || "Failed to delete article");
+    } finally {
+      setIsDeleting(false);
+      setArticleToDelete(null);
+    }
   };
 
   // Recent 5 articles
@@ -95,7 +94,7 @@ export const DashboardOverview = () => {
           >
             <GitPullRequest size={15} className="text-amber-500" />
             <span>Review Queue</span>
-            {stats.pendingReviews > 0 && (
+            {overview?.pendingReviews > 0 && (
               <span className="px-1.5 py-0.2 bg-amber-500 text-slate-950 font-bold rounded-full text-[10px]">
                 {stats.pendingReviews}
               </span>
@@ -141,8 +140,8 @@ export const DashboardOverview = () => {
         <StatCard
           title="Pending Reviews"
           value={stats.pendingReviews}
-          change={stats.pendingReviews > 0 ? "Review Required" : "All Clear"}
-          isPositive={stats.pendingReviews === 0}
+          change={overview ? (overview.pendingReviews > 0 ? "Review Required" : "All Clear") : undefined}
+          isPositive={overview?.pendingReviews === 0}
           changeLabel="editorial desk"
           icon={Clock}
           iconColor="text-amber-600 bg-amber-50 border-amber-100"
@@ -275,6 +274,20 @@ export const DashboardOverview = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
+                {recentArticles.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-10 text-center">
+                      <div className="text-sm font-bold text-slate-800">No Articles Yet</div>
+                      <p className="text-xs text-slate-500 mt-1">You haven't created any articles. Start by writing your first story.</p>
+                      <Link
+                        to="/admin/articles/new"
+                        className="inline-flex items-center gap-1.5 mt-3 px-3.5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl"
+                      >
+                        <Plus size={14} /> Create Article
+                      </Link>
+                    </td>
+                  </tr>
+                )}
                 {recentArticles.map((art) => (
                   <tr key={art._id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="px-4 py-3">
@@ -404,14 +417,12 @@ export const DashboardOverview = () => {
       <ConfirmDialog
         isOpen={!!articleToDelete}
         onClose={() => setArticleToDelete(null)}
-        onConfirm={() => {
-          if (articleToDelete) {
-            deleteArticle(articleToDelete._id);
-            setArticleToDelete(null);
-          }
-        }}
+        onConfirm={handleConfirmDelete}
+        closeOnConfirm={false}
+        isProcessing={isDeleting}
+        processingText="Archiving..."
         title="Delete Article?"
-        message={`Are you sure you want to delete "${articleToDelete?.title}"? This action cannot be undone.`}
+        message={`"${articleToDelete?.title}" will be moved to the archive and removed from the public website. It can be restored from Articles.`}
         confirmText="Yes, Delete Article"
       />
 

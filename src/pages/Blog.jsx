@@ -1,3 +1,4 @@
+import { useSiteSettings } from "../context/SiteSettingsContext";
 import { useState, useMemo, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useBlog } from "../context/BlogProvider";
@@ -22,98 +23,89 @@ import {
 } from "lucide-react";
 
 // Thematic banner images representing each news beat
-import blog1 from "../assets/blog1.jpg"; // Sports
-import blog7 from "../assets/blog7.jpg"; // E-commerce
-import blog13 from "../assets/blog13.jpg"; // Business
-import blog18 from "../assets/blog18.png"; // Trading
-import blog19 from "../assets/blog19.jpeg"; // Lifestyle
-import blog20 from "../assets/blog20.jpg"; // Entertainment
-import blog25 from "../assets/blog25.jpg"; // Health
-import blog28 from "../assets/blog28.jpg"; // Technology
-import blog30 from "../assets/blog30.jpg"; // Local News
-import blog34 from "../assets/blog34.jpg"; // Foreign News / World
-import blog35 from "../assets/blog35.jpg"; // Politics
+
+import { deskImage } from "../config/desks";
 
 const CATEGORY_META = {
   All: {
-    bannerImage: "/categoryBg.jpg",
-    kicker: "The NewsFront Dispatch Archive",
+    bannerImage: deskImage("latest"),
+    kicker: "The Nsemra News Dispatch Archive",
     headline: "All Stories & In-Depth Reports",
     subtitle:
       "Access our complete catalogue of verified journalism, political analysis, economic dispatches, and cultural updates from Ghana and the international community.",
   },
   Sports: {
-    bannerImage: blog1,
+    bannerImage: deskImage("sports"),
     kicker: "Sports & Athletics Desk",
     headline: "Sports & Athletics Stories",
     subtitle:
       "Championship coverage, Ghanaian athletics, continental tournaments, football leagues, and international sports journalism.",
   },
   Technology: {
-    bannerImage: blog28,
+    bannerImage: deskImage("technology"),
     kicker: "Technology & Innovation Desk",
     headline: "Technology & Emerging Innovation",
     subtitle:
       "Authoritative analysis of African startups, AI breakthroughs, telecommunications infrastructure, and enterprise innovation.",
   },
   "Local News": {
-    bannerImage: blog30,
+    bannerImage: deskImage("local-news"),
     kicker: "Local News & National Affairs",
     headline: "Local News & Regional Coverage",
     subtitle:
       "Grassroots reporting and investigative coverage spanning Greater Accra, Ashanti, Western, and all 16 regions of Ghana.",
   },
   "Foreign News": {
-    bannerImage: blog34,
+    bannerImage: deskImage("foreign-news"),
     kicker: "Foreign News & Diplomacy",
     headline: "Foreign News & World Diplomacy",
     subtitle:
       "Critical reporting on African Union summits, ECOWAS developments, global geopolitics, and international accords.",
   },
   "E-commerce": {
-    bannerImage: blog7,
+    bannerImage: deskImage("e-commerce"),
     kicker: "E-Commerce & Digital Commerce",
     headline: "E-Commerce & Digital Retail Stories",
     subtitle:
       "Tracking online retail growth, cross-border payment platforms, logistics networks, and consumer spending patterns across Africa.",
   },
   Trading: {
-    bannerImage: blog18,
+    bannerImage: deskImage("trading"),
     kicker: "Trading & Capital Markets Desk",
     headline: "Trading, Equities & Capital Markets",
     subtitle:
       "Daily reporting on equity markets, cocoa and gold commodities, sovereign bond yields, and foreign exchange movements.",
   },
   Lifestyle: {
-    bannerImage: blog19,
+    bannerImage: deskImage("lifestyle"),
     kicker: "Lifestyle & Cultural Desk",
     headline: "Lifestyle, Culture & Urban Living",
     subtitle:
       "Curated features on contemporary African architecture, gastronomy, wellbeing, modern arts, and creative industries.",
   },
   Business: {
-    bannerImage: blog13,
+    bannerImage: deskImage("business"),
     kicker: "Business & Financial Markets Desk",
     headline: "Business & Corporate Dispatches",
     subtitle:
       "Market intelligence, corporate balance sheets, currency fluctuations, and consumer commerce trends shaping West African trade.",
   },
   Politics: {
-    bannerImage: blog35,
+    bannerImage: deskImage("politics"),
     kicker: "Politics & Governance Desk",
     headline: "Politics, Governance & Parliament",
     subtitle:
       "Authoritative analysis of parliamentary debates, policy formulation, electoral developments, and civic engagement.",
   },
   Entertainment: {
-    bannerImage: blog20,
+    bannerImage: deskImage("lifestyle"),
     kicker: "Arts & Entertainment Desk",
     headline: "Arts, Entertainment & Culture",
     subtitle:
       "Coverage of African music, film festivals, literary releases, and pop culture shaping the global African narrative.",
   },
   Health: {
-    bannerImage: blog25,
+    bannerImage: deskImage("lifestyle"),
     kicker: "Health & Wellbeing Desk",
     headline: "Public Health & Medical Science",
     subtitle:
@@ -122,6 +114,8 @@ const CATEGORY_META = {
 };
 
 const Blog = () => {
+  const { settings } = useSiteSettings();
+  const pageSize = settings?.publishing.articlesPerPage || 10;
   const { articles, refreshArticles } = useBlog();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -139,7 +133,8 @@ const Blog = () => {
   const [selectedCategory, setSelectedCategory] = useState(urlCategory);
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState("grid"); // 'grid' | 'list'
-  const [visibleCount, setVisibleCount] = useState(9);
+  const [visiblePages, setVisiblePages] = useState(1);
+  const visibleCount = visiblePages * pageSize;
 
   // Sync state when URL search params change during navigation
   const [prevUrlQ, setPrevUrlQ] = useState(urlQ);
@@ -245,18 +240,19 @@ const Blog = () => {
     prevFilters.sortBy !== sortBy
   ) {
     setPrevFilters({ searchQuery, selectedCategory, sortBy });
-    setVisibleCount(9);
+    setVisiblePages(1);
   }
 
   const visibleList = filteredArticles.slice(0, visibleCount);
-  const featuredItem = filteredArticles.length > 0 && selectedCategory === "All" && !searchQuery ? filteredArticles[0] : null;
-  const standardList = featuredItem ? visibleList.slice(1) : visibleList;
+  // Only a story an editor explicitly marked as featured is highlighted
+  const featuredItem = selectedCategory === "All" && !searchQuery ? filteredArticles.find((a) => a.isFeatured) || null : null;
+  const standardList = featuredItem ? visibleList.filter((a) => a._id !== featuredItem._id) : visibleList;
 
   const resetFilters = () => {
     setSearchQuery("");
     setSelectedCategory("All");
     setSortBy("newest");
-    setVisibleCount(9);
+    setVisiblePages(1);
     setSearchParams({});
   };
 
@@ -657,7 +653,7 @@ const Blog = () => {
             {visibleCount < filteredArticles.length && (
               <div className="pt-8 text-center space-y-3">
                 <button
-                  onClick={() => setVisibleCount((prev) => prev + 6)}
+                  onClick={() => setVisiblePages((prev) => prev + 1)}
                   className="px-8 py-3.5 bg-white border-2 border-[#0B1B3D] text-[#0B1B3D] font-bold rounded-xl hover:bg-[#0B1B3D] hover:text-white transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer text-sm"
                 >
                   Load More Stories ({filteredArticles.length - visibleCount} remaining)
@@ -675,7 +671,7 @@ const Blog = () => {
           <Advert placement="all_stories_banner" />
         </div>
 
-        {/* The NewsFront Daily Briefing Newsletter Subscription */}
+        {/* The Nsemra News Daily Briefing Newsletter Subscription */}
         <div className="mt-12">
           <Newsletter />
         </div>

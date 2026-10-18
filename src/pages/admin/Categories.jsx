@@ -637,7 +637,7 @@ export const Categories = () => {
               URL Slug <span className="text-slate-400 font-normal">(auto-generated)</span>
             </label>
             <div className="flex items-center gap-1 text-xs text-slate-500">
-              <span className="font-mono text-slate-400">newsfront.com/</span>
+              <span className="font-mono text-slate-400">{window.location.host}/</span>
               <input
                 type="text"
                 value={formData.slug}

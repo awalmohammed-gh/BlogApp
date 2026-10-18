@@ -1,57 +1,49 @@
 import { Link } from "react-router-dom";
-import { Calendar, User } from "lucide-react";
+import { Clock } from "lucide-react";
+import { stripHtml, readingMinutes, hideBrokenImage } from "../../utils/articleMeta";
 
 const BlogCard = ({ blog }) => {
   if (!blog) return null;
-  const { _id, author, title, description, date, image, category } = blog;
-
-  // remove HTML tags (safe preview text)
-  const cleanText = (html) => {
-    return (html || "").replace(/<[^>]*>/g, "");
-  };
+  const { _id, author, title, description, content, date, image, category } = blog;
 
   return (
     <Link
       to={`/blog-details/${_id}`}
-      className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:-translate-y-1"
+      className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-200 hover:shadow-xl hover:shadow-slate-200/70 hover:-translate-y-1 transition-all duration-300"
     >
-      {/* Image with category badge overlay */}
-      <div className="h-48 w-full overflow-hidden relative bg-gray-100">
+      <div className="aspect-16/10 w-full overflow-hidden relative bg-linear-to-br from-slate-100 to-blue-100">
         <img
           src={image}
           alt={title}
           loading="lazy"
+          onError={hideBrokenImage}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
         {category && (
-          <span className="absolute top-3 left-3 bg-[#1E3A8A]/90 backdrop-blur-xs text-white text-xs font-semibold px-2.5 py-1 rounded-lg shadow-sm">
+          <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-slate-900 text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm">
             {category}
           </span>
         )}
       </div>
 
-      {/* Content */}
-      <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
-        <div className="space-y-1.5">
-          <h2 className="text-base font-bold text-gray-900 group-hover:text-[#1E3A8A] transition-colors line-clamp-2 leading-snug">
-            {title}
-          </h2>
+      <div className="p-5 flex-1 flex flex-col gap-3">
+        <h3 className="font-serif-headline text-xl font-bold text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-2 leading-snug">
+          {title}
+        </h3>
+        <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed">{stripHtml(description)}</p>
 
-          <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
-            {cleanText(description)}
-          </p>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between text-[11px] text-gray-500 pt-3 border-t border-gray-100">
-          <div className="flex items-center gap-1.5 truncate max-w-[140px]">
-            <User size={12} className="text-gray-400 shrink-0" />
-            <span className="truncate font-medium">{author}</span>
-          </div>
-          <div className="flex items-center gap-1 shrink-0">
-            <Calendar size={12} className="text-gray-400" />
-            <span>{date}</span>
-          </div>
+        <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between gap-2 text-xs text-slate-500">
+          <span className="flex items-center gap-2 min-w-0">
+            {author && (
+              <span className="w-6 h-6 shrink-0 rounded-full bg-blue-100 text-blue-800 text-[10px] font-bold inline-flex items-center justify-center">
+                {author.charAt(0)}
+              </span>
+            )}
+            <span className="truncate">{author ? `${author} · ${date}` : date}</span>
+          </span>
+          <span className="shrink-0 inline-flex items-center gap-1">
+            <Clock size={12} /> {readingMinutes(content || description)} min
+          </span>
         </div>
       </div>
     </Link>

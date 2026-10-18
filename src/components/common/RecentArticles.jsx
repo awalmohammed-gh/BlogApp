@@ -1,360 +1,307 @@
 import { useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "motion/react";
+import { ArrowRight, ArrowUpRight, Clock, TrendingUp, ShieldCheck, Newspaper, Star } from "lucide-react";
 import { useBlog } from "../../context/BlogProvider";
 import BlogCard from "../card/BlogCard";
-import { 
-  ArrowRight, 
-  Flame, 
-  Clock, 
-  User, 
-  TrendingUp, 
-  Sparkles, 
-  ShieldCheck, 
-  Bookmark, 
-  Newspaper 
-} from "lucide-react";
+import { stripHtml, readingMinutes, deskCounts, hideBrokenImage } from "../../utils/articleMeta";
+
+const reveal = {
+  initial: { opacity: 0, y: 24 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-60px" },
+  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+};
+
+const SectionHeading = ({ id, eyebrow, title, to, linkLabel, dark = false }) => (
+  <div className="flex items-end justify-between gap-4 mb-8">
+    <div>
+      <span className={`text-xs font-semibold uppercase tracking-[0.18em] ${dark ? "text-sky-300" : "text-blue-600"}`}>{eyebrow}</span>
+      <h2 id={id} className={`mt-1.5 font-serif-headline text-3xl sm:text-4xl font-bold tracking-tight ${dark ? "text-white" : "text-slate-900"}`}>{title}</h2>
+    </div>
+    {to && (
+      <Link
+        to={to}
+        className={`group shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold ${dark ? "text-sky-300 hover:text-white" : "text-blue-700 hover:text-blue-900"}`}
+      >
+        <span className="hidden sm:inline">{linkLabel}</span>
+        <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+      </Link>
+    )}
+  </div>
+);
+
+const Byline = ({ story, light = false }) => (
+  <div className={`flex items-center gap-2 text-xs ${light ? "text-slate-200" : "text-slate-500"}`}>
+    {story.author && (
+      <>
+        <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[10px] font-bold ${light ? "bg-white/20 text-white" : "bg-blue-100 text-blue-800"}`}>
+          {story.author.charAt(0)}
+        </span>
+        <span className={`font-medium truncate ${light ? "text-white" : "text-slate-700"}`}>{story.author}</span>
+        <span aria-hidden="true">&middot;</span>
+      </>
+    )}
+    <span className="shrink-0">{story.date}</span>
+    <span aria-hidden="true">&middot;</span>
+    <span className="shrink-0 inline-flex items-center gap-1">
+      <Clock size={12} /> {readingMinutes(story.content)} min read
+    </span>
+  </div>
+);
 
 const RecentArticles = () => {
-  const { articles, refreshArticles } = useBlog();
+  const { articles, refreshArticles, loading } = useBlog();
 
   useEffect(() => {
-    if (typeof refreshArticles === "function") {
-      refreshArticles();
-    }
+    if (typeof refreshArticles === "function") refreshArticles();
   }, [refreshArticles]);
 
-  const published = useMemo(() => {
-    return (articles || []).filter((blog) => blog.isPublished === true);
-  }, [articles]);
+  const published = useMemo(() => (articles || []).filter((b) => b.isPublished === true), [articles]);
 
-  // Clean HTML from text helper
-  const cleanText = (html) => {
-    return (html || "").replace(/<[^>]*>/g, "");
-  };
+  // Each story appears once on the page, in this order of sections.
+  const sections = useMemo(() => {
+    const used = new Set();
+    const take = (list, n) => {
+      const picked = list.filter((b) => !used.has(b._id)).slice(0, n);
+      picked.forEach((b) => used.add(b._id));
+      return picked;
+    };
+    const [lead, ...secondary] = take(published, 4);
+    const featured = take(published.filter((b) => b.isFeatured), 3);
+    const latest = take(published, 6);
+    const more = take(published, 5);
+    return { lead, secondary, featured, latest, more };
+  }, [published]);
 
-  // 1. Lead Story & Top Supporting Wire
-  const leadStory = published[0];
-  const supportingStories = published.slice(1, 4);
+  const desks = useMemo(() => deskCounts(published).slice(0, 8), [published]);
+  const mostRead = useMemo(
+    () => [...published].filter((b) => Number(b.views) > 0).sort((a, b) => Number(b.views) - Number(a.views)).slice(0, 5),
+    [published]
+  );
 
-  // 2. Editor's Spotlight Cards
-  const spotlightStories = published.slice(4, 8);
-
-  // 3. In-Depth Analysis & Most Read Sidebar
-  const inDepthStories = published.slice(8, 12);
-  const trendingStories = published.slice(12, 17);
-
-  if (published.length === 0) {
+  if (loading && published.length === 0) {
     return (
-      <div className="p-12 text-center bg-gray-50 rounded-2xl border border-gray-100 my-8">
-        <Newspaper className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-        <h3 className="text-lg font-bold text-gray-800">No stories published yet</h3>
-        <p className="text-gray-500 text-sm mt-1">Please check back soon for real-time news updates.</p>
+      <div className="grid lg:grid-cols-12 gap-6 animate-pulse" aria-label="Loading stories">
+        <div className="lg:col-span-7 h-105 rounded-3xl bg-slate-200/70" />
+        <div className="lg:col-span-5 space-y-4">
+          {[0, 1, 2].map((i) => <div key={i} className="h-32 rounded-2xl bg-slate-200/70" />)}
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-16">
-      
-      {/* =========================================================================
-          SECTION 1: THE FRONT-PAGE LEAD & SUPPORTING WIRE
-         ========================================================================= */}
-      <section>
-        {/* Section Header */}
-        <div className="flex items-center justify-between border-b-2 border-[#0B1B3D] pb-3 mb-6">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 bg-red-600 rounded-full animate-pulse"></span>
-            <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-[#0B1B3D]">
-              Front-Page Lead &bull; Live Wire
-            </h2>
-          </div>
-          <span className="text-[11px] text-gray-500 font-medium hidden sm:inline">
-            Updated in Real-Time &bull; Verified Editorial Desk
-          </span>
+  if (published.length === 0) {
+    return (
+      <div className="py-20 px-6 text-center bg-white rounded-3xl border border-slate-200">
+        <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+          <Newspaper className="w-7 h-7" />
         </div>
+        <h3 className="font-serif-headline text-2xl font-bold text-slate-900">No stories published yet</h3>
+        <p className="text-slate-500 text-sm mt-2 max-w-md mx-auto">
+          The newsroom hasn't published its first story. Check back soon, or subscribe below to hear when it does.
+        </p>
+      </div>
+    );
+  }
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Main Lead Story (Left - 7 cols) */}
-          {leadStory && (
-            <article className="lg:col-span-7 bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
-              <Link to={`/blog-details/${leadStory._id}`} className="block">
-                {/* 16:9 Featured Image */}
-                <div className="relative aspect-16/9 w-full overflow-hidden bg-gray-100">
-                  <img
-                    src={leadStory.image}
-                    alt={leadStory.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/20 to-transparent"></div>
-                  
-                  {/* Category Pill */}
-                  <span className="absolute top-4 left-4 bg-red-600 text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-md shadow-md">
-                    Lead Story &bull; {leadStory.category}
-                  </span>
+  const { lead, secondary, featured, latest, more } = sections;
 
-                  <span className="absolute bottom-4 left-4 text-xs text-white/90 font-medium flex items-center gap-1.5 drop-shadow-sm">
-                    <Clock size={13} />
-                    {leadStory.date}
-                  </span>
-                </div>
+  return (
+    <div className="space-y-24">
+      {/* ===== Top stories ===== */}
+      <motion.section {...reveal} aria-labelledby="top-stories">
+        <SectionHeading id="top-stories" eyebrow="Today on Nsemra News" title="Top Stories" to="/blog" linkLabel="All stories" />
 
-                {/* Lead Story Copy */}
-                <div className="p-6 sm:p-7 space-y-3">
-                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold font-serif-headline text-gray-950 group-hover:text-blue-700 transition-colors leading-[1.18] tracking-tight">
-                    {leadStory.title}
-                  </h3>
-
-                  <p className="text-sm sm:text-base text-gray-600 line-clamp-3 leading-relaxed">
-                    {cleanText(leadStory.description)}
-                  </p>
-
-                  <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-900 font-bold flex items-center justify-center text-xs">
-                        {leadStory.author.charAt(0)}
-                      </div>
-                      <span className="font-semibold text-gray-800">{leadStory.author}</span>
-                      <span className="text-gray-300">&bull;</span>
-                      <span className="text-gray-500">{leadStory.subTitle}</span>
-                    </div>
-
-                    <span className="text-blue-700 font-semibold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
-                      Read Full Story &rarr;
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </article>
-          )}
-
-          {/* Supporting Headlines Wire (Right - 5 cols) */}
-          <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 divide-y divide-gray-100">
-            <div className="pb-4 flex items-center justify-between">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 flex items-center gap-2">
-                <Flame className="w-4 h-4 text-orange-600" />
-                Top Developing Stories
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <Link
+            to={`/blog-details/${lead._id}`}
+            className={`group relative overflow-hidden rounded-3xl bg-slate-900 min-h-95 sm:min-h-115 flex items-end ${secondary.length ? "lg:col-span-7" : "lg:col-span-12"}`}
+          >
+            <img
+              onError={hideBrokenImage}
+              src={lead.image}
+              alt={lead.title}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/60 to-slate-950/5" />
+            <div className="relative p-6 sm:p-9 space-y-4 max-w-2xl">
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-sky-400/20 border border-sky-300/30 text-sky-100 text-[11px] font-semibold uppercase tracking-wider backdrop-blur-md">
+                {lead.isBreaking ? "Breaking" : "Lead story"} &middot; {lead.category}
+              </span>
+              <h3 className="font-serif-headline text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-white leading-[1.1] tracking-tight">
+                {lead.title}
               </h3>
-              <Link to="/latest" className="text-xs font-semibold text-blue-700 hover:underline">
-                View wire &rarr;
-              </Link>
+              {lead.description && <p className="text-sm sm:text-base text-slate-300 line-clamp-2 leading-relaxed">{stripHtml(lead.description)}</p>}
+              <Byline story={lead} light />
             </div>
+          </Link>
 
-            {supportingStories.map((story) => (
-              <article key={story._id} className="py-4 first:pt-4 last:pb-0 group">
-                <Link to={`/blog-details/${story._id}`} className="flex gap-4 items-start">
-                  {/* Thumbnail */}
-                  <div className="w-24 sm:w-28 h-20 sm:h-22 rounded-xl overflow-hidden shrink-0 relative bg-gray-100">
-                    <img
-                      src={story.image}
-                      alt={story.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+          {secondary.length > 0 && (
+            <div className="lg:col-span-5 flex flex-col gap-4">
+              {secondary.map((story) => (
+                <Link
+                  key={story._id}
+                  to={`/blog-details/${story._id}`}
+                  className="group flex-1 flex gap-4 p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-200 hover:shadow-lg hover:shadow-slate-200/60 transition-all"
+                >
+                  <div className="w-28 sm:w-36 shrink-0 rounded-xl overflow-hidden bg-slate-100">
+                    <img onError={hideBrokenImage} src={story.image} alt={story.title} loading="lazy" className="w-full h-full min-h-24 object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
-
-                  {/* Text */}
-                  <div className="flex-1 space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600">
-                      {story.category}
-                    </span>
-                    <h4 className="text-sm sm:text-base font-bold text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2 leading-snug">
+                  <div className="min-w-0 flex flex-col justify-center gap-1.5 py-1">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-blue-600">{story.category}</span>
+                    <h4 className="font-serif-headline text-lg font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-blue-700 transition-colors">
                       {story.title}
                     </h4>
-                    <div className="flex items-center gap-2 text-[11px] text-gray-400 pt-0.5">
-                      <span>{story.author}</span>
-                      <span>&bull;</span>
-                      <span>{story.date}</span>
-                    </div>
+                    <span className="text-xs text-slate-500">{story.date} &middot; {readingMinutes(story.content)} min read</span>
                   </div>
                 </Link>
-              </article>
-            ))}
-          </div>
-
-        </div>
-      </section>
-
-      {/* =========================================================================
-          SECTION 2: EDITOR'S SPOTLIGHT & KEY DESKS
-         ========================================================================= */}
-      <section className="bg-slate-50 -mx-4 sm:-mx-[4vw] md:-mx-[6vw] px-4 sm:px-[4vw] md:px-[6vw] py-14 border-y border-gray-200">
-        <div className="max-w-7xl mx-auto space-y-8">
-          
-          <div className="flex items-center justify-between flex-wrap gap-4 border-b border-gray-200 pb-4">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-blue-700">
-                Editorial Curations
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-bold font-serif-headline text-gray-900 tracking-tight mt-0.5">
-                Editor's Choice & Across the Desks
-              </h2>
-            </div>
-
-            <Link
-              to="/blog"
-              className="text-xs sm:text-sm font-semibold text-blue-700 hover:text-blue-900 flex items-center gap-1 group"
-            >
-              <span>Explore all desks</span>
-              <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {spotlightStories.map((story) => (
-              <BlogCard key={story._id} blog={story} />
-            ))}
-          </div>
-
-        </div>
-      </section>
-
-      {/* =========================================================================
-          SECTION 3: IN-DEPTH REPORTING & TRENDING / MOST READ SIDEBAR
-         ========================================================================= */}
-      <section>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          
-          {/* Left Column: In-Depth Analytical Features (8 cols) */}
-          <div className="lg:col-span-8 space-y-6">
-            <div className="flex items-center justify-between border-b-2 border-gray-900 pb-3">
-              <h2 className="text-xl sm:text-2xl font-bold font-serif-headline text-gray-950 tracking-tight">
-                In-Depth Analysis & Regional Reports
-              </h2>
-              <span className="text-xs text-gray-500 font-medium">Longform &bull; 4 Min Reads</span>
-            </div>
-
-            <div className="space-y-6">
-              {inDepthStories.map((story) => (
-                <article 
-                  key={story._id}
-                  className="bg-white rounded-2xl p-5 border border-gray-100 shadow-xs hover:shadow-md transition-shadow group flex flex-col sm:flex-row gap-5 items-start"
-                >
-                  {/* Image */}
-                  <Link 
-                    to={`/blog-details/${story._id}`} 
-                    className="w-full sm:w-56 aspect-16/10 rounded-xl overflow-hidden shrink-0 bg-gray-100 block"
-                  >
-                    <img
-                      src={story.image}
-                      alt={story.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </Link>
-
-                  {/* Body */}
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-blue-700 font-bold uppercase tracking-wider text-[11px]">
-                        {story.category}
-                      </span>
-                      <span className="text-gray-400 text-[11px]">{story.date}</span>
-                    </div>
-
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors leading-snug">
-                      <Link to={`/blog-details/${story._id}`}>
-                        {story.title}
-                      </Link>
-                    </h3>
-
-                    <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                      {cleanText(story.description)}
-                    </p>
-
-                    <div className="pt-2 flex items-center justify-between text-xs text-gray-500 border-t border-gray-50">
-                      <div className="flex items-center gap-1.5">
-                        <User size={13} className="text-gray-400" />
-                        <span className="font-medium text-gray-700">{story.author}</span>
-                      </div>
-                      <Link
-                        to={`/blog-details/${story._id}`}
-                        className="text-blue-700 font-semibold hover:underline"
-                      >
-                        Read analysis &rarr;
-                      </Link>
-                    </div>
-                  </div>
-                </article>
               ))}
             </div>
+          )}
+        </div>
+      </motion.section>
 
-            {/* View More Link */}
-            <div className="text-center pt-4">
+      {/* ===== Latest stories ===== */}
+      {latest.length > 0 && (
+        <motion.section {...reveal} aria-label="Latest stories">
+          <SectionHeading eyebrow="Fresh from the newsroom" title="Latest Stories" to="/blog" linkLabel="Browse the archive" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {latest.map((story) => <BlogCard key={story._id} blog={story} />)}
+          </div>
+        </motion.section>
+      )}
+
+      {/* ===== Explore by desk ===== */}
+      {desks.length > 0 && (
+        <motion.section {...reveal} aria-label="Explore by desk">
+          <SectionHeading eyebrow="Find your beat" title="Explore by Desk" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {desks.map((desk) => (
               <Link
-                to="/blog"
-                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white border-2 border-[#0B1B3D] text-[#0B1B3D] font-bold rounded-xl hover:bg-[#0B1B3D] hover:text-white transition-all duration-200 text-sm shadow-xs hover:shadow-md cursor-pointer"
+                key={desk.slug}
+                to={`/${desk.slug}`}
+                className="group relative overflow-hidden rounded-2xl aspect-4/3 bg-slate-900"
               >
-                <span>Browse All 39+ Published Articles</span>
-                <ArrowRight size={16} />
+                <img onError={hideBrokenImage} src={desk.image} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500" />
+                <div className="absolute inset-0 bg-linear-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-4 flex items-end justify-between gap-2">
+                  <div className="min-w-0">
+                    <h3 className="text-white font-semibold text-base sm:text-lg truncate">{desk.name}</h3>
+                    <span className="text-xs text-slate-300">{desk.count} {desk.count === 1 ? "story" : "stories"}</span>
+                  </div>
+                  <span className="w-8 h-8 shrink-0 rounded-full bg-white/15 backdrop-blur-md text-white flex items-center justify-center group-hover:bg-white group-hover:text-slate-900 transition-colors">
+                    <ArrowUpRight size={16} />
+                  </span>
+                </div>
               </Link>
+            ))}
+          </div>
+        </motion.section>
+      )}
+
+      {/* ===== Editor's choice (only stories marked as featured) ===== */}
+      {featured.length > 0 && (
+        <motion.section {...reveal} className="relative -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-16 rounded-none sm:rounded-3xl bg-[#050B1F] overflow-hidden">
+          <div className="absolute inset-0 hero-starfield opacity-60 pointer-events-none" />
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-sky-500/20 blur-[100px] pointer-events-none" />
+          <div className="relative">
+            <SectionHeading eyebrow="Curated by our editors" title="Editor's Choice" dark />
+            <div className={`grid grid-cols-1 gap-6 ${featured.length === 1 ? "md:max-w-xl" : featured.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
+              {featured.map((story) => (
+                <Link
+                  key={story._id}
+                  to={`/blog-details/${story._id}`}
+                  className="group rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-sky-300/40 hover:bg-white/10 transition-all"
+                >
+                  <div className="aspect-16/10 overflow-hidden">
+                    <img onError={hideBrokenImage} src={story.image} alt={story.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                  <div className="p-5 space-y-2">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-sky-300">
+                      <Star size={12} className="fill-sky-300" /> {story.category}
+                    </span>
+                    <h3 className="font-serif-headline text-xl font-bold text-white leading-snug line-clamp-2">{story.title}</h3>
+                    <p className="text-sm text-slate-400 line-clamp-2">{stripHtml(story.description)}</p>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
+        </motion.section>
+      )}
 
-          {/* Right Column: Most Read Ranked 1 to 5 + Trust Box (4 cols) */}
-          <aside className="lg:col-span-4 space-y-6">
-            
-            {/* Most Read Box */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
-                <h3 className="font-bold text-gray-950 text-sm uppercase tracking-wider flex items-center gap-1.5">
-                  <TrendingUp className="w-4 h-4 text-blue-700" />
-                  Most Read on NewsFront
-                </h3>
-                <span className="text-[10px] font-semibold text-gray-400 uppercase">Today</span>
-              </div>
-
-              <div className="space-y-4">
-                {trendingStories.map((story, idx) => (
-                  <Link
-                    key={story._id}
-                    to={`/blog-details/${story._id}`}
-                    className="flex gap-4 items-start group pb-4 border-b border-gray-50 last:border-0 last:pb-0"
-                  >
-                    {/* Rank Number */}
-                    <span className="font-serif-headline text-3xl font-black text-slate-300 group-hover:text-blue-600 transition-colors w-8 text-center shrink-0 leading-none mt-0.5">
-                      {`0${idx + 1}`}
-                    </span>
-
-                    {/* Story summary */}
-                    <div className="flex-1 space-y-1">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-blue-600 block">
-                        {story.category}
-                      </span>
-                      <h4 className="text-xs sm:text-sm font-bold text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2 leading-snug">
+      {/* ===== More stories + Most read ===== */}
+      <motion.section {...reveal} className={more.length > 0 ? "grid grid-cols-1 lg:grid-cols-12 gap-10" : ""} aria-label="More stories">
+        {more.length > 0 && (
+        <div className="lg:col-span-8">
+            <>
+              <SectionHeading eyebrow="Keep reading" title="More Stories" />
+              <div className="divide-y divide-slate-200">
+                {more.map((story) => (
+                  <Link key={story._id} to={`/blog-details/${story._id}`} className="group flex gap-5 py-6 first:pt-0">
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-blue-600">{story.category}</span>
+                      <h3 className="font-serif-headline text-xl sm:text-2xl font-bold text-slate-900 leading-snug group-hover:text-blue-700 transition-colors line-clamp-2">
                         {story.title}
-                      </h4>
-                      <p className="text-[11px] text-gray-400">{story.author}</p>
+                      </h3>
+                      <p className="text-sm text-slate-600 line-clamp-2 hidden sm:block">{stripHtml(story.description)}</p>
+                      <Byline story={story} />
+                    </div>
+                    <div className="w-24 h-24 sm:w-40 sm:h-28 shrink-0 rounded-xl overflow-hidden bg-slate-100">
+                      <img onError={hideBrokenImage} src={story.image} alt={story.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     </div>
                   </Link>
                 ))}
               </div>
-            </div>
-
-            {/* Newsroom Editorial Standards Badge */}
-            <div className="bg-gradient-to-br from-[#0B1B3D] to-[#122353] rounded-2xl p-6 text-white shadow-md space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6 text-blue-300" />
-              </div>
-              <h4 className="font-bold text-base font-serif-headline">
-                The NewsFront Trust Standard
-              </h4>
-              <p className="text-xs text-blue-100/80 leading-relaxed">
-                Our correspondents adhere strictly to the GJA Code of Ethics and international verification benchmarks. We do not accept sponsored interference in editorial stories.
-              </p>
-              <div className="pt-2">
-                <Link
-                  to="/about"
-                  className="text-xs font-semibold text-blue-300 hover:text-white underline inline-block"
-                >
-                  Read our Editorial Charter &rarr;
-                </Link>
-              </div>
-            </div>
-
-          </aside>
-
+            </>
+          <Link
+            to="/blog"
+            className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+          >
+            Browse all stories <ArrowRight size={16} />
+          </Link>
         </div>
-      </section>
+        )}
 
+        <aside className={more.length > 0 ? "lg:col-span-4 space-y-6" : "grid grid-cols-1 md:grid-cols-2 gap-6 items-start"}>
+          <div className="rounded-2xl bg-white border border-slate-200/80 p-6">
+            <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-900 mb-5">
+              <TrendingUp className="w-4 h-4 text-blue-600" /> Most Read
+            </h3>
+            {mostRead.length === 0 ? (
+              <p className="text-sm text-slate-500">Rankings appear once stories have recorded views.</p>
+            ) : (
+              <ol className="space-y-5">
+                {mostRead.map((story, idx) => (
+                  <li key={story._id}>
+                    <Link to={`/blog-details/${story._id}`} className="group flex gap-4 items-start">
+                      <span className="font-serif-headline text-3xl font-bold leading-none text-transparent bg-clip-text bg-linear-to-b from-sky-400 to-blue-700 w-8 shrink-0">
+                        {idx + 1}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400">{story.category}</span>
+                        <span className="block text-sm font-semibold text-slate-900 leading-snug line-clamp-2 group-hover:text-blue-700 transition-colors">{story.title}</span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+
+          <div className="rounded-2xl p-6 text-white bg-linear-to-br from-[#0B1B3D] to-[#123B7A] space-y-3">
+            <ShieldCheck className="w-7 h-7 text-sky-300" />
+            <h3 className="font-serif-headline text-xl font-bold">Our editorial standards</h3>
+            <p className="text-sm text-blue-100/80 leading-relaxed">
+              Every story is reviewed by an editor before publication, and corrections are made openly.
+            </p>
+            <Link to="/about" className="inline-flex items-center gap-1 text-sm font-semibold text-sky-300 hover:text-white">
+              About Nsemra News <ArrowRight size={14} />
+            </Link>
+          </div>
+        </aside>
+      </motion.section>
     </div>
   );
 };

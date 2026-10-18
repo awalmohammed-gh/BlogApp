@@ -1,9 +1,12 @@
+import { formatPublicDate } from "../utils/formatPublicDate";
+import { useSiteSettings } from "./SiteSettingsContext";
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { publicArticleService } from "../services/public/publicArticleService";
 
 const BlogContext = createContext();
 
 export const BlogProvider = ({ children }) => {
+  const { settings } = useSiteSettings();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,16 +29,10 @@ export const BlogProvider = ({ children }) => {
           isPublished: art.status ? art.status === "published" : true,
           isFeatured: art.isFeatured || false,
           isBreaking: art.isBreakingNews || false,
-          date: art.publishedAt
-            ? new Date(art.publishedAt).toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric"
-              })
-            : "Recently",
-          author: art.author?.name || "NewsFront Desk",
-          authorRole: art.author?.title || "Accredited Correspondent",
-          authorAvatar: art.author?.avatar,
+          date: art.publishedAt ? formatPublicDate(art.publishedAt, settings?.general) : "Recently",
+          author: art.byline || art.author?.name || "Nsemra News Desk",
+          authorRole: art.byline ? "" : art.author?.title || "",
+          authorAvatar: art.byline ? undefined : art.author?.avatar,
           tags: (art.tags || []).map((t) => (typeof t === "object" ? t.name : t)),
           views: art.views || 0
         }));
@@ -50,7 +47,7 @@ export const BlogProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [settings?.general]);
 
   useEffect(() => {
     fetchPublishedArticles();

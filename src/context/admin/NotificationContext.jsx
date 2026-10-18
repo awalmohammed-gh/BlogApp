@@ -6,323 +6,243 @@ import notificationService from "../../services/admin/notificationService";
 const NotificationContext = createContext();
 
 const POLLING_INTERVAL_MS = 30000; // 30 seconds
+const PREVIEW_LIMIT = 10;
 
+/**
+ * MongoDB is the source of truth. This provider keeps a small preview list for
+ * the header dropdown plus the unread badge, polls with Axios, and coordinates
+ * mutations so that a poll which overlaps a delete/read change is discarded
+ * instead of re-inserting stale rows. Full paginated lists (the Notifications
+ * page) fetch their own query and refetch whenever `syncToken` changes.
+ */
 export const NotificationProvider = ({ children }) => {
   const { admin } = useAuth();
 
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Incremented on every poll tick and successful mutation; list views refetch on change.
+  const [syncToken, setSyncToken] = useState(0);
 
-  // Tracking refs to manage polling lifecycle and prevent duplicates
-  const isFetchingRef = useRef(false);
+  const requestSeqRef = useRef(0);
+  // Changes whenever a mutation starts or finishes; responses requested under an older epoch are stale.
+  const mutationEpochRef = useRef(0);
+  const deletedIdsRef = useRef(new Set());
   const isInitialLoadRef = useRef(true);
   const knownNotificationIdsRef = useRef(new Set());
-  const pollingTimerRef = useRef(null);
+  const isPollingRef = useRef(false);
+
+  const getEpoch = useCallback(() => mutationEpochRef.current, []);
+  const withoutDeleted = useCallback(
+    (items) => items.filter((n) => !deletedIdsRef.current.has(String(n._id))),
+    []
+  );
+  const bumpSync = useCallback(() => setSyncToken((t) => t + 1), []);
 
   /**
-   * Fetch paginated notifications with optional query parameters
+   * Fetch the header preview and unread count. Out-of-order or mutation-overlapping
+   * responses are ignored.
    */
-  const fetchNotifications = useCallback(
-    async (params = {}, options = { background: false }) => {
+  const loadPreview = useCallback(
+    async ({ background = false } = {}) => {
       if (!admin?._id) return;
-
-      if (!options.background) {
-        setIsLoading(true);
-      }
+      const seq = ++requestSeqRef.current;
+      const epoch = mutationEpochRef.current;
+      if (!background) setIsLoading(true);
 
       try {
-        const res = await notificationService.getNotifications(params);
-        if (res.success && Array.isArray(res.data)) {
-          setNotifications(res.data);
-          setUnreadCount(typeof res.unreadCount === "number" ? res.unreadCount : 0);
-          if (res.pagination) {
-            setPagination(res.pagination);
-          }
+        const res = await notificationService.getNotifications({ page: 1, limit: PREVIEW_LIMIT });
+        if (seq !== requestSeqRef.current || epoch !== mutationEpochRef.current) return;
+        if (!res.success || !Array.isArray(res.data)) return;
 
-          // Check for genuinely new incoming notifications to show subtle toast
-          const newNotifications = [];
-          res.data.forEach((item) => {
-            if (!knownNotificationIdsRef.current.has(item._id)) {
-              knownNotificationIdsRef.current.add(item._id);
-              if (!isInitialLoadRef.current && !item.isRead) {
-                newNotifications.push(item);
-              }
-            }
+        const items = withoutDeleted(res.data);
+        setNotifications(items);
+        setUnreadCount(typeof res.unreadCount === "number" ? res.unreadCount : 0);
+        setError(null);
+
+        // Subtle toast for notifications that arrived since the last refresh
+        const arrivals = items.filter((item) => !knownNotificationIdsRef.current.has(item._id));
+        arrivals.forEach((item) => knownNotificationIdsRef.current.add(item._id));
+        const firstUnread = arrivals.find((item) => !item.isRead);
+        if (!isInitialLoadRef.current && firstUnread) {
+          toast(`${firstUnread.title}: ${firstUnread.message}`, {
+            id: `notif-${firstUnread._id}`,
+            icon: "🔔",
+            duration: 4000,
+            style: { borderRadius: "12px", background: "#1e293b", color: "#fff", fontSize: "12px", fontWeight: "600" }
           });
-
-          // Show subtle in-app alert for newly received items
-          if (newNotifications.length > 0 && !isInitialLoadRef.current) {
-            const first = newNotifications[0];
-            toast(
-              `${first.title}: ${first.message}`,
-              {
-                id: `notif-${first._id}`,
-                icon: "🔔",
-                duration: 4000,
-                style: {
-                  borderRadius: "12px",
-                  background: "#1e293b",
-                  color: "#fff",
-                  fontSize: "12px",
-                  fontWeight: "600"
-                }
-              }
-            );
-          }
-
-          isInitialLoadRef.current = false;
-          setError(null);
         }
+        isInitialLoadRef.current = false;
       } catch (err) {
-        if (!options.background) {
-          setError(err.response?.data?.message || "Failed to load notifications");
+        if (seq === requestSeqRef.current && !background) {
+          setError(err?.message || "Failed to load notifications");
         }
       } finally {
-        if (!options.background) {
-          setIsLoading(false);
-        }
+        if (seq === requestSeqRef.current && !background) setIsLoading(false);
       }
     },
-    [admin?._id]
+    [admin?._id, withoutDeleted]
   );
 
-  /**
-   * Lightweight unread count refresh
-   */
-  const refreshUnreadCount = useCallback(async () => {
-    if (!admin?._id) return;
-    try {
-      const res = await notificationService.getUnreadCount();
-      if (res.success && typeof res.unreadCount === "number") {
-        setUnreadCount(res.unreadCount);
+  /** Re-read preview + badge and tell list views to refetch their own query. */
+  const refresh = useCallback(
+    async (options) => {
+      bumpSync();
+      await loadPreview(options);
+    },
+    [bumpSync, loadPreview]
+  );
+
+  /** Wrap a server mutation so any poll started before it finishes is discarded. */
+  const runMutation = useCallback(
+    async (request) => {
+      mutationEpochRef.current += 1;
+      try {
+        return await request();
+      } finally {
+        mutationEpochRef.current += 1;
       }
-    } catch {
-      // Quiet fail on polling tick
-    }
-  }, [admin?._id]);
+    },
+    []
+  );
 
-  /**
-   * Background polling tick
-   */
   const performPollTick = useCallback(async () => {
-    if (!admin?._id) return;
-    if (isFetchingRef.current) return; // Prevent overlapping requests
-
-    // Page Visibility API check: pause frequent updates when tab is hidden
-    if (typeof document !== "undefined" && document.visibilityState === "hidden") {
-      return;
-    }
-
+    if (!admin?._id || isPollingRef.current) return;
+    if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+    isPollingRef.current = true;
     try {
-      isFetchingRef.current = true;
-      // Fetch notifications silently in background
-      await fetchNotifications({ page: 1, limit: 20 }, { background: true });
+      await refresh({ background: true });
     } finally {
-      isFetchingRef.current = false;
+      isPollingRef.current = false;
     }
-  }, [admin?._id, fetchNotifications]);
+  }, [admin?._id, refresh]);
 
-  /**
-   * Setup polling lifecycle: interval, tab visibility, and focus listeners
-   */
   useEffect(() => {
     if (!admin?._id) {
       setNotifications([]);
       setUnreadCount(0);
       knownNotificationIdsRef.current.clear();
+      deletedIdsRef.current.clear();
       isInitialLoadRef.current = true;
       return;
     }
 
-    // Initial fetch on mount / login
-    fetchNotifications();
-
-    // Setup interval for 30 seconds
-    pollingTimerRef.current = setInterval(performPollTick, POLLING_INTERVAL_MS);
-
-    // Event handler for visibility change (resumes immediately when tab is reopened)
+    loadPreview();
+    const timer = setInterval(performPollTick, POLLING_INTERVAL_MS);
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        performPollTick();
-      }
+      if (document.visibilityState === "visible") performPollTick();
     };
-
-    // Event handler for window focus
-    const handleFocus = () => {
-      performPollTick();
-    };
-
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", handleFocus);
+    window.addEventListener("focus", performPollTick);
 
     return () => {
-      if (pollingTimerRef.current) {
-        clearInterval(pollingTimerRef.current);
-        pollingTimerRef.current = null;
-      }
+      clearInterval(timer);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("focus", performPollTick);
     };
-  }, [admin?._id, fetchNotifications, performPollTick]);
+  }, [admin?._id, loadPreview, performPollTick]);
 
-  /**
-   * Mark a notification as read
-   */
+  const patchPreview = (id, changes) =>
+    setNotifications((prev) => prev.map((n) => (n._id === id ? { ...n, ...changes } : n)));
+
+  const syncUnreadFromServer = async () => {
+    try {
+      const res = await notificationService.getUnreadCount();
+      if (res.success && typeof res.unreadCount === "number") setUnreadCount(res.unreadCount);
+    } catch {
+      // The next poll reconciles the badge
+    }
+  };
+
+  /** Mark one notification read. Resolves with the updated document; throws on failure. */
   const markNotificationAsRead = async (id) => {
-    // Optimistic UI update
-    setNotifications((prev) =>
-      prev.map((n) => (n._id === id ? { ...n, isRead: true, readAt: new Date() } : n))
-    );
-    setUnreadCount((prev) => Math.max(0, prev - 1));
-
     try {
-      const res = await notificationService.markAsRead(id);
-      if (res.success && res.data) {
-        setNotifications((prev) =>
-          prev.map((n) => (n._id === id ? { ...n, ...res.data } : n))
-        );
-      }
+      const res = await runMutation(() => notificationService.markAsRead(id));
+      patchPreview(id, { isRead: true, readAt: res.data?.readAt || new Date().toISOString() });
+      await syncUnreadFromServer();
+      bumpSync();
+      return res.data;
     } catch (err) {
-      // Revert on error
-      fetchNotifications({ page: 1, limit: 20 }, { background: true });
-      toast.error(err.response?.data?.message || "Failed to mark as read");
+      toast.error(err?.message || "Failed to mark notification as read");
+      throw err;
     }
   };
 
-  /**
-   * Mark a notification as unread
-   */
   const markNotificationAsUnread = async (id) => {
-    // Optimistic UI update
-    setNotifications((prev) =>
-      prev.map((n) => (n._id === id ? { ...n, isRead: false, readAt: null } : n))
-    );
-    setUnreadCount((prev) => prev + 1);
-
     try {
-      const res = await notificationService.markAsUnread(id);
-      if (res.success && res.data) {
-        setNotifications((prev) =>
-          prev.map((n) => (n._id === id ? { ...n, ...res.data } : n))
-        );
-      }
+      const res = await runMutation(() => notificationService.markAsUnread(id));
+      patchPreview(id, { isRead: false, readAt: null });
+      await syncUnreadFromServer();
+      bumpSync();
+      return res.data;
     } catch (err) {
-      fetchNotifications({ page: 1, limit: 20 }, { background: true });
-      toast.error(err.response?.data?.message || "Failed to mark as unread");
+      toast.error(err?.message || "Failed to mark notification as unread");
+      throw err;
     }
   };
 
-  /**
-   * Mark all active notifications as read
-   */
   const markAllNotificationsAsRead = async () => {
-    const previousUnread = unreadCount;
-    setNotifications((prev) =>
-      prev.map((n) => ({ ...n, isRead: true, readAt: new Date() }))
-    );
-    setUnreadCount(0);
-
     try {
-      const res = await notificationService.markAllAsRead();
-      if (res.success) {
-        toast.success("All notifications marked as read");
-      }
+      const res = await runMutation(() => notificationService.markAllAsRead());
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      await syncUnreadFromServer();
+      bumpSync();
+      toast.success(res.modifiedCount === 1 ? "1 notification marked as read" : `${res.modifiedCount} notifications marked as read`);
     } catch (err) {
-      setUnreadCount(previousUnread);
-      fetchNotifications({ page: 1, limit: 20 }, { background: true });
-      toast.error(err.response?.data?.message || "Failed to mark all as read");
+      toast.error(err?.message || "Failed to mark all as read");
     }
   };
 
-  /**
-   * Archive a notification (soft delete)
-   */
   const archiveNotification = async (id) => {
-    const target = notifications.find((n) => n._id === id);
-    setNotifications((prev) => prev.filter((n) => n._id !== id));
-    if (target && !target.isRead) {
-      setUnreadCount((prev) => Math.max(0, prev - 1));
-    }
-
     try {
-      const res = await notificationService.archiveNotification(id);
-      if (res.success) {
-        toast.success("Notification archived");
-      }
+      await runMutation(() => notificationService.archiveNotification(id));
+      setNotifications((prev) => prev.filter((n) => n._id !== id));
+      await syncUnreadFromServer();
+      bumpSync();
+      toast.success("Notification archived");
     } catch (err) {
-      fetchNotifications({ page: 1, limit: 20 }, { background: true });
-      toast.error(err.response?.data?.message || "Failed to archive notification");
+      toast.error(err?.message || "Failed to archive notification");
+      throw err;
     }
   };
 
   /**
-   * Permanently delete a single notification from MongoDB
+   * Permanently delete one notification in MongoDB. The row is removed only
+   * after the server confirms. Resolves with { wasUnread, unreadCount, total }.
    */
   const deleteNotification = async (id) => {
-    const target = notifications.find((n) => n._id === id);
+    const res = await runMutation(() => notificationService.deleteNotification(id));
+    deletedIdsRef.current.add(String(id));
     setNotifications((prev) => prev.filter((n) => n._id !== id));
-    if (target && !target.isRead) {
-      setUnreadCount((prev) => Math.max(0, prev - 1));
-    }
-    knownNotificationIdsRef.current.delete(id);
-
-    try {
-      const res = await notificationService.deleteNotification(id);
-      if (res.success) {
-        toast.success("Notification deleted permanently");
-      }
-    } catch (err) {
-      fetchNotifications({ page: 1, limit: 20 }, { background: true });
-      toast.error(err.response?.data?.message || "Failed to delete notification");
-    }
+    if (typeof res.unreadCount === "number") setUnreadCount(res.unreadCount);
+    bumpSync();
+    return res;
   };
 
   /**
-   * Permanently delete multiple notifications from MongoDB
+   * Permanently delete the selected notifications in MongoDB. Resolves with the
+   * server's exact result: { deletedCount, deletedIds, unavailableIds, unreadCount, total }.
    */
   const deleteBulkNotifications = async (notificationIds) => {
-    if (!Array.isArray(notificationIds) || notificationIds.length === 0) return;
-
-    const idSet = new Set(notificationIds);
-    let unreadDeleted = 0;
-    notifications.forEach((n) => {
-      if (idSet.has(n._id) && !n.isRead) {
-        unreadDeleted++;
-      }
-    });
-
-    setNotifications((prev) => prev.filter((n) => !idSet.has(n._id)));
-    if (unreadDeleted > 0) {
-      setUnreadCount((prev) => Math.max(0, prev - unreadDeleted));
-    }
-    notificationIds.forEach((id) => knownNotificationIdsRef.current.delete(id));
-
-    try {
-      const res = await notificationService.deleteBulkNotifications(notificationIds);
-      if (res.success) {
-        toast.success(
-          res.deletedCount === 1
-            ? "1 notification deleted permanently"
-            : `${res.deletedCount} notifications deleted permanently`
-        );
-      }
-    } catch (err) {
-      fetchNotifications({ page: 1, limit: 20 }, { background: true });
-      toast.error(err.response?.data?.message || "Failed to delete selected notifications");
-    }
+    const res = await runMutation(() => notificationService.deleteBulkNotifications(notificationIds));
+    const gone = new Set([...(res.deletedIds || []), ...(res.unavailableIds || [])].map(String));
+    (res.deletedIds || []).forEach((id) => deletedIdsRef.current.add(String(id)));
+    setNotifications((prev) => prev.filter((n) => !gone.has(String(n._id))));
+    if (typeof res.unreadCount === "number") setUnreadCount(res.unreadCount);
+    bumpSync();
+    return res;
   };
 
   const value = {
     notifications,
     unreadCount,
-    pagination,
     isLoading,
     error,
-    fetchNotifications,
-    refreshUnreadCount,
+    syncToken,
+    getEpoch,
+    withoutDeleted,
+    refresh,
     markNotificationAsRead,
     markNotificationAsUnread,
     markAllNotificationsAsRead,
@@ -331,13 +251,10 @@ export const NotificationProvider = ({ children }) => {
     deleteBulkNotifications
   };
 
-  return (
-    <NotificationContext.Provider value={value}>
-      {children}
-    </NotificationContext.Provider>
-  );
+  return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useNotifications = () => {
   const context = useContext(NotificationContext);
   if (!context) {

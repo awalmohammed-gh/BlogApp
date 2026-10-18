@@ -127,12 +127,12 @@ export const Advertisements = () => {
     setEditingAd(null);
     setFormData({
       campaignName: "",
-      advertiserName: "NewsFront Media Solutions",
+      advertiserName: "",
       headline: "",
       description: "",
       placement: "homepage_banner",
       status: "draft",
-      buttonText: "Explore Partnership Options",
+      buttonText: "Learn More",
       destinationUrl: "https://",
       media: null,
       imageUrl: "",
@@ -288,7 +288,7 @@ export const Advertisements = () => {
             Commercial Advertisements & Partnerships
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Create, schedule, and manage verified commercial placements and sponsored banners across NewsFront.
+            Create, schedule, and manage verified commercial placements and sponsored banners across Nsemra News.
           </p>
         </div>
 
@@ -822,11 +822,11 @@ export const Advertisements = () => {
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-center gap-2">
               <AlertCircle size={16} className="text-amber-600 shrink-0" />
               <span>
-                <strong>Live Placement Simulation:</strong> This component renders exactly as public website visitors will see it on NewsFront.
+                <strong>Live Placement Simulation:</strong> This component renders exactly as public website visitors will see it on Nsemra News.
               </span>
             </div>
 
-            {/* Render exact NewsFront Advert frame */}
+            {/* Render exact Nsemra News Advert frame */}
             <div className="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 md:p-10 border border-slate-800 shadow-md relative overflow-hidden">
               <div className="absolute -top-12 -right-12 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
 

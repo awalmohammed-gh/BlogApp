@@ -6,6 +6,9 @@ import BlogPage from "../pages/BlogPage";
 import Contact from "../pages/Contact";
 import About from "../pages/About";
 import CategoryPage from "../pages/CategoryPage";
+import NewsletterAction from "../pages/NewsletterAction";
+import EngagementManagement from "../pages/admin/EngagementManagement";
+import ContactEnquiries from "../pages/admin/ContactEnquiries";
 
 // Admin CMS Components
 import AdminLayout from "../components/admin/layout/AdminLayout";
@@ -36,7 +39,7 @@ const router = createBrowserRouter(
       <Route path="/admin/login" element={<Login />} />
       <Route path="/admin/accept-invite" element={<AcceptInvite />} />
 
-      {/* NewsFront Admin Dashboard & CMS Routes */}
+      {/* Nsemra News Admin Dashboard & CMS Routes */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<DashboardOverview />} />
         <Route path="articles" element={<Articles />} />
@@ -45,7 +48,9 @@ const router = createBrowserRouter(
         <Route path="categories" element={<Categories />} />
         <Route path="tags" element={<Tags />} />
         <Route path="media" element={<MediaLibrary />} />
-        <Route path="comments" element={<Comments />} />
+        <Route path="comments" element={<ProtectedRoute allowedRoles={["editor", "super_admin"]}><Comments /></ProtectedRoute>} />
+        <Route path="enquiries" element={<ProtectedRoute allowedRoles={["editor", "super_admin"]}><ContactEnquiries /></ProtectedRoute>} />
+        <Route path="subscribers" element={<ProtectedRoute allowedRoles={["super_admin"]}><EngagementManagement kind="newsletter" /></ProtectedRoute>} />
         <Route
           path="authors"
           element={
@@ -93,12 +98,14 @@ const router = createBrowserRouter(
       </Route>
 
 
-      {/* Public NewsFront Website Routes */}
+      {/* Public Nsemra News Website Routes */}
       <Route path="/" element={<SystemLayout />}>
         <Route index element={<Home />} />
         <Route path="blog" element={<Blog />} />
         <Route path="blog-details/:id" element={<BlogPage />} />
         <Route path="contact" element={<Contact />} />
+        <Route path="newsletter/confirm" element={<NewsletterAction action="confirm" />} />
+        <Route path="newsletter/unsubscribe" element={<NewsletterAction action="unsubscribe" />} />
         <Route path="about" element={<About />} />
         <Route path=":category" element={<CategoryPage />} />
       </Route>

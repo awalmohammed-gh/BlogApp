@@ -16,8 +16,8 @@ import {
   Clock,
   ShieldAlert
 } from "lucide-react";
-import toast from "react-hot-toast";
 import { useAdmin } from "../../../context/admin/AdminContext";
+import StaffAvatar from "../common/StaffAvatar";
 import { useAuth } from "../../../context/admin/AuthContext";
 import { useNotifications } from "../../../context/admin/NotificationContext";
 
@@ -25,7 +25,6 @@ export const AdminHeader = () => {
   const { admin, logout } = useAuth();
   const {
     currentAdminUser,
-    stats,
     isSidebarCollapsed,
     toggleSidebarCollapsed,
     openMobileSidebar,
@@ -225,7 +224,7 @@ export const AdminHeader = () => {
                       <div
                         key={id}
                         onClick={() => {
-                          markNotificationAsRead(id);
+                          if (!isRead) markNotificationAsRead(id).catch(() => {});
                           setNotificationsOpen(false);
                           if (targetUrl) navigate(targetUrl);
                         }}
@@ -276,7 +275,7 @@ export const AdminHeader = () => {
           target="_blank"
           rel="noopener noreferrer"
           className="hidden sm:inline-flex p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-          title="Open Public NewsFront Website"
+          title="Open Public Nsemra News Website"
         >
           <ExternalLink size={18} />
         </Link>
@@ -288,14 +287,10 @@ export const AdminHeader = () => {
             onClick={() => setProfileDropdownOpen((prev) => !prev)}
             className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
           >
-            <img
-              src={
-                admin?.avatar ||
-                currentAdminUser.avatar ||
-                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
-              }
-              alt={admin?.name || currentAdminUser.name}
-              className="w-8 h-8 rounded-full object-cover ring-2 ring-slate-200"
+            <StaffAvatar
+              src={admin?.avatar || currentAdminUser.avatar}
+              name={admin?.name || currentAdminUser.name}
+              className="w-8 h-8 rounded-full ring-2 ring-slate-200"
             />
             <ChevronDown size={14} className="text-slate-400 hidden sm:block" />
           </button>

@@ -256,7 +256,7 @@ export const PagesContent = () => {
             Website Content Management
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Manage editorial copy, promotional banners, hero imagery, and SEO metadata across public NewsFront sections.
+            Manage editorial copy, promotional banners, hero imagery, and SEO metadata across public Nsemra News sections.
           </p>
         </div>
         <button
@@ -817,7 +817,7 @@ export const PagesContent = () => {
                   type="text"
                   value={pageData.seo?.metaTitle || ""}
                   onChange={(e) => handleSeoChange("metaTitle", e.target.value)}
-                  placeholder="e.g. NewsFront | Ghana, Africa & World News"
+                  placeholder="e.g. Nsemra News | Ghana, Africa & World News"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>

@@ -6,24 +6,22 @@ import RecentArticles from "../components/common/RecentArticles";
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-white">
-      {/* 1. Ghana and Beyond Editorial Frontispiece */}
+    <div className="min-h-screen bg-slate-50">
+      {/* Hero with spinning globe */}
       <Hero />
 
-      {/* 2. Editorial Category Sub-Masthead */}
+      {/* Sticky desk navigation */}
       <PopularCategory />
 
-      {/* 3. Main Publication Content Container */}
-      <main id="articles-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
-        {/* Tiered Editorial Newsroom Layout */}
+      {/* Stories */}
+      <div id="articles-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 space-y-20 scroll-mt-40">
         <RecentArticles />
 
-        {/* Commercial Partner Feature */}
+        {/* Shown only when an active campaign exists */}
         <Advert />
 
-        {/* The NewsFront Daily Briefing */}
         <Newsletter />
-      </main>
+      </div>
     </div>
   );
 };

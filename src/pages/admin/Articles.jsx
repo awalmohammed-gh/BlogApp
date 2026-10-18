@@ -183,7 +183,7 @@ export const Articles = () => {
   const handlePublish = async (id) => {
     try {
       await articleService.publishArticle(id);
-      toast.success("Article published successfully to NewsFront!");
+      toast.success("Article published successfully to Nsemra News!");
       fetchArticles();
     } catch (err) {
       toast.error(err?.response?.data?.message || "Publishing failed");
@@ -701,7 +701,7 @@ export const Articles = () => {
                 title: previewArticle.title,
                 subTitle: previewArticle.subTitle,
                 category: previewArticle.category?.name || "General News",
-                author: previewArticle.author?.name || "NewsFront Desk",
+                author: previewArticle.author?.name || "Nsemra News Desk",
                 date: previewArticle.publishedAt
                   ? new Date(previewArticle.publishedAt).toLocaleDateString("en-US", {
                       month: "long",

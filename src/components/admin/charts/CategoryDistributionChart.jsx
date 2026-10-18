@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { analyticsService } from "../../../services/admin/analyticsService";
-import { useAdmin } from "../../../context/admin/AdminContext";
 
 export const CategoryDistributionChart = ({
   title = "Articles by News Category",
   categoryData = null
 }) => {
-  const { categories } = useAdmin();
   const [data, setData] = useState(categoryData || []);
   const [loading, setLoading] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
 
   useEffect(() => {
     if (categoryData) {
@@ -23,11 +22,12 @@ export const CategoryDistributionChart = ({
         const res = await analyticsService.getCategories();
         if (isMounted && res?.success && Array.isArray(res.data)) {
           setData(res.data);
+          setUnavailable(false);
         }
       } catch {
-        // Fallback to context categories
-        if (isMounted && categories) {
-          setData(categories.map((c) => ({ name: c.name, color: c.color, publishedArticles: 0 })));
+        if (isMounted) {
+          setData([]);
+          setUnavailable(true);
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -39,7 +39,7 @@ export const CategoryDistributionChart = ({
     return () => {
       isMounted = false;
     };
-  }, [categoryData, categories]);
+  }, [categoryData]);
 
   const distribution = (data || [])
     .map((cat) => ({
@@ -67,7 +67,7 @@ export const CategoryDistributionChart = ({
         </div>
       ) : distribution.length === 0 ? (
         <div className="h-32 flex flex-col items-center justify-center text-xs text-slate-400">
-          <p>No published articles in categories yet.</p>
+          <p>{unavailable ? "Category data is unavailable right now." : "No published articles in categories yet."}</p>
         </div>
       ) : (
         <>

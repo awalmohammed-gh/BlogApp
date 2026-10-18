@@ -1,5 +1,5 @@
 /**
- * URL-friendly lowercase slug utility for NewsFront CMS frontend
+ * URL-friendly lowercase slug utility for Nsemra News CMS frontend
  * @param {string} text
  * @returns {string}
  */
