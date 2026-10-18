@@ -125,10 +125,6 @@ const Navbar = () => {
             <NavLink to="/contact" className="hover:text-white transition-colors">
               Contact Desk
             </NavLink>
-            <span className="text-blue-400/50">&bull;</span>
-            <NavLink to="/admin" className="text-amber-400 font-bold hover:text-amber-300 transition-colors flex items-center gap-1">
-              Admin
-            </NavLink>
           </div>
         </div>
       </div>
@@ -357,13 +353,6 @@ const Navbar = () => {
             </div>
 
             <div className="border-t border-blue-900/60 pt-4 space-y-2">
-              <NavLink
-                to="/admin"
-                className="block text-sm font-bold text-amber-400 hover:text-amber-300 py-1"
-                onClick={() => setMobileMenu(false)}
-              >
-                NewsFront Admin &rarr;
-              </NavLink>
               <NavLink
                 to="/about"
                 className="block text-sm text-blue-200 hover:text-white py-1"
