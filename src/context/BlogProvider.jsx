@@ -21,9 +21,9 @@ export const BlogProvider = ({ children }) => {
           categorySlug: art.category?.slug || "",
           description: art.excerpt || "",
           content: art.content || art.excerpt || "",
-          image: art.featuredImage?.url || "/heroBg.jpg",
+          image: art.featuredImage?.url?.trim() ? art.featuredImage.url : "/heroBg.jpg",
           featuredImage: art.featuredImage,
-          isPublished: art.status === "published",
+          isPublished: art.status ? art.status === "published" : true,
           isFeatured: art.isFeatured || false,
           isBreaking: art.isBreakingNews || false,
           date: art.publishedAt

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useBlog } from "../context/BlogProvider";
 import BlogCard from "../components/card/BlogCard";
@@ -122,8 +122,14 @@ const CATEGORY_META = {
 };
 
 const Blog = () => {
-  const { articles } = useBlog();
+  const { articles, refreshArticles } = useBlog();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (typeof refreshArticles === "function") {
+      refreshArticles();
+    }
+  }, [refreshArticles]);
 
   // Read initial query from URL search param if present (e.g. from navbar search)
   const urlQ = searchParams.get("q") || "";
@@ -148,16 +154,28 @@ const Blog = () => {
     setSelectedCategory(urlCategory);
   }
 
-  const categories = [
-    "All",
-    "Sports",
-    "Technology",
-    "Local News",
-    "Foreign News",
-    "E-commerce",
-    "Trading",
-    "Lifestyle",
-  ];
+  // Curated desks with dynamic inclusion of any real category in published articles
+  const categories = useMemo(() => {
+    const standardDesks = [
+      "All",
+      "Sports",
+      "Technology",
+      "Local News",
+      "Foreign News",
+      "Business",
+      "E-commerce",
+      "Trading",
+      "Lifestyle",
+      "Politics"
+    ];
+    const liveCats = new Set();
+    (articles || []).forEach((a) => {
+      if (a.isPublished && a.category && !standardDesks.includes(a.category)) {
+        liveCats.add(a.category);
+      }
+    });
+    return [...standardDesks, ...Array.from(liveCats)];
+  }, [articles]);
 
   // Dynamic category counts from real article data
   const categoryCounts = useMemo(() => {

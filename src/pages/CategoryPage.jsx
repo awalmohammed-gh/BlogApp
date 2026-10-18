@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useBlog } from "../context/BlogProvider";
 import { NavLink, useParams, Link } from "react-router-dom";
 import BlogCard from "../components/card/BlogCard";
@@ -293,7 +293,13 @@ const getDeskConfig = (category) => {
 
 const CategoryPage = () => {
   const { category } = useParams();
-  const { articles } = useBlog();
+  const { articles, refreshArticles } = useBlog();
+
+  useEffect(() => {
+    if (typeof refreshArticles === "function") {
+      refreshArticles();
+    }
+  }, [refreshArticles]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");

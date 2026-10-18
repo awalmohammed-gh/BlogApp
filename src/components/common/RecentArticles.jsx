@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useBlog } from "../../context/BlogProvider";
 import BlogCard from "../card/BlogCard";
@@ -15,7 +15,13 @@ import {
 } from "lucide-react";
 
 const RecentArticles = () => {
-  const { articles } = useBlog();
+  const { articles, refreshArticles } = useBlog();
+
+  useEffect(() => {
+    if (typeof refreshArticles === "function") {
+      refreshArticles();
+    }
+  }, [refreshArticles]);
 
   const published = useMemo(() => {
     return (articles || []).filter((blog) => blog.isPublished === true);
