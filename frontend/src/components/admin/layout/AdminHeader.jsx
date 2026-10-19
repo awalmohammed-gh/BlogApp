@@ -83,9 +83,9 @@ export const AdminHeader = () => {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <header className="sticky top-0 z-20 h-16 bg-white border-b border-slate-200/80 px-4 sm:px-6 flex items-center justify-between shadow-2xs">
+    <header className="sticky top-0 z-20 min-h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] bg-white border-b border-slate-200/80 px-4 sm:px-6 flex items-center justify-between gap-2 shadow-2xs">
       {/* Left: Sidebar Toggle & Breadcrumbs */}
-      <div className="flex items-center gap-3">
+      <div className="min-w-0 flex items-center gap-3">
         {/* Mobile menu trigger */}
         <button
           type="button"
@@ -107,12 +107,12 @@ export const AdminHeader = () => {
         </button>
 
         {/* Breadcrumbs */}
-        <nav className="hidden md:flex items-center gap-2 text-xs">
+        <nav className="min-w-0 hidden md:flex items-center gap-2 text-xs overflow-hidden">
           {breadcrumbs.map((crumb, idx) => (
-            <span key={idx} className="flex items-center gap-2">
+            <span key={idx} className="min-w-0 flex items-center gap-2">
               {idx > 0 && <span className="text-slate-300">/</span>}
               {idx === breadcrumbs.length - 1 ? (
-                <span className="font-bold text-slate-900 tracking-tight">
+                <span className="truncate font-bold text-slate-900 tracking-tight">
                   {crumb.label}
                 </span>
               ) : (
@@ -129,11 +129,12 @@ export const AdminHeader = () => {
       </div>
 
       {/* Right Action Icons & Controls */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="shrink-0 flex items-center gap-2 sm:gap-3">
         {/* Global Search Button */}
         <button
           type="button"
           onClick={openSearch}
+          aria-label="Search newsroom"
           className="flex items-center gap-2.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 rounded-lg border border-slate-200 text-xs transition-colors cursor-pointer"
         >
           <Search size={14} className="text-slate-400" />
@@ -172,6 +173,8 @@ export const AdminHeader = () => {
             onClick={() => setNotificationsOpen((prev) => !prev)}
             className="relative p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
             aria-label="Notifications"
+            aria-expanded={notificationsOpen}
+            aria-controls="admin-notifications"
           >
             <Bell size={18} />
             {unreadCount > 0 && (
@@ -182,7 +185,7 @@ export const AdminHeader = () => {
           </button>
 
           {notificationsOpen && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-40 animate-fadeIn">
+            <div id="admin-notifications" className="fixed left-4 right-4 top-[calc(4.5rem+env(safe-area-inset-top))] sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-40 animate-fadeIn max-h-[calc(var(--overlay-height,var(--viewport-height))-6rem)] flex flex-col">
               {/* Header */}
               <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -205,7 +208,7 @@ export const AdminHeader = () => {
               </div>
 
               {/* List */}
-              <div className="max-h-80 overflow-y-auto custom-scrollbar divide-y divide-slate-100">
+              <div className="min-h-0 max-h-80 overflow-y-auto overscroll-contain custom-scrollbar divide-y divide-slate-100">
                 {notifications.length === 0 ? (
                   <div className="p-8 text-center text-xs text-slate-400">
                     <Bell size={24} className="mx-auto mb-2 text-slate-300 opacity-60" />

@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronUp, Menu, X, Search, Clock, TrendingUp } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { usePublicArticles, usePublicDesks } from "../hooks/usePublicArticles";
+import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
 
 const Navbar = () => {
@@ -13,6 +14,8 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
+  const headerRef = useRef(null);
+  useBodyScrollLock(mobileMenu);
   const navigate = useNavigate();
   const desks = usePublicDesks();
   const { articles:searchResults } = usePublicArticles({search:searchQuery.trim(),limit:5},{enabled:searchOpen && searchQuery.trim().length>=2,debounce:300});
@@ -47,6 +50,29 @@ const Navbar = () => {
       searchInputRef.current.focus();
     }
   }, [searchOpen]);
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1280px)");
+    const closeOnDesktop = () => { if (desktop.matches) setMobileMenu(false); };
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") { setMobileMenu(false); setSearchOpen(false); }
+    };
+    desktop.addEventListener("change", closeOnDesktop);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      desktop.removeEventListener("change", closeOnDesktop);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (mobileMenu || searchOpen) return;
+    const update = () => document.documentElement.style.setProperty("--site-header-height", `${Math.ceil(headerRef.current.getBoundingClientRect().height)}px`);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(headerRef.current);
+    return () => observer.disconnect();
+  }, [mobileMenu, searchOpen]);
 
   const primaryDesks = [
     { name: "Home", path: "/" },
@@ -83,7 +109,7 @@ const Navbar = () => {
   });
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 transition-all duration-300">
+    <header ref={headerRef} data-menu-open={mobileMenu} className="site-navigation fixed top-0 left-0 w-full z-50 transition-all duration-300">
       {/* Top Editorial Utility / Date Bar */}
       <div className="bg-[#0B1B3D] text-blue-100 text-[11px] border-b border-blue-900/60 hidden md:block">
         <div className="max-w-7xl mx-auto px-6 py-1.5 flex items-center justify-between">
@@ -128,21 +154,21 @@ const Navbar = () => {
 
       {/* Main Masthead Navigation Bar */}
       <div
-        className={`w-full transition-all duration-300 border-b ${
+        className={`site-navigation-main w-full transition-all duration-300 border-b ${
           isScrolled
             ? "bg-[#0B1B3D]/95 backdrop-blur-md shadow-lg border-blue-900/80 py-3"
             : "bg-[#0B1B3D]/90 backdrop-blur-sm border-blue-900/40 py-3.5 md:py-4"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 xl:px-10 flex shrink-0 items-center justify-between gap-2">
           
           {/* Logo / Brand */}
-          <NavLink to="/" className="flex items-center gap-3 group">
+          <NavLink to="/" className="flex min-w-0 items-center gap-3 group">
             <BrandLogo />
           </NavLink>
 
           {/* Desktop Nav Items */}
-          <nav className="hidden lg:flex items-center gap-1 text-[13px] font-medium text-white/90">
+          <nav className="hidden xl:flex items-center gap-1 text-[13px] font-medium text-white/90">
             {primaryDesks.map((item) => (
               <NavLink
                 key={item.path}
@@ -212,11 +238,13 @@ const Navbar = () => {
           </nav>
 
           {/* Right Action Icons (Search + Contact) */}
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-3">
             <button
-              onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 rounded-lg text-blue-100 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              onClick={() => { setSearchOpen(!searchOpen); setMobileMenu(false); }}
+              className="min-h-11 min-w-11 flex items-center justify-center p-2 rounded-lg text-blue-100 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               aria-label="Search articles"
+              aria-expanded={searchOpen}
+              aria-controls="site-search"
               title="Quick Search"
             >
               <Search size={18} />
@@ -231,9 +259,11 @@ const Navbar = () => {
 
             {/* Mobile Menu Button */}
             <button
-              onClick={() => setMobileMenu(!mobileMenu)}
-              className="lg:hidden p-2 text-white hover:text-blue-200 transition-colors"
+              onClick={() => { setMobileMenu(!mobileMenu); setSearchOpen(false); }}
+              className="xl:hidden min-h-11 min-w-11 flex items-center justify-center p-2 text-white hover:text-blue-200 transition-colors"
               aria-label="Toggle navigation"
+              aria-expanded={mobileMenu}
+              aria-controls="mobile-navigation"
             >
               {mobileMenu ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -242,7 +272,7 @@ const Navbar = () => {
 
         {/* Quick Search Drawer */}
         {searchOpen && (
-          <div className="bg-[#07132B] border-t border-blue-900/60 px-6 py-4 animate-fadeIn">
+          <div id="site-search" className="site-search bg-[#07132B] border-t border-blue-900/60 px-4 sm:px-6 py-4 animate-fadeIn">
             <div className="max-w-4xl mx-auto">
               <form onSubmit={handleSearchSubmit} className="relative flex items-center">
                 <Search className="absolute left-4 w-5 h-5 text-gray-400" />
@@ -316,7 +346,7 @@ const Navbar = () => {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenu && (
-          <div className="lg:hidden bg-[#0B1B3D] border-t border-blue-900/80 px-6 py-6 space-y-4 max-h-[80vh] overflow-y-auto animate-fadeIn">
+          <nav id="mobile-navigation" aria-label="Mobile navigation" className="mobile-navigation xl:hidden bg-[#0B1B3D] border-t border-blue-900/80 px-4 sm:px-6 py-6 space-y-4 animate-fadeIn">
             <div className="text-xs text-blue-300 font-semibold uppercase tracking-wider">
               Main News Desks
             </div>
@@ -355,7 +385,7 @@ const Navbar = () => {
                 Contact & Pitch Leads
               </NavLink>
             </div>
-          </div>
+          </nav>
         )}
       </div>
     </header>

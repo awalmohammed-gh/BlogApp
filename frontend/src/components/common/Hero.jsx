@@ -68,40 +68,40 @@ const Hero = () => {
   const accent = words.length > 1 ? words.pop() : null;
 
   const primaryClass =
-    "group inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-linear-to-r from-sky-500 to-blue-600 text-white text-sm font-semibold shadow-lg shadow-sky-900/40 hover:from-sky-400 hover:to-blue-500 transition-all";
+    "group inline-flex min-h-11 items-center justify-center gap-2 px-3 sm:px-6 py-3 rounded-xl bg-linear-to-r from-sky-500 to-blue-600 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-sky-900/40 hover:from-sky-400 hover:to-blue-500 transition-all";
 
   return (
-    <section className="relative overflow-hidden bg-[#050B1F] text-white pt-28 md:pt-36 pb-16 md:pb-24">
+    <section className="home-hero relative overflow-hidden bg-[#050B1F] text-white">
       {/* Atmosphere */}
       <div className="absolute inset-0 hero-starfield opacity-80 pointer-events-none" />
       <div className="absolute inset-0 hero-grid pointer-events-none" />
       <div className="absolute -top-40 right-[-10%] w-[46rem] h-[46rem] rounded-full bg-sky-500/15 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-30%] left-[-15%] w-[36rem] h-[36rem] rounded-full bg-blue-700/20 blur-[120px] pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+      <div className="home-hero-grid relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-8 items-center">
         {/* Copy */}
-        <div className="lg:col-span-6 text-center lg:text-left">
+        <div className="hero-copy min-w-0 lg:col-span-6 text-center lg:text-left">
           {content.kicker && (
-            <motion.div {...fadeUp(0)} className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-sky-400/25 backdrop-blur-md mb-6">
-              <span className="relative flex h-2 w-2">
+            <motion.div {...fadeUp(0)} className="hero-kicker inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-sky-400/25 backdrop-blur-md mb-6">
+              <span className="relative flex shrink-0 h-2 w-2">
                 <span className="absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75 motion-safe:animate-ping" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-400" />
               </span>
-              <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-sky-200">{content.kicker}</span>
+              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.12em] text-sky-200">{content.kicker}</span>
             </motion.div>
           )}
 
-          <motion.h1 {...fadeUp(0.1)} className="font-serif-headline font-bold tracking-tight text-balance leading-[1.02] text-5xl sm:text-6xl xl:text-7xl">
+          <motion.h1 {...fadeUp(0.1)} className="font-serif-headline font-bold tracking-tight text-balance leading-[1.02] text-[clamp(2.5rem,10vw,3.75rem)] xl:text-7xl">
             {words.join(" ")}{" "}
             {accent && <span className="text-transparent bg-clip-text bg-linear-to-r from-sky-300 via-cyan-200 to-blue-400">{accent}</span>}
           </motion.h1>
 
-          <motion.p {...fadeUp(0.2)} className="mt-6 text-base sm:text-lg text-slate-300 leading-relaxed max-w-xl mx-auto lg:mx-0">
+          <motion.p {...fadeUp(0.2)} className="hero-description mt-6 text-sm sm:text-lg text-slate-300 leading-relaxed max-w-xl mx-auto lg:mx-0">
             {content.description}
           </motion.p>
 
           {/* Story search */}
-          <motion.form {...fadeUp(0.3)} onSubmit={handleSearch} role="search" className="mt-8 max-w-xl mx-auto lg:mx-0">
+          <motion.form {...fadeUp(0.3)} onSubmit={handleSearch} role="search" className="hero-search mt-8 max-w-xl mx-auto lg:mx-0">
             <label htmlFor="hero-search" className="sr-only">Search stories</label>
             <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white/[0.07] border border-white/15 backdrop-blur-md focus-within:border-sky-400/60 focus-within:bg-white/10 transition-colors">
               <Search className="w-5 h-5 text-slate-400 ml-3 shrink-0" aria-hidden="true" />
@@ -119,7 +119,7 @@ const Hero = () => {
             </div>
           </motion.form>
 
-          <motion.div {...fadeUp(0.4)} className="mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-3">
+          <motion.div {...fadeUp(0.4)} className="hero-actions mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3">
             {content.buttonUrl?.startsWith("#") ? (
               <a href={content.buttonUrl} onClick={scrollToStories} className={primaryClass}>
                 {content.buttonText || "Start Reading"}
@@ -133,16 +133,16 @@ const Hero = () => {
             )}
             <Link
               to={content.secondaryButtonUrl || "/blog"}
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-white/15 bg-white/5 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
+              className="inline-flex min-h-11 items-center justify-center gap-2 px-3 sm:px-6 py-3 rounded-xl border border-white/15 bg-white/5 text-xs sm:text-sm font-semibold text-white hover:bg-white/10 transition-colors"
             >
-              <Newspaper size={16} className="text-sky-300" />
+              <Newspaper size={16} className="hidden sm:block text-sky-300" />
               {content.secondaryButtonText || "All Stories"}
             </Link>
           </motion.div>
 
           {/* Real desks with published stories */}
           {desks.length > 0 && (
-            <motion.div {...fadeUp(0.5)} className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-2">
+            <motion.div {...fadeUp(0.5)} className="hero-desks mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-2">
               <span className="text-xs text-slate-400 mr-1">Popular desks</span>
               {desks.slice(0, 4).map((desk) => (
                 <Link
@@ -162,7 +162,7 @@ const Hero = () => {
           initial={{ opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="lg:col-span-6 flex justify-center"
+          className="hero-globe lg:col-span-6 flex justify-center"
         >
           <div className="relative w-[78vw] max-w-[300px] sm:max-w-[400px] lg:max-w-[500px] aspect-square">
             {/* Glow */}
@@ -204,7 +204,7 @@ const Hero = () => {
 
             {/* Real newsroom status */}
             {published.length > 0 && (
-              <div className="absolute top-[4%] right-[-4%] hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0B1B3D]/80 border border-white/10 backdrop-blur-md shadow-xl text-xs">
+              <div className="absolute top-[4%] right-[-4%] hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0B1B3D]/80 border border-white/10 backdrop-blur-md shadow-xl text-xs">
                 <Radio size={14} className="text-sky-300" />
                 <span className="font-semibold">{published.length} {published.length === 1 ? "story" : "stories"}</span>
                 <span className="text-slate-400">&middot; {desks.length} {desks.length === 1 ? "desk" : "desks"}</span>
@@ -214,7 +214,7 @@ const Hero = () => {
             {latest && (
               <Link
                 to={`/blog-details/${latest._id}`}
-                className="absolute bottom-[2%] left-[-8%] hidden sm:flex items-center gap-3 w-64 p-2.5 pr-4 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-xl shadow-2xl hover:bg-white/15 transition-colors"
+                className="absolute bottom-[2%] left-[-8%] hidden lg:flex items-center gap-3 w-64 p-2.5 pr-4 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-xl shadow-2xl hover:bg-white/15 transition-colors"
               >
                 <img {...responsiveImageProps(latest.image, {width:640})} alt="" onError={hideBrokenImage} className="w-14 h-14 rounded-xl object-cover shrink-0" />
                 <span className="min-w-0">

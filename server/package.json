@@ -19,6 +19,7 @@
     "test:smtp-config": "node --test test/smtpConfig.test.js",
     "test:env-config": "node --test test/envConfig.test.js",
     "test:database-migration": "node --test test/databaseMigration.test.js",
+    "test:responsive": "node scripts/responsive-audit.mjs",
     "test:nsemra": "node --test test/nsemra.test.js",
     "db:demo-report": "node src/scripts/reportDemoRecords.js",
     "brand:migrate": "node src/scripts/rebrandSite.js",

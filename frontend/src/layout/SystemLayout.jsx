@@ -27,7 +27,7 @@ const SystemLayout = () => {
       <ScrollToTop />
       
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 min-w-0">
         <Suspense fallback={<PageSkeleton />}><Outlet /></Suspense>
       </main>
       <Footer />

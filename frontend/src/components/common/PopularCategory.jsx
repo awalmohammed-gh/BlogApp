@@ -17,7 +17,7 @@ const PopularCategory = () => {
   ];
 
   return (
-    <section className="w-full border-b border-slate-200/80 bg-white/85 backdrop-blur-md sticky top-[60px] md:top-[85px] z-40">
+    <section className="sticky-desks w-full border-b border-slate-200/80 bg-white/85 backdrop-blur-md sticky z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
         
         {/* Left Section Label */}
@@ -27,7 +27,7 @@ const PopularCategory = () => {
         </div>
 
         {/* Scrollable Editorial Desks List */}
-        <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto py-2.5 px-1 sm:px-4 no-scrollbar scroll-smooth flex-1">
+        <nav className="min-w-0 flex items-center gap-1 sm:gap-2 overflow-x-auto py-2.5 px-1 sm:px-4 no-scrollbar scroll-smooth flex-1">
           {editorialDesks.map((desk, idx) => (
             <NavLink
               key={idx}

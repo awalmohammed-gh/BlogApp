@@ -89,7 +89,7 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-900 via-[#0B1B3A] to-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans selection:bg-blue-600 selection:text-white">
+    <div className="auth-screen min-h-screen bg-linear-to-br from-slate-900 via-[#0B1B3A] to-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans selection:bg-blue-600 selection:text-white">
       {/* Background radial accent */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 sm:w-[600px] h-96 sm:h-[600px] bg-blue-600/10 rounded-full blur-3xl" />

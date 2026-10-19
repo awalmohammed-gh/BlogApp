@@ -1,5 +1,25 @@
 # React + Vite
 
+## Responsive layout verification
+
+From the repository root in PowerShell:
+
+```powershell
+$env:VITE_API_URL = "/api"
+npm --prefix frontend run build
+npm --prefix server run test:responsive
+```
+
+The browser audit checks nine viewport sizes from 320px phones to 1920px
+desktops, including landscape, public pages, login, navigation, admin dialogs,
+notifications, search and viewport resizing. It reads real published articles;
+staff sessions are mocked and all real writes and analytics are blocked.
+Screenshots and the report are saved under ignored
+`server/test-results/responsive/`. These are Chromium emulation checks, not
+physical-device Safari testing. Set `RESPONSIVE_API_URL` to use a different
+backend, `RESPONSIVE_WIDTHS` to run selected widths, or `CHROME_PATH` to choose
+the installed Chrome executable.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

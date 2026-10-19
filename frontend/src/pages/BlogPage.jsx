@@ -292,8 +292,8 @@ const BlogPage = () => {
           </div>
         </aside>
 
-        <div className="w-full max-w-3xl mx-auto lg:mx-0">
-          <div id="article-body" className={PROSE} dangerouslySetInnerHTML={{ __html: blogDetails.content }} />
+        <div className="min-w-0 w-full max-w-3xl mx-auto lg:mx-0">
+          <div id="article-body" className={`article-content ${PROSE}`} dangerouslySetInnerHTML={{ __html: blogDetails.content }} />
 
           {blogDetails.tags.length > 0 && (
             <div className="mt-12 flex flex-wrap items-center gap-2">

@@ -35,8 +35,8 @@ export default function BrandMark({ name, tagline, logoUrl = "", logoIncludesNam
       )}
       {showText && (
         <span className="min-w-0 text-left">
-          <span className="block text-base sm:text-lg font-black text-white tracking-tight leading-tight whitespace-nowrap">{name}</span>
-          {tagline && <span className="block text-[10px] font-medium text-blue-200 tracking-wide leading-tight mt-0.5 whitespace-nowrap">{tagline}</span>}
+          <span className="block truncate text-sm sm:text-lg font-black text-white tracking-tight leading-tight">{name}</span>
+          {tagline && <span className="block truncate text-[10px] font-medium text-blue-200 tracking-wide leading-tight mt-0.5">{tagline}</span>}
         </span>
       )}
       {compact && !hasLogo && <span className="sr-only">{name}{tagline ? ` — ${tagline}` : ""}</span>}

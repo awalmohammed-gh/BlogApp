@@ -119,7 +119,7 @@ const CategoryPage = () => {
       </section>
 
       {/* ===== Desk switcher ===== */}
-      <div className="sticky top-[60px] md:top-[85px] z-30 bg-white/85 backdrop-blur-md border-b border-slate-200/80">
+      <div className="sticky-desks sticky z-30 bg-white/85 backdrop-blur-md border-b border-slate-200/80">
         <nav aria-label="News desks" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex gap-2 overflow-x-auto no-scrollbar">
           {DESKS.map((d) => (
             <NavLink

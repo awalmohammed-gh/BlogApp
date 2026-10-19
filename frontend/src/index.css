@@ -9,6 +9,85 @@ html {
   scroll-behavior: smooth;
   color: #0f172a;
   background-color: #ffffff;
+  scroll-padding-top: calc(var(--site-header-height, 4.5rem) + 1rem);
+}
+
+:root {
+  --viewport-height: 100vh;
+  --site-header-height: 4.5rem;
+}
+
+@supports (height: 100dvh) {
+  :root { --viewport-height: 100dvh; }
+}
+
+body {
+  margin: 0;
+  min-width: 0;
+  padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+  overflow-wrap: break-word;
+}
+
+body, #root, .min-h-screen { min-height: var(--viewport-height); }
+#root { min-width: 0; }
+img, video { max-width: 100%; }
+:where(input, select, textarea) { min-width: 0; max-width: 100%; }
+
+.site-navigation {
+  display: flex;
+  flex-direction: column;
+  max-height: var(--overlay-height, var(--viewport-height));
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+  background: #0b1b3d;
+}
+.site-navigation-main { display: flex; flex-direction: column; min-height: 0; }
+.site-search { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.mobile-navigation { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px)); }
+.mobile-navigation a { display: flex; align-items: center; min-height: 44px; }
+.sticky-desks { top: var(--site-header-height); }
+.viewport-overlay { height: var(--overlay-height, var(--viewport-height)); }
+.safe-area-top { padding-top: max(1rem, env(safe-area-inset-top, 0px)); }
+.safe-area-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)); }
+.auth-screen { padding-top: max(2rem, env(safe-area-inset-top, 0px)); padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px)); }
+footer { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+.home-hero {
+  min-height: var(--viewport-height);
+  display: flex;
+  align-items: center;
+  padding-top: calc(var(--site-header-height) + clamp(1.25rem, 4vh, 3rem));
+  padding-bottom: clamp(1.5rem, 4vh, 3rem);
+}
+.home-hero-grid { width: 100%; min-width: 0; }
+.article-content { min-width: 0; overflow-wrap: anywhere; }
+.article-content :is(img, video, iframe) { max-width: 100%; }
+.article-content :is(pre, table) { display: block; max-width: 100%; overflow-x: auto; }
+
+@media (max-width: 1279px) {
+  .site-navigation[data-menu-open="true"] { height: var(--overlay-height, var(--viewport-height)); }
+  .site-navigation[data-menu-open="true"] .site-navigation-main { flex: 1; }
+}
+
+@media (max-width: 1023px) {
+  /* Keep the globe in the theme without making a phone scroll past a large illustration. */
+  .hero-globe { position: absolute; right: -5rem; bottom: -3rem; opacity: 0.16; pointer-events: none; }
+  .hero-globe > div { width: min(65vw, 22rem); }
+  .hero-copy { position: relative; z-index: 1; }
+}
+
+@media (max-width: 767px) {
+  /* Readable fields also avoid automatic input zoom in iOS Safari. */
+  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) { font-size: 1rem; }
+  .hero-kicker { margin-bottom: 1rem; }
+  .hero-description { margin-top: 1rem; }
+  .hero-search { margin-top: 1.25rem; }
+  .hero-actions, .hero-desks { margin-top: 1.25rem; }
+}
+
+@media (max-width: 767px) and (max-height: 700px) {
+  /* The same desks remain available immediately below the hero and in the menu. */
+  .hero-desks { display: none; }
 }
 
 .font-serif-headline {
@@ -87,6 +166,11 @@ html {
 
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .animate-fadeIn, .animate-fadeInUp { animation: none; }
 }
 
 .custom-scrollbar::-webkit-scrollbar {

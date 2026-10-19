@@ -27,6 +27,8 @@ import { useAdmin } from "../../../context/admin/AdminContext";
 import StaffAvatar from "../common/StaffAvatar";
 import { useNotifications } from "../../../context/admin/NotificationContext";
 import { useAuth } from "../../../context/admin/AuthContext";
+import { useEffect } from "react";
+import { useBodyScrollLock } from "../../../hooks/useBodyScrollLock";
 
 export const AdminSidebar = () => {
   const { unreadCount } = useNotifications();
@@ -41,6 +43,19 @@ export const AdminSidebar = () => {
   const { admin, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  useBodyScrollLock(isMobileSidebarOpen);
+  useEffect(() => {
+    if (!isMobileSidebarOpen) return;
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const closeOnDesktop = () => { if (desktop.matches) closeMobileSidebar(); };
+    const closeOnEscape = (event) => { if (event.key === "Escape") closeMobileSidebar(); };
+    desktop.addEventListener("change", closeOnDesktop);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      desktop.removeEventListener("change", closeOnDesktop);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [isMobileSidebarOpen, closeMobileSidebar]);
 
   const handleLogout = async () => {
     try {
@@ -197,30 +212,32 @@ export const AdminSidebar = () => {
     .filter((grp) => grp.items.length > 0);
 
 
+  const compact = isSidebarCollapsed && !isMobileSidebarOpen;
   const sidebarContent = (
-    <div className="h-full flex flex-col bg-[#0B1B3A] text-slate-200 select-none border-r border-slate-800/80">
+    <div className="h-full min-h-0 flex flex-col bg-[#0B1B3A] text-slate-200 select-none border-r border-slate-800/80">
       {/* Brand Header */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800/80 shrink-0">
+      <div className="min-h-16 pt-[env(safe-area-inset-top)] flex items-center justify-between px-4 border-b border-slate-800/80 shrink-0">
         <Link
           to="/admin"
           onClick={closeMobileSidebar}
           className="flex items-center gap-3 overflow-hidden"
         >
-          <BrandLogo compact={isSidebarCollapsed} />
+          <BrandLogo compact={compact} />
         </Link>
 
         {/* Mobile close button */}
         <button
           type="button"
           onClick={closeMobileSidebar}
-          className="p-1.5 text-slate-400 hover:text-white rounded-lg lg:hidden cursor-pointer"
+          className="min-h-11 min-w-11 flex items-center justify-center p-1.5 text-slate-400 hover:text-white rounded-lg lg:hidden cursor-pointer"
+          aria-label="Close mobile menu"
         >
           <X size={20} />
         </button>
       </div>
 
       {/* Role Indicator Banner */}
-      {!isSidebarCollapsed && (
+      {!compact && (
         <div className="px-4 py-2 bg-slate-900/60 border-b border-slate-800/60 flex items-center justify-between text-[11px]">
           <span className="text-slate-400 flex items-center gap-1.5">
             <ShieldCheck size={13} className="text-emerald-400" /> Role:
@@ -237,10 +254,10 @@ export const AdminSidebar = () => {
 
 
       {/* Navigation Links */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-4 space-y-6">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain custom-scrollbar px-3 py-4 space-y-6">
         {navGroups.map((group, gIdx) => (
           <div key={gIdx} className="space-y-1">
-            {!isSidebarCollapsed && (
+            {!compact && (
               <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400/80 mb-1.5">
                 {group.group}
               </div>
@@ -256,12 +273,12 @@ export const AdminSidebar = () => {
                   key={iIdx}
                   to={item.path}
                   onClick={closeMobileSidebar}
-                  title={isSidebarCollapsed ? item.name : undefined}
+                  title={compact ? item.name : undefined}
                   className={`group relative flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 ${
                     isActive
                       ? "bg-blue-600 text-white shadow-xs font-semibold"
                       : "text-slate-300 hover:bg-slate-800/70 hover:text-white"
-                  } ${isSidebarCollapsed ? "justify-center" : ""}`}
+                  } ${compact ? "justify-center" : ""}`}
                 >
                   <Icon
                     size={17}
@@ -270,11 +287,11 @@ export const AdminSidebar = () => {
                     }`}
                   />
 
-                  {!isSidebarCollapsed && (
+                  {!compact && (
                     <span className="truncate flex-1">{item.name}</span>
                   )}
 
-                  {!isSidebarCollapsed && item.badge !== null && item.badge !== undefined && (
+                  {!compact && item.badge !== null && item.badge !== undefined && (
                     <span
                       className={`px-1.5 py-0.5 text-[10px] rounded-full shrink-0 ${
                         item.badgeColor || "bg-slate-800 text-slate-300"
@@ -285,7 +302,7 @@ export const AdminSidebar = () => {
                   )}
 
                   {/* Tooltip on collapsed desktop view */}
-                  {isSidebarCollapsed && (
+                  {compact && (
                     <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap border border-slate-700">
                       {item.name}
                       {item.badge && ` (${item.badge})`}
@@ -299,14 +316,14 @@ export const AdminSidebar = () => {
       </div>
 
       {/* Footer Profile & Actions */}
-      <div className="p-3 border-t border-slate-800/80 bg-slate-900/40 shrink-0 space-y-1">
+      <div className="safe-area-bottom p-3 border-t border-slate-800/80 bg-slate-900/40 shrink-0 space-y-1">
         {/* Profile Link */}
         <NavLink
           to="/admin/profile"
           onClick={closeMobileSidebar}
-          title={isSidebarCollapsed ? currentAdminUser.name : undefined}
+          title={compact ? currentAdminUser.name : undefined}
           className={`flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800/70 transition-colors ${
-            isSidebarCollapsed ? "justify-center" : ""
+            compact ? "justify-center" : ""
           }`}
         >
           <StaffAvatar
@@ -314,7 +331,7 @@ export const AdminSidebar = () => {
             name={admin?.name || currentAdminUser.name}
             className="w-8 h-8 rounded-full ring-1 ring-slate-700"
           />
-          {!isSidebarCollapsed && (
+          {!compact && (
             <div className="truncate text-left flex-1">
               <div className="text-xs font-semibold text-white truncate">
                 {admin?.name || currentAdminUser.name}
@@ -336,26 +353,26 @@ export const AdminSidebar = () => {
           to="/"
           target="_blank"
           rel="noopener noreferrer"
-          title={isSidebarCollapsed ? "View Public Nsemra News Website" : undefined}
+          title={compact ? "View Public Nsemra News Website" : undefined}
           className={`flex items-center gap-3 px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800/70 rounded-xl transition-colors ${
-            isSidebarCollapsed ? "justify-center" : ""
+            compact ? "justify-center" : ""
           }`}
         >
           <ExternalLink size={16} className="text-slate-400 shrink-0" />
-          {!isSidebarCollapsed && <span className="truncate">View Website</span>}
+          {!compact && <span className="truncate">View Website</span>}
         </Link>
 
         {/* Logout Simulation */}
         <button
           type="button"
           onClick={handleLogout}
-          title={isSidebarCollapsed ? "Sign Out" : undefined}
+          title={compact ? "Sign Out" : undefined}
           className={`w-full flex items-center gap-3 px-3 py-2 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 rounded-xl transition-colors cursor-pointer ${
-            isSidebarCollapsed ? "justify-center" : ""
+            compact ? "justify-center" : ""
           }`}
         >
           <LogOut size={16} className="shrink-0" />
-          {!isSidebarCollapsed && <span className="truncate">Sign Out</span>}
+          {!compact && <span className="truncate">Sign Out</span>}
         </button>
       </div>
     </div>
@@ -374,7 +391,7 @@ export const AdminSidebar = () => {
 
       {/* Mobile Off-Canvas Drawer */}
       {isMobileSidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
+        <div className="viewport-overlay fixed inset-0 z-50 lg:hidden flex">
           {/* Backdrop */}
           <div
             className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity animate-fadeIn"

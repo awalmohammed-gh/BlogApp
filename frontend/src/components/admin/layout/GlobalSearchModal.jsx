@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, FileText, Folder, Users, Globe, ArrowRight, X } from "lucide-react";
 import { useAdmin } from "../../../context/admin/AdminContext";
+import { useBodyScrollLock } from "../../../hooks/useBodyScrollLock";
 
 export const GlobalSearchModal = ({ isOpen, onClose }) => {
+  useBodyScrollLock(isOpen);
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
   const { articles, categories, authors, pages } = useAdmin();
@@ -79,16 +81,16 @@ export const GlobalSearchModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-950/60 backdrop-blur-xs">
+    <div className="viewport-overlay fixed inset-0 z-50 flex items-start justify-center p-4 sm:pt-24 bg-slate-950/60 backdrop-blur-xs">
       <div
         className="fixed inset-0"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all z-10">
+      <div role="dialog" aria-modal="true" aria-label="Search newsroom" className="relative min-h-0 max-h-full flex flex-col w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all z-10">
         {/* Search Input Bar */}
-        <div className="flex items-center px-4 py-3.5 border-b border-slate-200 bg-slate-50/50">
+        <div className="shrink-0 flex items-center px-4 py-3.5 border-b border-slate-200 bg-slate-50/50">
           <Search size={18} className="text-slate-400 mr-3 shrink-0" />
           <input
             type="text"
@@ -96,7 +98,7 @@ export const GlobalSearchModal = ({ isOpen, onClose }) => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search news articles, categories, authors, and pages..."
-            className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+            className="min-w-0 w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
           />
           <div className="flex items-center gap-1.5 ml-2">
             <kbd className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-semibold text-slate-500 bg-slate-200/80 rounded border border-slate-300">
@@ -105,6 +107,7 @@ export const GlobalSearchModal = ({ isOpen, onClose }) => {
             <button
               type="button"
               onClick={onClose}
+              aria-label="Close newsroom search"
               className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
             >
               <X size={16} />
@@ -113,7 +116,7 @@ export const GlobalSearchModal = ({ isOpen, onClose }) => {
         </div>
 
         {/* Search Results Area */}
-        <div className="max-h-[60vh] overflow-y-auto custom-scrollbar p-3">
+        <div className="min-h-0 overflow-y-auto overscroll-contain custom-scrollbar p-3">
           {!trimmed && (
             <div className="p-6 text-center text-xs text-slate-400">
               Type keywords to search across articles, newsroom authors, and website pages.
