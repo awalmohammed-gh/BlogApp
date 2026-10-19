@@ -34,6 +34,7 @@ const output = path.resolve("test-results/responsive");
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || "C:/Program Files/Google/Chrome/Application/chrome.exe", headless: true });
 const report = { measuredAt: new Date().toISOString(), layouts: [], notes: "Chromium viewport emulation; real public articles, mocked staff session, no real writes or telemetry." };
+const heroOnly = process.env.RESPONSIVE_HERO_ONLY === "1";
 const viewports = [
   [320, 568], [360, 640], [390, 844], [430, 932], [844, 390],
   [768, 1024], [1024, 768], [1280, 800], [1920, 1080],
@@ -88,7 +89,7 @@ try {
     page.on("pageerror", (error) => errors.push(error.message));
     page.setDefaultTimeout(10000);
     const result = { width, height, pages: [] };
-    for (const route of ["/", "/blog", "/sports", `/blog-details/${sample.data[0].slug}`, "/about", "/contact", "/admin/login"]) {
+    for (const route of heroOnly ? ["/"] : ["/", "/blog", "/sports", `/blog-details/${sample.data[0].slug}`, "/about", "/contact", "/admin/login"]) {
       console.log(`Checking ${width}x${height} ${route}`);
       await page.goto(origin + route, { waitUntil: "domcontentloaded" });
       await page.locator("h1").first().waitFor();
@@ -99,6 +100,30 @@ try {
         const hero = await page.locator(".home-hero").boundingBox();
         assert.ok(hero.height >= height - 1, "Home hero must fill the visible viewport.");
         if (height >= 568) assert.ok(hero.height <= height + 1, `Hero exceeds the first screen at ${width}x${height}: ${hero.height}`);
+        if (width < 1024) {
+          for (const selector of [".hero-kicker", ".hero-description", ".hero-search", ".hero-actions"]) {
+            const bounds = await page.locator(selector).boundingBox();
+            if (bounds) assert.ok(bounds.x >= -1 && bounds.x + bounds.width <= width + 1, `${selector} must remain inside the phone screen.`);
+          }
+          const globe = await page.locator(".globe-stage").boundingBox();
+          assert.ok(Math.abs(globe.x + globe.width / 2 - width / 2) <= 1, "Mobile globe must be horizontally centered.");
+          assert.ok(Math.abs(globe.y + globe.height / 2 - hero.height / 2) <= 1, "Mobile globe must be vertically centered in the hero.");
+          assert.equal(await page.locator(".globe-channel-stream").count(), 8);
+          assert.equal(await page.locator(".globe-channel-stream").first().evaluate((element) => getComputedStyle(element).animationName), "none", "Reduced-motion settings must stop channel animation.");
+          if (width === 390) {
+            await page.emulateMedia({ reducedMotion: "no-preference" });
+            const animationFrame = () => page.evaluate(() => ({
+              spin: getComputedStyle(document.querySelector(".globe-spin")).transform,
+              packet: getComputedStyle(document.querySelector(".globe-channel-stream")).strokeDashoffset,
+            }));
+            const before = await animationFrame();
+            await page.waitForTimeout(300);
+            const after = await animationFrame();
+            assert.notEqual(before.spin, after.spin, "The globe must keep rotating.");
+            assert.notEqual(before.packet, after.packet, "Channel packets must move toward the globe.");
+            await page.emulateMedia({ reducedMotion: "reduce" });
+          }
+        }
         result.heroHeight = hero.height;
         if (width < 1280) {
           await page.getByRole("button", { name: "Toggle navigation", exact: true }).click();
@@ -114,6 +139,13 @@ try {
         await page.screenshot({ path: path.join(output, `home-${width}x${height}.png`) });
       }
       result.pages.push({ route, scrollWidth: dimensions.scrollWidth });
+    }
+    if (heroOnly) {
+      assert.deepEqual(errors, [], `${width}x${height} runtime errors`);
+      report.layouts.push(result);
+      console.log(`PASS ${width}x${height}: hero, centered mobile globe, channels, navigation`);
+      await context.close();
+      continue;
     }
     authenticated = true;
     await page.goto(origin + "/admin/categories", { waitUntil: "domcontentloaded" });

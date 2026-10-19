@@ -70,10 +70,13 @@ footer { padding-bottom: env(safe-area-inset-bottom, 0px); }
 }
 
 @media (max-width: 1023px) {
-  /* Keep the globe in the theme without making a phone scroll past a large illustration. */
-  .hero-globe { position: absolute; right: -5rem; bottom: -3rem; opacity: 0.16; pointer-events: none; }
-  .hero-globe > div { width: min(65vw, 22rem); }
+  .home-hero-grid { position: static; }
+  .hero-globe { position: absolute; inset: 0; align-items: center; pointer-events: none; }
+  .hero-globe > .globe-stage { width: min(58vw, 18rem); max-width: none; opacity: 0.45; }
   .hero-copy { position: relative; z-index: 1; }
+  .hero-copy h1, .hero-description { text-shadow: 0 2px 16px #050b1f; }
+  .hero-copy h1 > span { text-shadow: none; }
+  .hero-globe .globe-network { display: block; }
 }
 
 @media (max-width: 767px) {
@@ -111,8 +114,29 @@ footer { padding-bottom: env(safe-area-inset-bottom, 0px); }
 .globe-orbit-reverse { animation: globe-spin 42s linear infinite reverse; }
 .globe-float { animation: globe-float 6s ease-in-out infinite; }
 .globe-glow { animation: globe-pulse 5s ease-in-out infinite; }
+
+/* Paths point inward; staggered packets make the globe look like a news receiver. */
+@keyframes globe-channel-receive {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes globe-channel-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+@keyframes globe-signal-expand {
+  from { transform: scale(1); opacity: 0.4; }
+  to { transform: scale(1.45); opacity: 0; }
+}
+.globe-network { display: none; position: absolute; inset: -35%; width: 170%; height: 170%; overflow: visible; }
+.globe-channel-track { stroke: #7dd3fc; stroke-opacity: 0.3; stroke-width: 0.7; }
+.globe-channel-stream { stroke: #a5f3fc; stroke-width: 2; stroke-linecap: round; stroke-dasharray: 10 90; animation: globe-channel-receive 3.6s linear infinite; filter: drop-shadow(0 0 3px #38bdf8); }
+.globe-channel-node { fill: #bae6fd; animation: globe-channel-pulse 3.6s ease-in-out infinite; filter: drop-shadow(0 0 4px #38bdf8); }
+.globe-channel-halo { stroke: #7dd3fc; stroke-opacity: 0.35; stroke-width: 0.8; }
+.globe-signal-wave { stroke: #38bdf8; stroke-width: 0.6; opacity: 0.2; transform-box: fill-box; transform-origin: center; animation: globe-signal-expand 4.8s ease-out infinite; }
 @media (prefers-reduced-motion: reduce) {
-  .globe-spin, .globe-orbit, .globe-orbit-reverse, .globe-float, .globe-glow { animation: none; }
+  .globe-spin, .globe-orbit, .globe-orbit-reverse, .globe-float, .globe-glow,
+  .globe-channel-stream, .globe-channel-node, .globe-signal-wave { animation: none; }
 }
 
 /* Faint star field + grid for the dark hero */

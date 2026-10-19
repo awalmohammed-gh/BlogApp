@@ -14,6 +14,17 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }
 });
 
+const newsChannels = [
+  { path: "M 24 200 C 46 178 62 190 82 200", x: 24, y: 200 },
+  { path: "M 66 66 C 74 108 96 110 117 117", x: 66, y: 66 },
+  { path: "M 200 24 C 182 46 192 64 200 82", x: 200, y: 24 },
+  { path: "M 334 66 C 326 106 302 110 283 117", x: 334, y: 66 },
+  { path: "M 376 200 C 350 222 334 208 318 200", x: 376, y: 200 },
+  { path: "M 334 334 C 326 292 300 290 283 283", x: 334, y: 334 },
+  { path: "M 200 376 C 220 352 210 334 200 318", x: 200, y: 376 },
+  { path: "M 66 334 C 74 292 100 290 117 283", x: 66, y: 334 },
+];
+
 const Hero = () => {
   const navigate = useNavigate();
   const { articles } = useBlog();
@@ -164,7 +175,7 @@ const Hero = () => {
           transition={{ duration: 1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           className="hero-globe lg:col-span-6 flex justify-center"
         >
-          <div className="relative w-[78vw] max-w-[300px] sm:max-w-[400px] lg:max-w-[500px] aspect-square">
+          <div className="globe-stage relative w-[78vw] max-w-[300px] sm:max-w-[400px] lg:max-w-[500px] aspect-square">
             {/* Glow */}
             <div className="absolute inset-[-8%] rounded-full bg-sky-400/25 blur-3xl globe-glow" aria-hidden="true" />
 
@@ -175,6 +186,21 @@ const Hero = () => {
             <div className="absolute inset-[-15%] rounded-full border border-blue-400/10 globe-orbit-reverse hidden sm:block" aria-hidden="true">
               <span className="absolute bottom-[14%] right-[6%] w-2 h-2 rounded-full bg-cyan-200 shadow-[0_0_12px_3px_rgba(165,243,252,0.7)]" />
             </div>
+
+            {/* Decorative channel packets travel from the outer nodes into the globe. */}
+            <svg className="globe-network" viewBox="0 0 400 400" fill="none" aria-hidden="true" focusable="false">
+              {[0, 1, 2].map((wave) => (
+                <circle key={wave} className="globe-signal-wave" cx="200" cy="200" r="120" style={{ animationDelay: `${wave * -1.6}s` }} />
+              ))}
+              {newsChannels.map((channel, index) => (
+                <g key={channel.path}>
+                  <path className="globe-channel-track" d={channel.path} />
+                  <path className="globe-channel-stream" d={channel.path} pathLength="100" style={{ animationDelay: `${index * -0.45}s` }} />
+                  <circle className="globe-channel-node" cx={channel.x} cy={channel.y} r="3" style={{ animationDelay: `${index * -0.45}s` }} />
+                  <circle className="globe-channel-halo" cx={channel.x} cy={channel.y} r="7" />
+                </g>
+              ))}
+            </svg>
 
             {/* Globe: the image is cropped to its sphere and rotates inside a circle */}
             <div className="globe-float absolute inset-0">
