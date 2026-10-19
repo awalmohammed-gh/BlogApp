@@ -42,22 +42,34 @@ const loadConfig = (variables) => {
   }
 };
 
-test("development supports an Atlas URI without overriding its database", () => {
+test("development uses Atlas and selects nsemfoa_data even with a legacy local URI", () => {
   const result = loadConfig({
+    NODE_ENV: "development",
+    MONGODB_URI: "mongodb://local.example.test/newsfront_db",
     MONGODB_ATLAS_URI: "mongodb://atlas.example.test/news",
     EXPECTED_URI: "mongodb://atlas.example.test/news",
+    EXPECTED_DB_NAME: "nsemfoa_data",
   });
   assert.equal(result.status, 0, result.stderr);
   assert.doesNotMatch(result.stderr, /Missing required environment variable/);
 });
 
-test("local and test URIs take precedence over the Atlas alias outside production", () => {
+test("isolated tests use their disposable URI without a database override", () => {
   const result = loadConfig({
     MONGODB_URI: "mongodb://canonical.example.test/news",
     MONGODB_ATLAS_URI: "mongodb://atlas.example.test/news",
     EXPECTED_URI: "mongodb://canonical.example.test/news",
   });
   assert.equal(result.status, 0, result.stderr);
+});
+
+test("development requires MONGODB_ATLAS_URI instead of silently using old local data", () => {
+  const result = loadConfig({
+    NODE_ENV: "development",
+    MONGODB_URI: "mongodb://local.example.test/newsfront_db",
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stderr, /Missing required environment variable "MONGODB_ATLAS_URI"/);
 });
 
 test("production uses the Atlas URI and selects nsemfoa_data", () => {

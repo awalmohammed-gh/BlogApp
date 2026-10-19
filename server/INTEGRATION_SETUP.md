@@ -4,6 +4,30 @@ The existing React application and Express API remain separate. No new authentic
 
 ## Database and indexes
 
+Development and production both use `MONGODB_ATLAS_URI` and explicitly select
+`nsemfoa_data`. A database path embedded in the URL does not override that name.
+Only `NODE_ENV=test` uses `MONGODB_URI` and leaves its disposable database name intact.
+
+To copy the legacy local database, keep its connection URL under `MONGODB_URI` in
+the ignored `server/.env` and configure `MONGODB_ATLAS_URI` for the destination:
+
+```powershell
+npm run db:migrate-atlas
+npm run db:migrate-atlas -- --apply
+```
+
+The first command previews the transfer. Applying creates a BSON-preserving EJSON
+backup under ignored `server/backups`, copies all collections and indexes, and
+verifies every document. IDs, article revisions, media references, accounts,
+categories, tags, CMS pages and settings remain intact. Existing source records
+are never removed. The command can resume an identical partial copy and refuses
+conflicting or unrelated destination records rather than replacing them. ImageKit
+files stay at their existing URLs; their Media Library records are copied.
+If the running app created a version-0 settings singleton in the empty destination,
+`--replace-default-settings` allows replacing it only while its values still
+exactly match the built-in defaults. The old singleton is included in the backup;
+its replacement is atomic and preserves the source settings ID.
+
 Use MongoDB Atlas or a MongoDB replica set. Publication and invitation acceptance use transactions so article state, revision state, notification creation, and single-use invitation consumption remain consistent. A standalone MongoDB process cannot execute these transactions.
 
 Before production traffic, run from `server`:

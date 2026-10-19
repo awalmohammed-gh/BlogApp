@@ -3,17 +3,16 @@ import dotenv from "dotenv";
 // Load environment variables from .env
 dotenv.config();
 
-// Production uses the Atlas variable; local development and isolated tests can
-// continue to supply MONGODB_URI. Normalize it for existing application callers.
+// Development and production share Atlas. Only isolated automated tests may use
+// a disposable MONGODB_URI instead of the application's database.
 const isProduction = process.env.NODE_ENV === "production";
-const mongodbUri = isProduction
-  ? process.env.MONGODB_ATLAS_URI
-  : process.env.MONGODB_URI || process.env.MONGODB_ATLAS_URI;
+const isTest = process.env.NODE_ENV === "test";
+const mongodbUri = isTest ? process.env.MONGODB_URI : process.env.MONGODB_ATLAS_URI;
 const requiredEnvVars = [];
 const jwtSecret = process.env.JWT_SECRET_KEY || process.env.JWT_SECRET;
 
 if (!mongodbUri) {
-  requiredEnvVars.push(isProduction ? "MONGODB_ATLAS_URI" : "MONGODB_URI");
+  requiredEnvVars.push(isTest ? "MONGODB_URI" : "MONGODB_ATLAS_URI");
 }
 
 if (!jwtSecret) {
@@ -33,7 +32,7 @@ export const env = {
   PORT: parseInt(process.env.PORT || "5000", 10),
   NODE_ENV: process.env.NODE_ENV || "development",
   MONGODB_URI: mongodbUri,
-  MONGODB_DB_NAME: isProduction ? "nsemfoa_data" : undefined,
+  MONGODB_DB_NAME: isTest ? undefined : "nsemfoa_data",
   JWT_SECRET: jwtSecret,
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "8h",
   JWT_ISSUER: "newsfront-cms",
