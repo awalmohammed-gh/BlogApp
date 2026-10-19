@@ -7,7 +7,7 @@ import ArticleComment from "../models/ArticleComment.js";
 import { readingMinutes } from "../utils/readingMinutes.js";
 
 try {
-  await mongoose.connect(env.MONGODB_URI,{autoIndex:false});
+  await mongoose.connect(env.MONGODB_URI,{autoIndex:false,dbName:env.MONGODB_DB_NAME});
   for(const model of [Article,ArticleRevision,Notification,ArticleComment]){await model.createIndexes();console.log(`${model.modelName}: declared indexes ready`);}
   let updated=0;let batch=[];
   const cursor=Article.find({status:"published",publicReadingMinutes:null}).select("content publishedRevision").populate("publishedRevision","content").lean().cursor({batchSize:100});

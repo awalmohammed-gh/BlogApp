@@ -10,6 +10,7 @@ export const connectDatabase = async () => {
 
   try {
     const conn = await mongoose.connect(env.MONGODB_URI, {
+      dbName: env.MONGODB_DB_NAME,
       autoIndex: env.NODE_ENV !== "production",
       serverSelectionTimeoutMS: 10000,
       maxPoolSize:20,
@@ -20,7 +21,7 @@ export const connectDatabase = async () => {
     });
 
     isConnected = true;
-    console.log(`[Database] MongoDB connection established successfully (Host: ${conn.connection.host})`);
+    console.log(`[Database] MongoDB connection established successfully (Host: ${conn.connection.host}, Database: ${conn.connection.name})`);
 
     mongoose.connection.on("error", (err) => {
       console.error("[Database] Runtime MongoDB connection error:", err.message);
