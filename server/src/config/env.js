@@ -27,7 +27,7 @@ export const env = {
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "8h",
   JWT_ISSUER: "newsfront-cms",
   JWT_AUDIENCE: "newsfront-admin",
-  FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:5173",
+  FRONTEND_URL: process.env.FRONTEND_SERVICE_URL || process.env.FRONTEND_URL || "http://localhost:5173",
   COOKIE_NAME: process.env.COOKIE_NAME || "newsfront_admin_token",
   BCRYPT_SALT_ROUNDS: parseInt(process.env.BCRYPT_SALT_ROUNDS || "12", 10),
   isProduction: process.env.NODE_ENV === "production",

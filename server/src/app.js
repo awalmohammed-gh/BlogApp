@@ -7,6 +7,7 @@ import compression from "compression";
 import { invalidatePublicReads } from "./middleware/publicReadCache.js";
 
 import env from "./config/env.js";
+import connectDatabase from "./config/database.js";
 import adminAuthRoutes from "./routes/adminAuthRoutes.js";
 import adminProfileRoutes from "./routes/adminProfileRoutes.js";
 import adminStaffRoutes from "./routes/adminStaffRoutes.js";
@@ -32,6 +33,16 @@ import { mountPublicFrontend } from "./middleware/publicFrontend.js";
 const app = express();
 app.disable("x-powered-by");
 app.set("trust proxy", process.env.TRUST_PROXY === "1" ? 1 : false);
+
+// Ensure MongoDB connection is ready (caches connection across serverless requests)
+app.use(async (req, res, next) => {
+  try {
+    await connectDatabase();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 app.use(compression({ threshold:1024, filter:(req,res)=>!req.path.startsWith("/api/admin") && compression.filter(req,res) }));
 app.use("/api/admin", (req,res,next)=>{
   res.set("Cache-Control","no-store");

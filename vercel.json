@@ -1,26 +1,53 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "frontend/dist",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "frontend": {
+      "root": "frontend",
+      "framework": "vite"
+    },
+    "server": {
+      "root": "server",
+      "framework": "express",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "frontend",
+          "format": "url",
+          "env": "FRONTEND_SERVICE_URL"
+        }
+      ]
+    }
+  },
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api"
+      "source": "/api",
+      "destination": {
+        "service": "server"
+      }
     },
     {
-      "source": "/api",
-      "destination": "/api"
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "server"
+      }
     },
     {
       "source": "/robots.txt",
-      "destination": "/api"
+      "destination": {
+        "service": "server"
+      }
     },
     {
       "source": "/sitemap.xml",
-      "destination": "/api"
+      "destination": {
+        "service": "server"
+      }
     },
     {
-      "source": "/((?!api/|sitemap\\.xml|robots\\.txt).*)",
-      "destination": "/index.html"
+      "source": "/(.*)",
+      "destination": {
+        "service": "frontend"
+      }
     }
   ]
 }
