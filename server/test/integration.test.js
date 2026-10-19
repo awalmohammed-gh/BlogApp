@@ -1,0 +1,258 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import crypto from "node:crypto";
+import path from "node:path";
+import { MongoMemoryReplSet } from "mongodb-memory-server";
+import { SMTPServer } from "smtp-server";
+import mongoose from "mongoose";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+// Always use an isolated, disposable replica set. Never connect to project .env data.
+process.env.NODE_ENV = "test";
+process.env.JWT_SECRET_KEY = crypto.randomBytes(48).toString("hex");
+process.env.BCRYPT_SALT_ROUNDS = "4";
+process.env.FRONTEND_URL = "http://localhost:5173";
+process.env.SCHEDULER_SECRET = crypto.randomBytes(32).toString("hex");
+process.env.MONGOMS_DOWNLOAD_DIR = path.resolve(".cache/mongodb");
+delete process.env.SMTP_HOST;
+// Explicit empties prevent dotenv from loading real SMTP credentials into tests.
+process.env.SMTP_HOST = "";
+process.env.SMTP_USER = "";
+process.env.SMTP_PASSWORD = "";
+process.env.SMTP_FROM = "";
+
+test("Nsemra News persistence, moderation, email and publishing journeys", { timeout: 900000 }, async (t) => {
+  const repl = await MongoMemoryReplSet.create({ replSet: { count: 1 }, instanceOpts: [{ args: ["--setParameter", "enableTestCommands=1"] }], binary: { version: "7.0.14" } });
+  process.env.MONGODB_URI = repl.getUri("newsfront_integration");
+  const { default: app } = await import("../src/app.js");
+  const { default: Admin } = await import("../src/models/Admin.js");
+  const { default: Article } = await import("../src/models/Article.js");
+  const { default: ArticleRevision } = await import("../src/models/ArticleRevision.js");
+  const { default: Category } = await import("../src/models/Category.js");
+  const { default: ArticleComment } = await import("../src/models/ArticleComment.js");
+  const { default: Contact } = await import("../src/models/ContactSubmission.js");
+  const { default: Subscriber } = await import("../src/models/NewsletterSubscriber.js");
+  const { default: Invitation } = await import("../src/models/AdminInvitation.js");
+  const { default: Submission } = await import("../src/models/EditorialSubmission.js");
+  const { default: Notification } = await import("../src/models/Notification.js");
+  const { runScheduledArticles, startArticleScheduler, stopArticleScheduler } = await import("../src/services/articleScheduler.js");
+  const { schedulePublication } = await import("../src/services/publicationService.js");
+  await mongoose.connect(process.env.MONGODB_URI);
+  await Promise.all(Object.values(mongoose.models).map((model) => model.init()));
+  const server = app.listen(0, "127.0.0.1");
+  await new Promise((resolve) => server.once("listening", resolve));
+  const base = `http://127.0.0.1:${server.address().port}/api`;
+  let smtp;
+  t.after(async () => { stopArticleScheduler(); await new Promise((r) => server.close(r)); if (smtp) await new Promise((r) => smtp.close(r)); await mongoose.disconnect(); await repl.stop(); });
+  const request = async (url, { method = "GET", body, cookie, expected = 200, headers = {} } = {}) => {
+    const response = await fetch(`${base}${url}`, { method, headers: { "Content-Type": "application/json", Origin: process.env.FRONTEND_URL, ...(cookie ? { Cookie: cookie } : {}), ...headers }, ...(body !== undefined ? { body: JSON.stringify(body) } : {}) });
+    const data = await response.json();
+    assert.equal(response.status, expected, `${method} ${url}: ${JSON.stringify(data)}`);
+    return { data, cookie: response.headers.getSetCookie().map((c) => c.split(";")[0]).join("; ") };
+  };
+  const password = "Controlled-Test-Password-2048!";
+  const staff = {};
+  const cookies = {};
+  for (const role of ["super_admin", "editor", "author"]) {
+    staff[role] = await Admin.create({ name: `Integration ${role}`, email: `${role}@example.test`, role, status: "active", passwordHash: await Admin.hashPassword(password) });
+    cookies[role] = (await request("/admin/auth/login", { method: "POST", body: { email: staff[role].email, password } })).cookie;
+  }
+  const category = await Category.create({ name: "Integration Desk", slug: "integration-desk", status: "active", createdBy: staff.super_admin._id });
+  let index = 0;
+  const draft = async () => (await request("/admin/articles", { method: "POST", cookie: cookies.author, expected: 201, body: { title: `Controlled publication ${++index}`, content: "<p>Isolated integration article body.</p>", category: String(category._id), status: "draft" } })).data.data;
+  const reviewed = async () => {
+    const article = await draft();
+    await request(`/admin/articles/${article._id}/submit`, { method: "POST", cookie: cookies.author, body: {} });
+    const submission = await Submission.findOne({ articleId: article._id });
+    assert.ok(submission);
+    await request(`/admin/editorial/${submission._id}/approve`, { method: "POST", cookie: cookies.editor, body: { reviewNote: "Verified isolated test revision." } });
+    return { article, revision: await ArticleRevision.findById(submission.revisionId) };
+  };
+  let publicArticle;
+  await t.test("manual review and publish; CRUD cannot bypass editorial approval", async () => {
+    const { article, revision } = await reviewed();
+    publicArticle = article;
+    await request(`/articles/${article.slug}`, { expected: 404 });
+    await request(`/admin/articles/${article._id}/publish`, { method: "POST", cookie: cookies.author, expected: 403, body: {} });
+    await request(`/admin/articles/${article._id}/publish`, { method: "POST", cookie: cookies.editor, body: {} });
+    const visible = (await request(`/articles/${article.slug}`)).data.data.article;
+    assert.equal(visible.title, revision.title);
+    assert.ok(!("scheduleLease" in visible));
+    await request(`/admin/articles/${article._id}`, { method: "PATCH", cookie: cookies.author, body: { title: "Unapproved author working edit", status: "published" } });
+    assert.equal((await request(`/articles/${article.slug}`)).data.data.article.title, revision.title);
+    await request(`/admin/articles/${article._id}`, { method: "PATCH", cookie: cookies.author, expected: 409, body: { slug: "unapproved-public-url-change" } });
+    const other = await draft();
+    await request(`/admin/articles/${other._id}`, { method: "PATCH", cookie: cookies.editor, expected: 400, body: { status: "published" } });
+  });
+  await t.test("guest comment persists pending, admin approval exposes only public plain text fields", async () => {
+    const body = { name: "Controlled Reader", email: "reader@example.test", content: "<img src=x onerror=alert(1)> Plain text", website: "" };
+    await request(`/articles/${publicArticle.slug}/comments`, { method: "POST", expected: 201, body });
+    const comment = await ArticleComment.findOne({ commenterEmail: body.email });
+    assert.equal(comment.status, "pending");
+    assert.equal((await request(`/articles/${publicArticle.slug}/comments`)).data.pagination.total, 0);
+    await request("/admin/comments", { expected: 401 });
+    await request("/admin/comments", { cookie: cookies.author, expected: 403 });
+    assert.equal((await request("/admin/comments?status=pending", { cookie: cookies.editor })).data.pagination.total, 1);
+    await request(`/admin/comments/${comment._id}/status`, { method: "PATCH", cookie: cookies.editor, body: { status: "approved" } });
+    const approved = (await request(`/articles/${publicArticle.slug}/comments`)).data;
+    assert.equal(approved.pagination.total, 1);
+    assert.equal(approved.data[0].content, body.content);
+    assert.ok(!("commenterEmail" in approved.data[0]));
+    await request(`/articles/${publicArticle.slug}/comments`, { method: "POST", expected: 201, body: { ...body, parentCommentId: String(comment._id), content: "A moderated reply" } });
+    const unpublished = await draft();
+    await request(`/articles/${unpublished.slug}/comments`, { method: "POST", expected: 404, body });
+    await request(`/articles/${publicArticle.slug}/comments`, { method: "POST", expected: 400, body: { ...body, website: "spam" } });
+    await request(`/admin/comments/${comment._id}/status`, { method: "PATCH", cookie: cookies.editor, body: { status: "archived" } });
+    assert.equal((await request(`/articles/${publicArticle.slug}/comments`)).data.pagination.total, 0);
+    await request(`/admin/comments/${comment._id}/status`, { method: "PATCH", cookie: cookies.editor, body: { status: "pending" } });
+  });
+  await t.test("contact enquiries persist and statuses survive a fresh read", async () => {
+    const body = { name: "Controlled Sender", email: "contact@example.test", subject: "Integration enquiry", department: "correction", message: "A controlled test enquiry." };
+    await request("/contact", { method: "POST", expected: 201, body });
+    const doc = await Contact.findOne({ email: body.email });
+    assert.equal(doc.status, "new");
+    await request("/admin/contact-submissions", { cookie: cookies.author, expected: 403 });
+    await request(`/admin/contact-submissions/${doc._id}/status`, { method: "PATCH", cookie: cookies.editor, body: { status: "resolved" } });
+    assert.equal((await request(`/admin/contact-submissions/${doc._id}`, { cookie: cookies.editor })).data.data.status, "resolved");
+    await request("/contact", { method: "POST", expected: 400, body: { ...body, email: "invalid" } });
+  });
+  await t.test("settings persist, enforce RBAC and reject stale writes", async () => {
+    const doc = (await request("/admin/settings/general", { cookie: cookies.super_admin })).data.data;
+    const body = { section: "general", values: { ...doc.values.general, siteName: "Persisted Integration News" }, version: doc.version };
+    await request("/admin/settings/general", { method: "PATCH", cookie: cookies.editor, expected: 403, body });
+    await request("/admin/settings/general", { method: "PATCH", cookie: cookies.super_admin, body });
+    await request("/admin/settings/general", { method: "PATCH", cookie: cookies.super_admin, expected: 409, body });
+    await mongoose.disconnect(); await mongoose.connect(process.env.MONGODB_URI);
+    assert.equal((await request("/site/settings")).data.data.values.general.siteName, body.values.siteName);
+    const freshProcess = await promisify(execFile)(process.execPath, ["test/settingsRestartProbe.js"], { env: process.env });
+    assert.equal(JSON.parse(freshProcess.stdout.trim()).siteName, body.values.siteName);
+    const settings = (await request("/admin/settings/general", { cookie: cookies.super_admin })).data.data;
+    await request("/admin/settings/general", { method: "PATCH", cookie: cookies.super_admin, body: { section: "publishing", version: settings.version, values: { ...settings.values.publishing, enableComments: false } } });
+    await request(`/articles/${publicArticle.slug}/comments`, { method: "POST", expected: 403, body: { name: "Reader", email: "reader@example.test", content: "Disabled" } });
+  });
+  const messages = [];
+  let rejectMail = false;
+  await t.test("missing email configuration remains truthful and duplicates do not create subscribers", async () => {
+    const body = { email: " Pending@Example.Test ", consent: true, source: "homepage" };
+    await request("/newsletter/subscribe", { method: "POST", body });
+    await request("/newsletter/subscribe", { method: "POST", body });
+    assert.equal(await Subscriber.countDocuments({ email: "pending@example.test" }), 1);
+    assert.equal((await Subscriber.findOne({ email: "pending@example.test" })).status, "pending_verification");
+    assert.equal((await Subscriber.findOne({ email: "pending@example.test" })).emailStatus, "not_configured");
+    await request("/newsletter/subscribe", { method: "POST", expected: 400, body: { ...body, consent: false } });
+    const result = await request("/admin/staff/invite", { method: "POST", expected: 201, cookie: cookies.super_admin, body: { name: "Manual Invitation", email: "manual@example.test", role: "author" } });
+    assert.equal(result.data.data.emailStatus, "not_configured");
+    assert.ok(result.data.data.inviteUrl);
+  });
+  const decode = (message) => message.replace(/=\r?\n/g, "").replaceAll("=3D", "=");
+  await t.test("SMTP verification, token expiry/reuse, unsubscribe and opt-out preservation", async () => {
+    smtp = new SMTPServer({ authOptional: true, disabledCommands: ["STARTTLS"], onRcptTo(address, session, cb) { cb(rejectMail ? new Error("Controlled rejection") : null); }, onData(stream, session, cb) { let text = ""; stream.on("data", (chunk) => { text += chunk; }); stream.on("end", () => { messages.push(decode(text)); cb(); }); } });
+    await new Promise((resolve) => smtp.listen(0, "127.0.0.1", resolve));
+    process.env.SMTP_HOST = "127.0.0.1"; process.env.SMTP_PORT = String(smtp.server.address().port); process.env.SMTP_FROM = "Nsemra News <news@example.test>";
+    await request("/newsletter/subscribe", { method: "POST", body: { email: "verified@example.test", consent: true, source: "article" } });
+    const message = messages.at(-1);
+    const verification = message.match(/newsletter\/confirm\?token=([a-f\d]{64})/)[1];
+    const unsubscribe = message.match(/newsletter\/unsubscribe\?token=([a-f\d]{64})/)[1];
+    await request("/newsletter/confirm", { method: "POST", body: { token: verification } });
+    await request("/newsletter/confirm", { method: "POST", expected: 400, body: { token: verification } });
+    assert.equal((await Subscriber.findOne({ email: "verified@example.test" })).status, "active");
+    await request("/newsletter/unsubscribe", { method: "POST", body: { token: unsubscribe } });
+    await request("/newsletter/subscribe", { method: "POST", body: { email: "verified@example.test", consent: true } });
+    assert.equal((await Subscriber.findOne({ email: "verified@example.test" })).status, "unsubscribed");
+    await request("/admin/newsletter-subscribers", { cookie: cookies.editor, expected: 403 });
+    assert.equal((await request("/admin/newsletter-subscribers", { cookie: cookies.super_admin })).data.counts.unsubscribed, 1);
+  });
+  await t.test("staff SMTP failure, replacement resend, secure single-use activation and login", async () => {
+    rejectMail = true;
+    const invited = (await request("/admin/staff/invite", { method: "POST", expected: 201, cookie: cookies.super_admin, body: { name: "SMTP Invitation", email: "invited@example.test", role: "editor" } })).data.data;
+    assert.equal(invited.emailStatus, "email_failed");
+    const staffId = invited.staff._id;
+    const oldToken = new URL(invited.inviteUrl).searchParams.get("token");
+    await request(`/admin/staff/${staffId}/reinvite`, { method: "POST", cookie: cookies.super_admin, expected: 429, body: {} });
+    await Admin.updateOne({ _id: staffId }, { $set: { invitationRetryAfter: new Date(0) } });
+    rejectMail = false;
+    const resent = (await request(`/admin/staff/${staffId}/reinvite`, { method: "POST", cookie: cookies.super_admin, body: {} })).data.data;
+    assert.equal(resent.emailStatus, "email_sent");
+    const token = new URL(resent.inviteUrl).searchParams.get("token");
+    assert.ok(messages.at(-1).includes(token));
+    await request(`/admin/invitations/verify?token=${oldToken}`, { expected: 400 });
+    const stored = await Invitation.findOne({ adminId: staffId, consumedAt: null });
+    assert.notEqual(stored.tokenHash, token);
+    await request("/admin/invitations/accept", { method: "POST", body: { token, password, confirmPassword: password } });
+    await request("/admin/invitations/accept", { method: "POST", expected: 400, body: { token, password, confirmPassword: password } });
+    await request("/admin/auth/login", { method: "POST", body: { email: "invited@example.test", password } });
+    const expired = await Invitation.generateForAdmin({ adminId: staff.author._id, createdBy: staff.super_admin._id, expiresInHours: -1 });
+    await request(`/admin/invitations/verify?token=${expired.rawToken}`, { expected: 400 });
+  });
+  await t.test("scheduled approved revision publishes once under concurrent workers; future/cancelled/archived stay hidden", async () => {
+    const now = new Date(Date.now() + 60000);
+    const { article, revision } = await reviewed();
+    await request(`/admin/articles/${article._id}/schedule`, { method: "POST", cookie: cookies.editor, body: { scheduledAt: now.toISOString() } });
+    await Article.updateOne({ _id: article._id }, { $set: { title: "Unapproved working draft" } });
+    await request(`/articles/${article.slug}`, { expected: 404 });
+    const future = await reviewed();
+    await schedulePublication(future.article._id, future.revision._id, new Date(now.getTime() + 60000), staff.editor._id);
+    const cancelled = await reviewed();
+    await schedulePublication(cancelled.article._id, cancelled.revision._id, now, staff.editor._id);
+    await request(`/admin/articles/${cancelled.article._id}/unpublish`, { method: "POST", cookie: cookies.editor, body: {} });
+    const archived = await reviewed();
+    await schedulePublication(archived.article._id, archived.revision._id, now, staff.editor._id);
+    await request(`/admin/articles/${archived.article._id}`, { method: "DELETE", cookie: cookies.editor });
+    const invalid = await draft();
+    await Article.updateOne({ _id: invalid._id }, { $set: { status: "scheduled", scheduledAt: now } });
+    const result = await Promise.all([runScheduledArticles({ now }), runScheduledArticles({ now })]);
+    assert.equal(result.reduce((sum, r) => sum + r.published, 0), 1);
+    const published = await Article.findById(article._id);
+    assert.equal(published.status, "published"); assert.equal(published.publishedAt.toISOString(), now.toISOString());
+    assert.equal(String(published.publishedRevision), String(revision._id));
+    assert.equal((await Article.findById(future.article._id)).status, "scheduled");
+    assert.equal((await Article.findById(cancelled.article._id)).status, "draft");
+    assert.equal((await Article.findById(archived.article._id)).status, "archived");
+    assert.equal((await Article.findById(invalid._id)).scheduleAttempts, 5);
+    assert.equal((await runScheduledArticles({ now })).published, 0);
+    assert.equal(await Notification.countDocuments({ eventKey: `article:${article._id}:revision:${revision._id}:published` }), 1);
+    // The public API uses real time, so advance this isolated article's publication timestamp only.
+    await Article.updateOne({ _id: article._id }, { $set: { publishedAt: new Date(Date.now() - 1) } });
+    assert.equal((await request(`/articles/${article.slug}`)).data.data.article.title, revision.title);
+    await request("/internal/publish-scheduled", { method: "POST", expected: 401, body: {} });
+    await request("/internal/publish-scheduled", { method: "POST", headers: { Authorization: `Bearer ${process.env.SCHEDULER_SECRET}` }, body: {} });
+  });
+  await t.test("expired worker leases recover, revoked approval blocks publication and scheduler starts/stops", async () => {
+    const { article, revision } = await reviewed();
+    const now = new Date(Date.now() + 60000);
+    await schedulePublication(article._id, revision._id, now, staff.editor._id);
+    await Article.updateOne({ _id: article._id }, { $set: { scheduleLease: "abandoned", scheduleLeaseUntil: new Date(now.getTime() - 1) } });
+    assert.ok((await runScheduledArticles({ now })).published >= 1);
+    const revoked = await reviewed();
+    await schedulePublication(revoked.article._id, revoked.revision._id, now, staff.editor._id);
+    await ArticleRevision.updateOne({ _id: revoked.revision._id }, { $set: { isApproved: false } });
+    await runScheduledArticles({ now });
+    assert.equal((await Article.findById(revoked.article._id)).status, "scheduled");
+    await startArticleScheduler(); startArticleScheduler(); stopArticleScheduler();
+  });
+  await t.test("database publication failure rolls back, retries later and does not block other articles", async () => {
+    // Isolate due work from future schedules deliberately retained by earlier tests.
+    await Article.updateMany({ status: "scheduled" }, { $set: { status: "draft" } });
+    const first = await reviewed(), second = await reviewed();
+    const now = new Date(Date.now() + 60000);
+    await schedulePublication(first.article._id, first.revision._id, now, staff.editor._id);
+    await schedulePublication(second.article._id, second.revision._id, now, staff.editor._id);
+    await mongoose.connection.db.admin().command({ configureFailPoint: "failCommand", mode: { times: 1 }, data: { failCommands: ["insert"], errorCode: 12345 } });
+    const outcome = await runScheduledArticles({ now });
+    assert.equal(outcome.failed, 1); assert.equal(outcome.published, 1);
+    const failed = await Article.findById(first.article._id);
+    assert.equal(failed.status, "scheduled"); assert.equal(failed.scheduleAttempts, 1);
+    assert.equal(await Notification.countDocuments({ eventKey: `article:${first.article._id}:revision:${first.revision._id}:published` }), 0);
+    assert.equal((await runScheduledArticles({ now })).published, 0);
+    assert.equal((await runScheduledArticles({ now: new Date(now.getTime() + 120000) })).published, 1);
+    assert.equal(await Notification.countDocuments({ eventKey: `article:${first.article._id}:revision:${first.revision._id}:published` }), 1);
+  });
+  await t.test("existing authenticated CMS and public API reads still work", async () => {
+    for (const endpoint of ["/admin/auth/me", "/admin/profile", "/admin/staff", "/admin/categories", "/admin/tags", "/admin/media", "/admin/advertisements", "/admin/pages", "/admin/analytics/overview", "/admin/notifications"]) {
+      const response = await request(endpoint, { cookie: cookies.super_admin });
+      assert.equal(response.data.success, true, endpoint);
+    }
+    for (const endpoint of ["/articles", "/articles/featured", "/articles/breaking"]) assert.equal((await request(endpoint)).data.success, true);
+  });
+});

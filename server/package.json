@@ -1,0 +1,54 @@
+{
+  "name": "newsfront-server",
+  "version": "1.0.0",
+  "description": "Nsemra News Newsroom CMS Backend Server",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "bootstrap:admin": "node src/scripts/createInitialAdmin.js",
+    "admin:sync": "node src/scripts/syncSuperAdmin.js",
+    "media:reconcile": "node src/scripts/reconcileMediaAssets.js",
+    "test:integration": "node --test test/integration.test.js",
+    "test:browser": "node --test test/browser.test.js",
+    "db:integration-indexes": "node src/scripts/ensureIntegrationIndexes.js",
+    "db:performance-indexes": "node src/scripts/ensurePerformanceIndexes.js",
+    "email:verify": "node src/scripts/verifyEmail.js",
+    "test:smtp-config": "node --test test/smtpConfig.test.js",
+    "test:nsemra": "node --test test/nsemra.test.js",
+    "db:demo-report": "node src/scripts/reportDemoRecords.js",
+    "brand:migrate": "node src/scripts/rebrandSite.js",
+    "articles:import": "node src/scripts/importAssetArticles.js"
+  },
+  "keywords": [
+    "newsfront",
+    "cms",
+    "express",
+    "mongodb",
+    "jwt",
+    "authentication"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "compression": "^1.8.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "imagekit": "^6.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.10.1",
+    "multer": "^2.4.0",
+    "nodemailer": "^10.1.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.3.0",
+    "playwright": "^1.64.1",
+    "smtp-server": "^3.19.23"
+  }
+}
