@@ -1,0 +1,236 @@
+{
+  "phase": "baseline",
+  "measuredAt": "2026-10-18T15:33:07.535Z",
+  "slug": "team-a-clinches-national-championship",
+  "publishedCount": 39,
+  "conditions": {
+    "viewport": "390x844",
+    "cpuSlowdown": 4,
+    "latencyMs": 150,
+    "downloadMbps": 1.6,
+    "samplesPerPage": 3,
+    "observationMs": 8000,
+    "note": "Local synthetic lab data; telemetry blocked. Not field Core Web Vitals or Lighthouse."
+  },
+  "bundles": [
+    {
+      "name": "index-7iqzKmSc.css",
+      "bytes": 136888,
+      "gzipBytes": 19677
+    },
+    {
+      "name": "index-B-LzU445.js",
+      "bytes": 1111176,
+      "gzipBytes": 288650
+    }
+  ],
+  "api": {
+    "/api/articles?limit=50": {
+      "medianMs": 9.67,
+      "p95Ms": 15.4,
+      "bytes": 102430,
+      "status": 200,
+      "cacheControl": null
+    },
+    "/api/articles?limit=12": {
+      "medianMs": 6.72,
+      "p95Ms": 7.74,
+      "bytes": 36231,
+      "status": 200,
+      "cacheControl": null
+    },
+    "/api/articles/team-a-clinches-national-championship": {
+      "medianMs": 9.29,
+      "p95Ms": 11.26,
+      "bytes": 15878,
+      "status": 200,
+      "cacheControl": null
+    },
+    "/api/articles?search=community&limit=12": {
+      "medianMs": 7.37,
+      "p95Ms": 14.07,
+      "bytes": 2375,
+      "status": 200,
+      "cacheControl": null
+    },
+    "/api/site/settings": {
+      "medianMs": 1.8,
+      "p95Ms": 3.12,
+      "bytes": 1094,
+      "status": 200,
+      "cacheControl": "no-store"
+    },
+    "/api/site/stats": {
+      "medianMs": 0.68,
+      "p95Ms": 6.4,
+      "bytes": 134,
+      "status": 200,
+      "cacheControl": "no-cache"
+    }
+  },
+  "pages": {
+    "/": {
+      "runs": [
+        {
+          "lcp": 7924,
+          "cls": 0.9522864399125391,
+          "longTasks": 1110,
+          "fcpMs": 7408,
+          "ttfbMs": 7.800000011920929,
+          "javascriptBytes": 1111176,
+          "imageTransferBytes": 560855,
+          "imageRequests": 5,
+          "overflow": false,
+          "articleReadable": false,
+          "title": "Nsemra News | Stories That Matter.",
+          "apiRequests": [
+            "/api/site/pages/home",
+            "/api/articles?limit=50",
+            "/api/advertisements?placement=homepage_banner",
+            "/api/articles?limit=50",
+            "/api/admin/auth/me",
+            "/api/site/settings",
+            "/api/articles?limit=50",
+            "/api/articles?limit=50"
+          ],
+          "errors": []
+        },
+        {
+          "lcp": 8312,
+          "cls": 0.9522864399125391,
+          "longTasks": 788,
+          "fcpMs": 7396,
+          "ttfbMs": 3,
+          "javascriptBytes": 1111176,
+          "imageTransferBytes": 560855,
+          "imageRequests": 5,
+          "overflow": false,
+          "articleReadable": false,
+          "title": "Nsemra News | Stories That Matter.",
+          "apiRequests": [
+            "/api/site/pages/home",
+            "/api/articles?limit=50",
+            "/api/advertisements?placement=homepage_banner",
+            "/api/articles?limit=50",
+            "/api/admin/auth/me",
+            "/api/site/settings",
+            "/api/articles?limit=50",
+            "/api/articles?limit=50"
+          ],
+          "errors": []
+        },
+        {
+          "lcp": 8528,
+          "cls": 0.9522864399125391,
+          "longTasks": 1451,
+          "fcpMs": 7760,
+          "ttfbMs": 6.899999976158142,
+          "javascriptBytes": 1111176,
+          "imageTransferBytes": 560855,
+          "imageRequests": 5,
+          "overflow": false,
+          "articleReadable": false,
+          "title": "Nsemra News | Stories That Matter.",
+          "apiRequests": [
+            "/api/site/pages/home",
+            "/api/articles?limit=50",
+            "/api/advertisements?placement=homepage_banner",
+            "/api/articles?limit=50",
+            "/api/admin/auth/me",
+            "/api/site/settings",
+            "/api/articles?limit=50",
+            "/api/articles?limit=50"
+          ],
+          "errors": []
+        }
+      ],
+      "medianLcpMs": 8312,
+      "medianFcpMs": 7408,
+      "medianBlockingMs": 1110,
+      "maxCls": 0.9522864399125391
+    },
+    "/blog-details/team-a-clinches-national-championship": {
+      "runs": [
+        {
+          "lcp": 12532,
+          "cls": 0,
+          "longTasks": 752,
+          "fcpMs": 7300,
+          "ttfbMs": 9,
+          "javascriptBytes": 1111176,
+          "imageTransferBytes": 717021,
+          "imageRequests": 4,
+          "overflow": false,
+          "articleReadable": true,
+          "title": "Team A Clinches National Championship",
+          "apiRequests": [
+            "/api/articles/team-a-clinches-national-championship",
+            "/api/articles?limit=50",
+            "/api/admin/auth/me",
+            "/api/site/settings",
+            "/api/articles/team-a-clinches-national-championship",
+            "/api/articles?limit=50",
+            "/api/analytics/track",
+            "/api/advertisements?placement=article_inline",
+            "/api/articles/team-a-clinches-national-championship/comments?page=1&limit=10"
+          ],
+          "errors": []
+        },
+        {
+          "lcp": 13504,
+          "cls": 0,
+          "longTasks": 2114,
+          "fcpMs": 8256,
+          "ttfbMs": 4.900000035762787,
+          "javascriptBytes": 1111176,
+          "imageTransferBytes": 717021,
+          "imageRequests": 4,
+          "overflow": false,
+          "articleReadable": true,
+          "title": "Team A Clinches National Championship",
+          "apiRequests": [
+            "/api/articles/team-a-clinches-national-championship",
+            "/api/articles?limit=50",
+            "/api/admin/auth/me",
+            "/api/site/settings",
+            "/api/analytics/track",
+            "/api/articles/team-a-clinches-national-championship",
+            "/api/articles?limit=50",
+            "/api/advertisements?placement=article_inline",
+            "/api/articles/team-a-clinches-national-championship/comments?page=1&limit=10"
+          ],
+          "errors": []
+        },
+        {
+          "lcp": 12672,
+          "cls": 0,
+          "longTasks": 959,
+          "fcpMs": 7424,
+          "ttfbMs": 7.400000035762787,
+          "javascriptBytes": 1111176,
+          "imageTransferBytes": 717021,
+          "imageRequests": 4,
+          "overflow": false,
+          "articleReadable": true,
+          "title": "Team A Clinches National Championship",
+          "apiRequests": [
+            "/api/articles/team-a-clinches-national-championship",
+            "/api/articles?limit=50",
+            "/api/admin/auth/me",
+            "/api/site/settings",
+            "/api/articles/team-a-clinches-national-championship",
+            "/api/articles?limit=50",
+            "/api/analytics/track",
+            "/api/advertisements?placement=article_inline",
+            "/api/articles/team-a-clinches-national-championship/comments?page=1&limit=10"
+          ],
+          "errors": []
+        }
+      ],
+      "medianLcpMs": 12672,
+      "medianFcpMs": 7424,
+      "medianBlockingMs": 959,
+      "maxCls": 0
+    }
+  }
+}

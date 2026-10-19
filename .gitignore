@@ -33,7 +33,6 @@ yarn-error.log*
 server/test-results/
 server/backups/
 server/cookies.txt
-performance/
 
 # OS and IDE files
 .DS_Store

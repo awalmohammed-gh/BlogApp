@@ -1,0 +1,672 @@
+{
+  "measuredAt": "2026-10-18T15:33:36.497Z",
+  "replicaSet": false,
+  "counts": {
+    "articles": 39,
+    "pageViews": 8
+  },
+  "queries": {
+    "latest": {
+      "returned": 12,
+      "docsExamined": 39,
+      "keysExamined": 39,
+      "timeMs": 20,
+      "winningPlan": {
+        "isCached": false,
+        "stage": "SORT",
+        "sortPattern": {
+          "publishedAt": -1,
+          "_id": -1
+        },
+        "memLimit": 104857600,
+        "limitAmount": 12,
+        "type": "simple",
+        "inputStage": {
+          "stage": "FETCH",
+          "nss": "newsfront_db.articles",
+          "inputStage": {
+            "stage": "IXSCAN",
+            "nss": "newsfront_db.articles",
+            "keyPattern": {
+              "status": 1,
+              "publishedAt": -1
+            },
+            "indexName": "status_1_publishedAt_-1",
+            "isMultiKey": false,
+            "multiKeyPaths": {
+              "status": [],
+              "publishedAt": []
+            },
+            "isUnique": false,
+            "isSparse": false,
+            "isPartial": false,
+            "indexVersion": 2,
+            "direction": "forward",
+            "indexBounds": {
+              "status": [
+                "[\"published\", \"published\"]"
+              ],
+              "publishedAt": [
+                "[new Date(1792337616497), new Date(-9223372036854775808)]"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "category": {
+      "returned": 5,
+      "docsExamined": 5,
+      "keysExamined": 5,
+      "timeMs": 8,
+      "winningPlan": {
+        "isCached": false,
+        "stage": "SORT",
+        "sortPattern": {
+          "publishedAt": -1,
+          "_id": -1
+        },
+        "memLimit": 104857600,
+        "limitAmount": 12,
+        "type": "simple",
+        "inputStage": {
+          "stage": "FETCH",
+          "nss": "newsfront_db.articles",
+          "inputStage": {
+            "stage": "IXSCAN",
+            "nss": "newsfront_db.articles",
+            "keyPattern": {
+              "category": 1,
+              "status": 1,
+              "publishedAt": -1
+            },
+            "indexName": "category_1_status_1_publishedAt_-1",
+            "isMultiKey": false,
+            "multiKeyPaths": {
+              "category": [],
+              "status": [],
+              "publishedAt": []
+            },
+            "isUnique": false,
+            "isSparse": false,
+            "isPartial": false,
+            "indexVersion": 2,
+            "direction": "forward",
+            "indexBounds": {
+              "category": [
+                "[ObjectId('6ad48dbb7d2079036934f0da'), ObjectId('6ad48dbb7d2079036934f0da')]"
+              ],
+              "status": [
+                "[\"published\", \"published\"]"
+              ],
+              "publishedAt": [
+                "[new Date(1792337616497), new Date(-9223372036854775808)]"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "slug": {
+      "returned": 1,
+      "docsExamined": 1,
+      "keysExamined": 1,
+      "timeMs": 0,
+      "winningPlan": {
+        "isCached": false,
+        "stage": "LIMIT",
+        "limitAmount": 12,
+        "inputStage": {
+          "stage": "FETCH",
+          "filter": {
+            "$and": [
+              {
+                "publishedAt": {
+                  "$lte": "2026-10-18T15:33:36.497Z"
+                }
+              },
+              {
+                "status": {
+                  "$eq": "published"
+                }
+              }
+            ]
+          },
+          "nss": "newsfront_db.articles",
+          "inputStage": {
+            "stage": "IXSCAN",
+            "nss": "newsfront_db.articles",
+            "keyPattern": {
+              "slug": 1
+            },
+            "indexName": "slug_1",
+            "isMultiKey": false,
+            "multiKeyPaths": {
+              "slug": []
+            },
+            "isUnique": true,
+            "isSparse": false,
+            "isPartial": false,
+            "indexVersion": 2,
+            "direction": "forward",
+            "indexBounds": {
+              "slug": [
+                "[\"new-tech-startup-hub-opens-in-accra\", \"new-tech-startup-hub-opens-in-accra\"]"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "approvedComments": {
+      "returned": 0,
+      "docsExamined": 0,
+      "keysExamined": 0,
+      "timeMs": 3,
+      "winningPlan": {
+        "isCached": false,
+        "stage": "SORT",
+        "sortPattern": {
+          "createdAt": -1,
+          "_id": -1
+        },
+        "memLimit": 104857600,
+        "limitAmount": 12,
+        "type": "simple",
+        "inputStage": {
+          "stage": "FETCH",
+          "nss": "newsfront_db.articlecomments",
+          "inputStage": {
+            "stage": "IXSCAN",
+            "nss": "newsfront_db.articlecomments",
+            "keyPattern": {
+              "articleId": 1,
+              "status": 1,
+              "createdAt": -1
+            },
+            "indexName": "articleId_1_status_1_createdAt_-1",
+            "isMultiKey": false,
+            "multiKeyPaths": {
+              "articleId": [],
+              "status": [],
+              "createdAt": []
+            },
+            "isUnique": false,
+            "isSparse": false,
+            "isPartial": false,
+            "indexVersion": 2,
+            "direction": "forward",
+            "indexBounds": {
+              "articleId": [
+                "[ObjectId('6ad4a8f4902b5cbc92bbc86f'), ObjectId('6ad4a8f4902b5cbc92bbc86f')]"
+              ],
+              "status": [
+                "[\"approved\", \"approved\"]"
+              ],
+              "createdAt": [
+                "[MaxKey, MinKey]"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "notifications": {
+      "returned": 0,
+      "docsExamined": 1,
+      "keysExamined": 1,
+      "timeMs": 0,
+      "winningPlan": {
+        "isCached": false,
+        "stage": "SORT",
+        "sortPattern": {
+          "createdAt": -1,
+          "_id": -1
+        },
+        "memLimit": 104857600,
+        "limitAmount": 12,
+        "type": "simple",
+        "inputStage": {
+          "stage": "FETCH",
+          "filter": {
+            "isArchived": {
+              "$eq": false
+            }
+          },
+          "nss": "newsfront_db.notifications",
+          "inputStage": {
+            "stage": "IXSCAN",
+            "nss": "newsfront_db.notifications",
+            "keyPattern": {
+              "recipientId": 1
+            },
+            "indexName": "recipientId_1",
+            "isMultiKey": false,
+            "multiKeyPaths": {
+              "recipientId": []
+            },
+            "isUnique": false,
+            "isSparse": false,
+            "isPartial": false,
+            "indexVersion": 2,
+            "direction": "forward",
+            "indexBounds": {
+              "recipientId": [
+                "[ObjectId('6ad3ae52a4c3a753e097eb34'), ObjectId('6ad3ae52a4c3a753e097eb34')]"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "indexes": {
+    "articles": [
+      {
+        "v": 2,
+        "key": {
+          "_id": 1
+        },
+        "name": "_id_",
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "slug": 1
+        },
+        "name": "slug_1",
+        "background": true,
+        "unique": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "featuredImage.media": 1
+        },
+        "name": "featuredImage.media_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "category": 1
+        },
+        "name": "category_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "author": 1
+        },
+        "name": "author_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "status": 1
+        },
+        "name": "status_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "editorialStatus": 1
+        },
+        "name": "editorialStatus_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "publishedRevision": 1
+        },
+        "name": "publishedRevision_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "currentSubmission": 1
+        },
+        "name": "currentSubmission_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "isFeatured": 1
+        },
+        "name": "isFeatured_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "isBreakingNews": 1
+        },
+        "name": "isBreakingNews_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "publishedAt": 1
+        },
+        "name": "publishedAt_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "scheduledAt": 1
+        },
+        "name": "scheduledAt_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "status": 1,
+          "publishedAt": -1
+        },
+        "name": "status_1_publishedAt_-1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "category": 1,
+          "status": 1,
+          "publishedAt": -1
+        },
+        "name": "category_1_status_1_publishedAt_-1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "isFeatured": 1,
+          "status": 1,
+          "publishedAt": -1
+        },
+        "name": "isFeatured_1_status_1_publishedAt_-1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "isBreakingNews": 1,
+          "status": 1,
+          "publishedAt": -1
+        },
+        "name": "isBreakingNews_1_status_1_publishedAt_-1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "author": 1,
+          "status": 1,
+          "createdAt": -1
+        },
+        "name": "author_1_status_1_createdAt_-1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "status": 1,
+          "scheduledAt": 1,
+          "scheduleRetryAt": 1,
+          "scheduleLeaseUntil": 1
+        },
+        "name": "status_1_scheduledAt_1_scheduleRetryAt_1_scheduleLeaseUntil_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      }
+    ],
+    "articlecomments": [
+      {
+        "v": 2,
+        "key": {
+          "_id": 1
+        },
+        "name": "_id_",
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "articleId": 1
+        },
+        "name": "articleId_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "status": 1
+        },
+        "name": "status_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "articleId": 1,
+          "status": 1,
+          "createdAt": -1
+        },
+        "name": "articleId_1_status_1_createdAt_-1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "status": 1,
+          "createdAt": -1
+        },
+        "name": "status_1_createdAt_-1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "createdAt": -1
+        },
+        "name": "createdAt_-1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      }
+    ],
+    "notifications": [
+      {
+        "v": 2,
+        "key": {
+          "_id": 1
+        },
+        "name": "_id_",
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "recipientId": 1
+        },
+        "name": "recipientId_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "type": 1
+        },
+        "name": "type_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "isRead": 1
+        },
+        "name": "isRead_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "status": 1
+        },
+        "name": "status_1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "recipientId": 1,
+          "createdAt": -1
+        },
+        "name": "recipientId_1_createdAt_-1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "recipientId": 1,
+          "status": 1,
+          "isRead": 1,
+          "createdAt": -1
+        },
+        "name": "recipientId_1_status_1_isRead_1_createdAt_-1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "recipientId": 1,
+          "status": 1,
+          "type": 1,
+          "createdAt": -1
+        },
+        "name": "recipientId_1_status_1_type_1_createdAt_-1",
+        "background": true,
+        "collation": {
+          "locale": "simple"
+        }
+      },
+      {
+        "v": 2,
+        "key": {
+          "recipientId": 1,
+          "eventKey": 1
+        },
+        "name": "recipientId_1_eventKey_1",
+        "background": true,
+        "unique": true,
+        "partialFilterExpression": {
+          "eventKey": {
+            "$type": "string"
+          }
+        },
+        "collation": {
+          "locale": "simple"
+        }
+      }
+    ]
+  }
+}

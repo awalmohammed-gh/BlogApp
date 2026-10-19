@@ -1,0 +1,32 @@
+{
+  "bundles": [
+    {
+      "name": "index-7iqzKmSc.css",
+      "bytes": 136888,
+      "gzipBytes": 19677
+    },
+    {
+      "name": "index-B63QGdva.js",
+      "bytes": 1111176,
+      "gzipBytes": 288647
+    }
+  ],
+  "/api/health": {
+    "status": 200,
+    "ms": 46,
+    "bytes": 91
+  },
+  "/api/articles?limit=1": {
+    "status": 200,
+    "ms": 7,
+    "bytes": 3538,
+    "slug": "team-a-clinches-national-championship",
+    "total": 39
+  },
+  "/api/site/settings": {
+    "status": 200,
+    "ms": 3,
+    "bytes": 1094,
+    "siteName": "Nsemfoa News"
+  }
+}
