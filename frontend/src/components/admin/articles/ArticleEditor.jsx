@@ -28,7 +28,7 @@ import {
   Settings2,
   X,
 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../../../utils/toast";
 
 import { useAuth } from "../../../context/admin/AuthContext";
 import { articleService } from "../../../services/admin/articleService";

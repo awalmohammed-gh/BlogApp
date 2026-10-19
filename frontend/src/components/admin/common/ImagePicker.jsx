@@ -7,7 +7,7 @@ import {
   Loader2,
   Link as LinkIcon,
 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../../../utils/toast";
 import MediaPickerModal from "./MediaPickerModal";
 import mediaService from "../../../services/admin/mediaService";
 

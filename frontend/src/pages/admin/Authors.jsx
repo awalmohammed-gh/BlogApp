@@ -22,7 +22,7 @@ import {
   UserCheck,
   UserX
 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../../utils/toast";
 
 import { useAuth } from "../../context/admin/AuthContext";
 import staffService from "../../services/admin/staffService";

@@ -21,7 +21,7 @@ import {
   RefreshCw,
   FileCheck
 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../../utils/toast";
 
 import sitePageService from "../../services/admin/sitePageService";
 import Modal from "../../components/admin/common/Modal";

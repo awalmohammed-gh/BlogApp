@@ -13,7 +13,7 @@ import {
   Archive,
   ArrowUpDown
 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../../utils/toast";
 
 import { useAuth } from "../../context/admin/AuthContext";
 import tagService from "../../services/admin/tagService";

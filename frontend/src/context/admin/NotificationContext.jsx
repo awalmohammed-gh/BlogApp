@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
-import toast from "react-hot-toast";
+import toast from "../../utils/toast";
 import { useAuth } from "./AuthContext";
 import notificationService from "../../services/admin/notificationService";
 
@@ -72,11 +72,9 @@ export const NotificationProvider = ({ children }) => {
         arrivals.forEach((item) => knownNotificationIdsRef.current.add(item._id));
         const firstUnread = arrivals.find((item) => !item.isRead);
         if (!isInitialLoadRef.current && firstUnread) {
-          toast(`${firstUnread.title}: ${firstUnread.message}`, {
+          toast.info(`${firstUnread.title}: ${firstUnread.message}`, {
             id: `notif-${firstUnread._id}`,
-            icon: "🔔",
-            duration: 4000,
-            style: { borderRadius: "12px", background: "#1e293b", color: "#fff", fontSize: "12px", fontWeight: "600" }
+            duration: 4000
           });
         }
         isInitialLoadRef.current = false;

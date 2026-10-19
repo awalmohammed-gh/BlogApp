@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import toast from "react-hot-toast";
+import toast from "../../utils/toast";
 import {
   MessageSquare, Search, RefreshCw, CheckCircle2, XCircle, ShieldAlert, Archive, RotateCcw, ExternalLink,
   CornerDownRight, Filter, X, ChevronLeft, ChevronRight, Mail, Loader2, Inbox

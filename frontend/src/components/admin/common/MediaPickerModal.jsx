@@ -9,7 +9,7 @@ import {
   Folder,
   RefreshCw
 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../../../utils/toast";
 import mediaService from "../../../services/admin/mediaService";
 
 const FOLDER_OPTIONS = [

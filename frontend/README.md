@@ -1,5 +1,29 @@
 # React + Vite
 
+## Application toast notifications
+
+The toast store, viewport and styling belong to this application. Import
+`toast` from `src/utils/toast.js` using the appropriate relative path:
+
+```js
+toast.success("Article published");
+toast.error("Unable to save your article");
+const id = toast.loading("Uploading your image…");
+toast.success("Image uploaded", { id });
+toast.dismiss(id); // Omit the ID to dismiss all messages.
+```
+
+`info` and `warning` are also supported. Messages accept `{ id, duration }`;
+loading messages stay until updated or dismissed. The viewport keeps up to five
+messages, supports keyboard dismissal and screen-reader announcements, and
+pauses timers while hovered, focused or the browser is inactive. Long stacks
+scroll within the device viewport, with reduced-motion preferences respected.
+
+Run `npm --prefix frontend run test:toast` for deterministic timer tests and
+`npm --prefix server run test:toast-browser` for contact form and toast browser
+checks. The browser audit intercepts all submissions and reads only public
+content. Set `TOAST_SITE_URL` to check the contact flow on a deployed build.
+
 ## Responsive layout verification
 
 From the repository root in PowerShell:

@@ -12,7 +12,7 @@ import {
   UserCheck,
   ArrowRight
 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../../utils/toast";
 import invitationService from "../../services/admin/invitationService";
 
 export const AcceptInvite = () => {

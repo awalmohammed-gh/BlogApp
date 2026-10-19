@@ -16,7 +16,7 @@ import {
   Eye,
   RemoveFormatting,
 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../../../utils/toast";
 import MediaPickerModal from "./MediaPickerModal";
 import { sanitizeHtml } from "../../../utils/sanitizeHtml";
 

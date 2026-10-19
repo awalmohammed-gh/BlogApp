@@ -12,7 +12,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useAuth } from "../../context/admin/AuthContext";
-import toast from "react-hot-toast";
+import toast from "../../utils/toast";
 
 export const Login = () => {
   const { login, isAuthenticated, isLoading } = useAuth();

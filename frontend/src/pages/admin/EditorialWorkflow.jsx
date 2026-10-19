@@ -19,7 +19,7 @@ import {
   Filter,
   CheckCircle2
 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../../utils/toast";
 
 import { useAdmin } from "../../context/admin/AdminContext";
 import EmptyState from "../../components/admin/common/EmptyState";

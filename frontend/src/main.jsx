@@ -5,13 +5,13 @@ import App from './App.jsx'
 import { SiteSettingsProvider } from './context/SiteSettingsContext.jsx'
 import AppErrorBoundary from './components/common/AppErrorBoundary.jsx'
 
-import { Toaster } from 'react-hot-toast'
+import ToastViewport from './components/common/ToastViewport.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AppErrorBoundary><SiteSettingsProvider>
 
-        <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+        <ToastViewport />
         <App />
 
     </SiteSettingsProvider></AppErrorBoundary>

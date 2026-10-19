@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import toast from "react-hot-toast";
+import toast from "../../utils/toast";
 import {
   Building2, Palette, Newspaper, Search, Share2, Lock, RefreshCw, AlertTriangle, CheckCircle2,
   Loader2, Mail, Phone, MapPin, Globe2, CalendarDays, ExternalLink, Info, Minus, Plus

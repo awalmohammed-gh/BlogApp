@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import toast from "react-hot-toast";
+import toast from "../../../utils/toast";
 import { Upload, Images, Trash2, Loader2, ImageOff, AlertTriangle } from "lucide-react";
 import mediaService from "../../../services/admin/mediaService";
 import MediaPickerModal from "../common/MediaPickerModal";

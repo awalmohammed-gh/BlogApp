@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import adminAuthService from "../../services/admin/authService";
-import toast from "react-hot-toast";
+import toast from "../../utils/toast";
 
 const AuthContext = createContext(null);
 

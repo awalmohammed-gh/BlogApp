@@ -20,7 +20,7 @@ import {
   CheckCircle2,
   AlertCircle
 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../../utils/toast";
 
 import advertisementService from "../../services/admin/advertisementService";
 import Modal from "../../components/admin/common/Modal";

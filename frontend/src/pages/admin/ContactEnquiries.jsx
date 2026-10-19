@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import toast from "react-hot-toast";
+import toast from "../../utils/toast";
 import {
   Inbox, Search, RefreshCw, Mail, Copy, Check, Reply, ArrowLeft, Loader2, ChevronLeft, ChevronRight,
   Newspaper, Megaphone, PenLine, Mic, LifeBuoy, Clock, UserCheck

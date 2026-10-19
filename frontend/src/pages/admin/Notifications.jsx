@@ -21,7 +21,7 @@ import {
   Tag,
   Mail
 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../../utils/toast";
 import { useNotifications } from "../../context/admin/NotificationContext";
 import notificationService from "../../services/admin/notificationService";
 import EmptyState from "../../components/admin/common/EmptyState";
@@ -206,7 +206,7 @@ export const Notifications = () => {
 
       const unavailable = (res.unavailableIds || []).length;
       if (unavailable > 0) {
-        toast(`Deleted ${res.deletedCount} of ${res.requestedCount}. ${plural(unavailable, "notification")} ${unavailable === 1 ? "was" : "were"} no longer available.`, { icon: "⚠️" });
+        toast.warning(`Deleted ${res.deletedCount} of ${res.requestedCount}. ${plural(unavailable, "notification")} ${unavailable === 1 ? "was" : "were"} no longer available.`);
       } else {
         toast.success(`Deleted ${plural(res.deletedCount, "notification")}`);
       }

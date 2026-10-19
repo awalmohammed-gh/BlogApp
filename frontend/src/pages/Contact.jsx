@@ -11,7 +11,7 @@ import {
   CheckCircle2, 
   AlertCircle 
 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../utils/toast";
 import blog28 from "../assets/blog28.jpg";
 import { publicSiteContentService } from "../services/public/publicSiteContentService";
 

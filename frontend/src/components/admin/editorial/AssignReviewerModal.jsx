@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { UserCheck, Shield, AlertCircle } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../../../utils/toast";
 import Modal from "../common/Modal";
 import editorialService from "../../../services/admin/editorialService";
 import { staffService } from "../../../services/admin/staffService";

@@ -13,7 +13,7 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../../utils/toast";
 import { useAuth } from "../../context/admin/AuthContext";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
 import profileService from "../../services/admin/profileService";

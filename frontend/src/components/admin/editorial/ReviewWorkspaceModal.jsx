@@ -17,7 +17,7 @@ import {
   ShieldAlert,
   ArrowRight
 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast from "../../../utils/toast";
 import Modal from "../common/Modal";
 import ReviewStatusBadge from "./ReviewStatusBadge";
 import RevisionComparisonModal from "./RevisionComparisonModal";
