@@ -3,8 +3,15 @@ import dotenv from "dotenv";
 // Load environment variables from .env
 dotenv.config();
 
-const requiredEnvVars = ["MONGODB_URI"];
+// Vercel's Atlas configuration may expose the connection as MONGODB_ATLAS_URI.
+// Keep MONGODB_URI as the canonical name used by the rest of the application.
+const mongodbUri = process.env.MONGODB_URI || process.env.MONGODB_ATLAS_URI;
+const requiredEnvVars = [];
 const jwtSecret = process.env.JWT_SECRET_KEY || process.env.JWT_SECRET;
+
+if (!mongodbUri) {
+  requiredEnvVars.push("MONGODB_URI");
+}
 
 if (!jwtSecret) {
   requiredEnvVars.push("JWT_SECRET_KEY");
@@ -22,7 +29,7 @@ for (const envVar of requiredEnvVars) {
 export const env = {
   PORT: parseInt(process.env.PORT || "5000", 10),
   NODE_ENV: process.env.NODE_ENV || "development",
-  MONGODB_URI: process.env.MONGODB_URI,
+  MONGODB_URI: mongodbUri,
   JWT_SECRET: jwtSecret,
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "8h",
   JWT_ISSUER: "newsfront-cms",

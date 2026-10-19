@@ -16,6 +16,7 @@
     "db:performance-indexes": "node src/scripts/ensurePerformanceIndexes.js",
     "email:verify": "node src/scripts/verifyEmail.js",
     "test:smtp-config": "node --test test/smtpConfig.test.js",
+    "test:env-config": "node --test test/envConfig.test.js",
     "test:nsemra": "node --test test/nsemra.test.js",
     "db:demo-report": "node src/scripts/reportDemoRecords.js",
     "brand:migrate": "node src/scripts/rebrandSite.js",
