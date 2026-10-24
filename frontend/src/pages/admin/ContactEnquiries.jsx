@@ -130,7 +130,7 @@ export default function ContactEnquiries() {
   };
 
   const replyHref = selected
-    ? `mailto:${selected.email}?subject=${encodeURIComponent(`Re: ${selected.subject || "Your message to Nsemra News"}`)}&body=${encodeURIComponent(
+    ? `mailto:${selected.email}?subject=${encodeURIComponent(`Re: ${selected.subject || "Your message to Nsemfoa News"}`)}&body=${encodeURIComponent(
         `\n\n---\nOn ${fullDate(selected.createdAt)}, ${selected.name} wrote:\n${selected.message.split("\n").map((l) => `> ${l}`).join("\n")}`
       )}`
     : "";

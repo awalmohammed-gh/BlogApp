@@ -278,7 +278,7 @@ export const AdminHeader = () => {
           target="_blank"
           rel="noopener noreferrer"
           className="hidden sm:inline-flex p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-          title="Open Public Nsemra News Website"
+          title="Open Public Nsemfoa News Website"
         >
           <ExternalLink size={18} />
         </Link>

@@ -72,7 +72,7 @@ export const ArticlePreviewModal = ({ article, isOpen, onClose }) => {
               </div>
               <div>
                 <div className="font-bold text-slate-900">
-                  {article.author || "Nsemra News Desk"}
+                  {article.author || "Nsemfoa News Desk"}
                 </div>
               </div>
             </div>

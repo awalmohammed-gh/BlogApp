@@ -639,7 +639,7 @@ export const Authors = () => {
       >
         <form onSubmit={handleSubmitInvite} className="space-y-4">
           <p className="text-xs text-slate-500">
-            Invite an Editor or Author to join the Nsemra News newsroom. They will receive a
+            Invite an Editor or Author to join the Nsemfoa News newsroom. They will receive a
             secure one-time link to set their password.
           </p>
 

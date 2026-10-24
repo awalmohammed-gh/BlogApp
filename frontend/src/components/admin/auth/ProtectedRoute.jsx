@@ -16,7 +16,7 @@ export const ProtectedRoute = ({ children, allowedRoles, requiredPermission }) =
           <BrandLogo />
           <div className="flex items-center gap-2.5 text-slate-300 text-sm font-medium">
             <Loader2 size={18} className="animate-spin text-blue-400" />
-            <span>Verifying Nsemra News credentials...</span>
+            <span>Verifying Nsemfoa News credentials...</span>
           </div>
         </div>
       </div>

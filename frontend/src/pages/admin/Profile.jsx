@@ -386,7 +386,7 @@ export default function Profile() {
               className="absolute right-6 top-0 h-full w-12 -skew-x-[25deg] border-x border-white/10 bg-white/[0.03]"
             />
             <p className="absolute left-6 top-5 text-[9px] font-semibold uppercase tracking-[0.18em] text-blue-200/70">
-              {settings?.general.siteName || "NSEMRA NEWS"} / People
+              {settings?.general.siteName || "NSEMFOA NEWS"} / People
             </p>
           </div>
           <div className="px-6 pb-6">

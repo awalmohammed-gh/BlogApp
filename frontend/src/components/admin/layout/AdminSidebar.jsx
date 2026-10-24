@@ -353,7 +353,7 @@ export const AdminSidebar = () => {
           to="/"
           target="_blank"
           rel="noopener noreferrer"
-          title={compact ? "View Public Nsemra News Website" : undefined}
+          title={compact ? "View Public Nsemfoa News Website" : undefined}
           className={`flex items-center gap-3 px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800/70 rounded-xl transition-colors ${
             compact ? "justify-center" : ""
           }`}

@@ -107,7 +107,7 @@ export const Login = () => {
             Welcome Back
           </h1>
           <p className="mt-2 text-sm text-slate-400">
-            Sign in to manage the Nsemra News newsroom.
+            Sign in to manage the Nsemfoa News newsroom.
           </p>
         </div>
 
@@ -245,7 +245,7 @@ export const Login = () => {
             href="/"
             className="text-xs text-slate-400 hover:text-white transition-colors"
           >
-            ← Return to public Nsemra News portal
+            ← Return to public Nsemfoa News portal
           </a>
         </div>
       </div>

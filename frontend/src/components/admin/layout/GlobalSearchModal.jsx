@@ -264,7 +264,7 @@ export const GlobalSearchModal = ({ isOpen, onClose }) => {
         {/* Footer shortcuts */}
         <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
           <span>Navigate with mouse or keyboard</span>
-          <span className="text-slate-400">Nsemra News Global Discovery</span>
+          <span className="text-slate-400">Nsemfoa News Global Discovery</span>
         </div>
       </div>
     </div>
