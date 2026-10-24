@@ -24,6 +24,25 @@ export function mountPublicFrontend(app) {
     res.set("Cache-Control","public, max-age=0, must-revalidate").type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join("")}</urlset>`);
   }catch(error){next(error);}});
   if(process.env.SERVE_FRONTEND !== "true") return;
+
+  // PWA Service Worker & Manifest headers (never cache SW so clients receive instant updates)
+  app.get(["/sw.js", "/registerSW.js", "/workbox-*.js"], (req, res, next) => {
+    res.set({
+      "Content-Type": "application/javascript",
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0"
+    });
+    next();
+  });
+  app.get(["/manifest.webmanifest", "/manifest.json"], (req, res, next) => {
+    res.set({
+      "Content-Type": "application/manifest+json",
+      "Cache-Control": "no-cache, must-revalidate"
+    });
+    next();
+  });
+
   app.use("/assets",express.static(path.join(directory,"assets"),{immutable:true,maxAge:"1y",fallthrough:false}));
   app.get("/blog-details/:slug",async(req,res,next)=>{try{
     let article=await Article.findOne({...published(),slug:req.params.slug}).select("title subTitle slug excerpt content seo featuredImage author byline category publishedAt updatedAt publishedRevision").populate("author","name").populate("publishedRevision","title subTitle slug excerpt content seo featuredImage").lean();

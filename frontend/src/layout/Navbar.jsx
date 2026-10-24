@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, Menu, X, Search, Clock, TrendingUp } from "luci
 import { useState, useEffect, useRef } from "react";
 import { usePublicArticles, usePublicDesks } from "../hooks/usePublicArticles";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
+import { InstallPWAButton } from "../components/pwa";
 
 
 const Navbar = () => {
@@ -250,6 +251,8 @@ const Navbar = () => {
               <Search size={18} />
             </button>
 
+            <InstallPWAButton variant="pill" />
+
             <NavLink
               to="/blog"
               className="hidden sm:inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors shadow-xs"
@@ -384,6 +387,9 @@ const Navbar = () => {
               >
                 Contact & Pitch Leads
               </NavLink>
+              <div className="pt-2">
+                <InstallPWAButton variant="mobile" />
+              </div>
             </div>
           </nav>
         )}

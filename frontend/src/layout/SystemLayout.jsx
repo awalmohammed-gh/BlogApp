@@ -9,6 +9,7 @@ import { BlogProvider } from "../context/BlogProvider"
 import PageSkeleton from "../components/common/PageSkeleton"
 import ScrollToTop from '../components/common/ScrollToTop'
 import { setPageMeta } from "../utils/setPageMeta"
+import { OfflineBanner, InstallPromptBanner, ReloadPrompt } from "../components/pwa"
 
 const SystemLayout = () => {
   const { settings } = useSiteSettings();
@@ -22,16 +23,21 @@ const SystemLayout = () => {
       twitterSite: settings.seo.twitterHandle
     });
   }, [settings, pathname]);
+
   return (
-    <BlogProvider><div className="min-h-screen flex flex-col bg-white text-gray-900">
-      <ScrollToTop />
-      
-      <Navbar />
-      <main className="flex-1 min-w-0">
-        <Suspense fallback={<PageSkeleton />}><Outlet /></Suspense>
-      </main>
-      <Footer />
-    </div></BlogProvider>
+    <BlogProvider>
+      <div className="min-h-screen flex flex-col bg-white text-gray-900">
+        <ScrollToTop />
+        <OfflineBanner />
+        <InstallPromptBanner />
+        <Navbar />
+        <main className="flex-1 min-w-0">
+          <Suspense fallback={<PageSkeleton />}><Outlet /></Suspense>
+        </main>
+        <Footer />
+        <ReloadPrompt />
+      </div>
+    </BlogProvider>
   )
 }
 

@@ -22,7 +22,7 @@ api.interceptors.response.use(
     // Check if network error (server offline / unreachable)
     if (!error.response) {
       return Promise.reject({
-        message: "Unable to reach the Nsemra News API server. Please ensure the backend is running.",
+        message: "Unable to reach the Nsemfoa News API server. Please ensure the backend is running.",
         status: 0,
         isNetworkError: true,
       });
