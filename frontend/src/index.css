@@ -50,7 +50,7 @@ img, video { max-width: 100%; }
 .safe-area-top { padding-top: max(1rem, env(safe-area-inset-top, 0px)); }
 .safe-area-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)); }
 .auth-screen { padding-top: max(2rem, env(safe-area-inset-top, 0px)); padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px)); }
-footer { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
 
 .home-hero {
   min-height: var(--viewport-height);
