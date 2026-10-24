@@ -48,6 +48,29 @@ export default defineConfig({
             type: 'image/png',
             purpose: 'maskable'
           }
+        ],
+        shortcuts: [
+          {
+            name: 'Admin Dashboard',
+            short_name: 'Admin',
+            description: 'Access the Nsemfoa Newsroom CMS and editorial dashboard',
+            url: '/admin',
+            icons: [{ src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' }]
+          },
+          {
+            name: 'Create Story',
+            short_name: 'New Post',
+            description: 'Draft and publish a new story in the newsroom',
+            url: '/admin/articles/new',
+            icons: [{ src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' }]
+          },
+          {
+            name: 'Front Page',
+            short_name: 'Home',
+            description: 'Read latest breaking news and headlines',
+            url: '/',
+            icons: [{ src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' }]
+          }
         ]
       },
       workbox: {
