@@ -3,10 +3,12 @@ import Hero from "../components/common/Hero";
 import Newsletter from "../components/common/Newsletter";
 import PopularCategory from "../components/common/PopularCategory";
 import RecentArticles from "../components/common/RecentArticles";
+import SEO from "../components/common/SEO";
 
 const Home = () => {
   return (
     <div className="min-h-screen bg-slate-50">
+      <SEO type="website" />
       {/* Hero with spinning globe */}
       <Hero />
 

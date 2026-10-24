@@ -108,11 +108,13 @@ const router = createBrowserRouter(
 
 
       </Route>
-      {/* Public Nsemra News Website Routes */}
+      {/* Public Nsemfoa News Website Routes */}
       <Route path="/" element={<SystemLayout />} errorElement={<ErrorFallback />}>
         <Route index element={<Home />} />
         <Route path="blog" element={<Blog />} />
         <Route path="blog-details/:id" element={<BlogPage />} />
+        <Route path="post/:id" element={<BlogPage />} />
+        <Route path="article/:id" element={<BlogPage />} />
         <Route path="contact" element={<Contact />} />
         <Route path="newsletter/confirm" element={<NewsletterAction action="confirm" />} />
         <Route path="newsletter/unsubscribe" element={<NewsletterAction action="unsubscribe" />} />

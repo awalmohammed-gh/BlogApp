@@ -239,10 +239,10 @@ const Hero = () => {
 
             {latest && (
               <Link
-                to={`/blog-details/${latest._id}`}
+                to={`/blog-details/${latest.slug || latest._id}`}
                 className="absolute bottom-[2%] left-[-8%] hidden lg:flex items-center gap-3 w-64 p-2.5 pr-4 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-xl shadow-2xl hover:bg-white/15 transition-colors"
               >
-                <img {...responsiveImageProps(latest.image, {width:640})} alt="" onError={hideBrokenImage} className="w-14 h-14 rounded-xl object-cover shrink-0" />
+                <img {...responsiveImageProps(latest.image, {width:640})} alt={latest.title || "Latest published story"} onError={hideBrokenImage} className="w-14 h-14 rounded-xl object-cover shrink-0" />
                 <span className="min-w-0">
                   <span className="block text-[10px] font-semibold uppercase tracking-wider text-sky-300">Latest &middot; {latest.category}</span>
                   <span className="block text-xs font-semibold text-white leading-snug line-clamp-2">{latest.title}</span>

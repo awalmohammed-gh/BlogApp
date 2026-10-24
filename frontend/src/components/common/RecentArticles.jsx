@@ -116,7 +116,7 @@ const RecentArticles = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <Link
-            to={`/blog-details/${lead._id}`}
+            to={`/blog-details/${lead.slug || lead._id}`}
             className={`group relative overflow-hidden rounded-3xl bg-slate-900 min-h-95 sm:min-h-115 flex items-end ${secondary.length ? "lg:col-span-7" : "lg:col-span-12"}`}
           >
             <img
@@ -145,7 +145,7 @@ const RecentArticles = () => {
               {secondary.map((story) => (
                 <Link
                   key={story._id}
-                  to={`/blog-details/${story._id}`}
+                  to={`/blog-details/${story.slug || story._id}`}
                   className="group flex-1 flex gap-4 p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-200 hover:shadow-lg hover:shadow-slate-200/60 transition-all"
                 >
                   <div className="w-28 sm:w-36 shrink-0 rounded-xl overflow-hidden bg-slate-100">
@@ -214,7 +214,7 @@ const RecentArticles = () => {
               {featured.map((story) => (
                 <Link
                   key={story._id}
-                  to={`/blog-details/${story._id}`}
+                  to={`/blog-details/${story.slug || story._id}`}
                   className="group rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-sky-300/40 hover:bg-white/10 transition-all"
                 >
                   <div className="aspect-16/10 overflow-hidden">
@@ -242,7 +242,7 @@ const RecentArticles = () => {
               <SectionHeading eyebrow="Keep reading" title="More Stories" />
               <div className="divide-y divide-slate-200">
                 {more.map((story) => (
-                  <Link key={story._id} to={`/blog-details/${story._id}`} className="group flex gap-5 py-6 first:pt-0">
+                  <Link key={story._id} to={`/blog-details/${story.slug || story._id}`} className="group flex gap-5 py-6 first:pt-0">
                     <div className="flex-1 min-w-0 space-y-2">
                       <span className="text-[11px] font-semibold uppercase tracking-wider text-blue-600">{story.category}</span>
                       <h3 className="font-serif-headline text-xl sm:text-2xl font-bold text-slate-900 leading-snug group-hover:text-blue-700 transition-colors line-clamp-2">
@@ -278,7 +278,7 @@ const RecentArticles = () => {
               <ol className="space-y-5">
                 {mostRead.map((story, idx) => (
                   <li key={story._id}>
-                    <Link to={`/blog-details/${story._id}`} className="group flex gap-4 items-start">
+                    <Link to={`/blog-details/${story.slug || story._id}`} className="group flex gap-4 items-start">
                       <span className="font-serif-headline text-3xl font-bold leading-none text-transparent bg-clip-text bg-linear-to-b from-sky-400 to-blue-700 w-8 shrink-0">
                         {idx + 1}
                       </span>

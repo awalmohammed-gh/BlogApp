@@ -8,9 +8,9 @@ import { useSiteSettings } from "../context/SiteSettingsContext";
 import BlogCard from "../components/card/BlogCard";
 import Advert from "../components/common/Advert";
 import Newsletter from "../components/common/Newsletter";
+import SEO from "../components/common/SEO";
 import { DESKS, getDesk, deskThumbnail } from "../config/desks";
 import { stripHtml, readingMinutes, hideBrokenImage } from "../utils/articleMeta";
-import { setPageMeta } from "../utils/setPageMeta";
 
 const SORTS = {
   newest: { label: "Newest first", apply: (list) => list },
@@ -20,9 +20,9 @@ const SORTS = {
 };
 
 const ListRow = ({ story }) => (
-  <Link to={`/blog-details/${story._id}`} className="group flex gap-5 p-4 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-200 hover:shadow-lg hover:shadow-slate-200/60 transition-all">
+  <Link to={`/blog-details/${story.slug || story._id}`} className="group flex gap-5 p-4 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-200 hover:shadow-lg hover:shadow-slate-200/60 transition-all">
     <div className="w-28 h-24 sm:w-48 sm:h-32 shrink-0 rounded-xl overflow-hidden bg-linear-to-br from-slate-100 to-blue-100">
-      <img {...responsiveImageProps(story.image, {width:640})} alt={story.title} onError={hideBrokenImage} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+      <img {...responsiveImageProps(story.image, {width:640})} width={320} height={200} alt={story.title} onError={hideBrokenImage} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
     </div>
     <div className="min-w-0 flex flex-col justify-center gap-1.5">
       <span className="text-[11px] font-semibold uppercase tracking-wider text-blue-600">{story.category}</span>
@@ -75,6 +75,12 @@ const CategoryPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <SEO
+        title={desk.name}
+        description={desk.tagline}
+        canonical={typeof window !== "undefined" ? `${window.location.origin}/${desk.slug}` : ""}
+        image={desk.image}
+      />
       {/* ===== Hero with the desk's own image ===== */}
       <section className="relative overflow-hidden bg-[#050B1F] text-white pt-28 md:pt-36 pb-14 md:pb-20">
         <motion.img

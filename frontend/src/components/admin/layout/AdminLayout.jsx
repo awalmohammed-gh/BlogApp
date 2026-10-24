@@ -5,12 +5,14 @@ import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./AdminHeader";
 import GlobalSearchModal from "./GlobalSearchModal";
 import ProtectedRoute from "../auth/ProtectedRoute";
+import SEO from "../../common/SEO";
 
 const AdminLayoutInner = () => {
   const { isSidebarCollapsed, isSearchOpen, closeSearch } = useAdmin();
 
   return (
     <div className="min-h-screen bg-[#F7F9FC] text-slate-900 flex flex-col font-sans">
+      <SEO title="Newsroom CMS" robots="noindex, nofollow" />
       {/* Collapsible / Off-canvas Sidebar */}
       <AdminSidebar />
 

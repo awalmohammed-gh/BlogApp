@@ -1,6 +1,7 @@
 import { engagementService } from "../services/public/engagementService";
 import { useSiteSettings } from "../context/SiteSettingsContext";
 import { useState, useEffect } from "react";
+import SEO from "../components/common/SEO";
 import { 
   Mail, 
   Phone, 
@@ -82,8 +83,8 @@ const Contact = () => {
       a: "We strive for 100% accuracy. If you notice any factual discrepancy in any story, submit a message choosing 'Editorial Correction' with the article link, and our editors will review and update within hours."
     },
     {
-      q: "Can other publications syndicate or quote Nsemra News articles?",
-      a: "Content may be quoted with clear hyperlinked attribution to Nsemra News. For full syndication rights, contact us through the form on this page."
+      q: "Can other publications syndicate or quote Nsemfoa News articles?",
+      a: "Content may be quoted with clear hyperlinked attribution to Nsemfoa News. For full syndication rights, contact us through the form on this page."
     }
   ];
 
@@ -120,6 +121,11 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO
+        title="Contact Newsroom & Bureau"
+        description="Submit confidential news tips, reach bureau correspondents, propose editorial corrections, or discuss advertising partnerships."
+        canonical={typeof window !== "undefined" ? `${window.location.origin}/contact` : ""}
+      />
       {/* =========================================================================
           HERO MASTHEAD BANNER (Cohesive with Landing Page Navy Palette)
          ========================================================================= */}
@@ -128,7 +134,7 @@ const Contact = () => {
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <img
             src={blog28}
-            alt="Nsemra News Communications Bureau"
+            alt="Nsemfoa News Communications Bureau"
             className="w-full h-full object-cover object-center scale-105"
           />
         </div>
@@ -144,7 +150,7 @@ const Contact = () => {
           </div>
 
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold font-serif-headline tracking-tight text-white mb-4">
-            Contact the Nsemra News Newsroom
+            Contact the Nsemfoa News Newsroom
           </h1>
 
           <p className="text-sm sm:text-base md:text-lg text-blue-100/90 max-w-2xl mx-auto leading-relaxed font-light mb-8">

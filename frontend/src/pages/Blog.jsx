@@ -6,6 +6,7 @@ import { usePublicArticles, usePublicDesks } from "../hooks/usePublicArticles";
 import BlogCard from "../components/card/BlogCard";
 import Advert from "../components/common/Advert";
 import Newsletter from "../components/common/Newsletter";
+import SEO from "../components/common/SEO";
 import {
   Search,
   X,
@@ -30,7 +31,7 @@ import { deskImage } from "../config/desks";
 const CATEGORY_META = {
   All: {
     bannerImage: deskImage("latest"),
-    kicker: "The Nsemra News Dispatch Archive",
+    kicker: "The Nsemfoa News Dispatch Archive",
     headline: "All Stories & In-Depth Reports",
     subtitle:
       "Access our complete catalogue of verified journalism, political analysis, economic dispatches, and cultural updates from Ghana and the international community.",
@@ -183,7 +184,11 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      
+      <SEO
+        title={selectedCategory === "All" ? "All Stories Archive" : `${selectedCategory} Stories`}
+        description={activeMeta.subtitle || "Browse verified stories, investigative journalism, and analysis."}
+        canonical={typeof window !== "undefined" ? `${window.location.origin}/blog` : ""}
+      />
       {/* =========================================================================
           HERO MASTHEAD BANNER (Cohesive with Landing Page Navy Palette & Dynamic Beat)
          ========================================================================= */}

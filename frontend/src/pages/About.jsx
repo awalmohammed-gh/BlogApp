@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
+import SEO from "../components/common/SEO";
 import { 
   ShieldCheck, 
   Globe2, 
@@ -101,6 +102,11 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO
+        title="About Us & Editorial Charter"
+        description="Learn about the Nsemfoa News newsroom, editorial standards, fact-checking methodology, and correspondents."
+        canonical={typeof window !== "undefined" ? `${window.location.origin}/about` : ""}
+      />
       {/* =========================================================================
           HERO MASTHEAD BANNER (Cohesive with Landing Page Navy Palette)
          ========================================================================= */}
@@ -109,7 +115,7 @@ const About = () => {
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <img
             src={blog34}
-            alt="Nsemra News Editorial Bureau"
+            alt="Nsemfoa News Editorial Bureau"
             className="w-full h-full object-cover object-center scale-105"
           />
         </div>
@@ -121,7 +127,7 @@ const About = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 text-center text-white z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 backdrop-blur-md mb-4 text-xs font-semibold uppercase tracking-widest text-blue-200">
             <BookOpen className="w-3.5 h-3.5 text-blue-300" />
-            <span>{heroSection?.kicker || "Nsemra News Editorial Bureau & Press House"}</span>
+            <span>{heroSection?.kicker || "Nsemfoa News Editorial Bureau & Press House"}</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold font-serif-headline tracking-tight text-white mb-4">

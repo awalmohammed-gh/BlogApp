@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight, ChevronRight, Clock, Eye, Link2, Check, Printer, Share2, Tag } from "lucide-react";
 import { FaXTwitter, FaFacebookF, FaLinkedinIn, FaWhatsapp } from "react-icons/fa6";
-import { setPageMeta } from "../utils/setPageMeta";
+import SEO from "../components/common/SEO";
 import { useSiteSettings } from "../context/SiteSettingsContext";
 import { formatPublicDate } from "../utils/formatPublicDate";
 import ReadingProgress from "../components/common/ReadingProgress";
@@ -201,6 +201,19 @@ const BlogPage = () => {
 
   return (
     <article className="bg-white">
+      <SEO
+        title={blogDetails.seo?.metaTitle || blogDetails.title}
+        description={blogDetails.seo?.metaDescription || blogDetails.subTitle || blogDetails.description}
+        canonical={blogDetails.seo?.canonicalUrl || (typeof window !== "undefined" ? `${window.location.origin}/blog-details/${blogDetails.slug || blogDetails._id}` : "")}
+        image={blogDetails.seo?.ogImage || blogDetails.image}
+        type="article"
+        article={{
+          title: blogDetails.title,
+          publishedAt: blogDetails.publishedAt,
+          updatedAt: blogDetails.updatedAt,
+          author: blogDetails.author
+        }}
+      />
       <ReadingProgress articleId={blogDetails._id} />
 
       {/* ===== Header ===== */}
@@ -221,7 +234,7 @@ const BlogPage = () => {
 
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}>
             <Link to={`/${desk.slug}`} className="inline-flex items-center gap-2 pl-1 pr-3.5 py-1 rounded-full bg-white border border-slate-200 text-sm font-medium text-slate-700 hover:border-blue-200 hover:text-blue-700 transition-colors">
-              <img src={desk.image} alt="" className="w-6 h-6 rounded-full object-cover" />
+              <img src={desk.image} alt={desk.name} className="w-6 h-6 rounded-full object-cover" />
               {blogDetails.category}
             </Link>
 
@@ -233,7 +246,7 @@ const BlogPage = () => {
             <div className="mt-8 pb-8 border-b border-slate-200 flex flex-wrap items-center justify-between gap-5">
               <div className="flex items-center gap-3">
                 {blogDetails.authorAvatar ? (
-                  <img src={blogDetails.authorAvatar} alt="" className="w-11 h-11 rounded-full object-cover" />
+                  <img src={blogDetails.authorAvatar} alt={blogDetails.author} className="w-11 h-11 rounded-full object-cover" />
                 ) : (
                   <span className="w-11 h-11 rounded-full bg-linear-to-br from-sky-400 to-blue-700 text-white font-bold inline-flex items-center justify-center">
                     {blogDetails.author.charAt(0)}
@@ -242,7 +255,11 @@ const BlogPage = () => {
                 <div className="text-sm">
                   <div className="font-semibold text-slate-900">{blogDetails.author}</div>
                   <div className="text-slate-500 flex flex-wrap items-center gap-x-2">
-                    {blogDetails.date && <span>{blogDetails.date}</span>}
+                    {blogDetails.date && (
+                      <time dateTime={blogDetails.publishedAt ? new Date(blogDetails.publishedAt).toISOString() : undefined}>
+                        {blogDetails.date}
+                      </time>
+                    )}
                     <span aria-hidden="true">&middot;</span>
                     <span className="inline-flex items-center gap-1"><Clock size={13} /> {minutes} min read</span>
                     {blogDetails.views > 0 && (

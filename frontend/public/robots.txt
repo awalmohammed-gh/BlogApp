@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/admin
+Disallow: /api/internal
+
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /api/admin
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+Sitemap: https://nsemfoa-blogs.vercel.app/sitemap.xml
