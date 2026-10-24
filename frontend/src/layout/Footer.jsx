@@ -95,8 +95,8 @@ const Footer = () => {
       )}
 
       {/* Bottom Bar: Tight, responsive, seamless on mobile */}
-      <div className="border-t border-blue-900/60 bg-[#07132B] pt-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-blue-200/75">
+      <div className="border-t border-blue-900/60 bg-[#07132B] pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] sm:py-3.5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs text-blue-200/75">
           <p className="text-center sm:text-left text-[11px] sm:text-xs">
             © {new Date().getFullYear()} {general?.siteName || "Nsemfoa News"} Media Group. All rights reserved.
           </p>

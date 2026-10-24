@@ -1,9 +1,10 @@
+import { memo } from "react";
 import { responsiveImageProps } from "../../utils/imageKit";
 import { Link } from "react-router-dom";
 import { Clock } from "lucide-react";
 import { stripHtml, readingMinutes, hideBrokenImage } from "../../utils/articleMeta";
 
-const BlogCard = ({ blog }) => {
+const BlogCard = memo(({ blog }) => {
   if (!blog) return null;
   const { _id, author, title, description, content, date, image, category } = blog;
 
@@ -16,7 +17,8 @@ const BlogCard = ({ blog }) => {
         <img
           {...responsiveImageProps(image)}
           alt={title}
-         
+          width={640}
+          height={400}
           onError={hideBrokenImage}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
@@ -49,6 +51,8 @@ const BlogCard = ({ blog }) => {
       </div>
     </Link>
   );
-};
+});
+
+BlogCard.displayName = "BlogCard";
 
 export default BlogCard;

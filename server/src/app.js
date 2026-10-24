@@ -32,6 +32,7 @@ import { mountPublicFrontend } from "./middleware/publicFrontend.js";
 
 const app = express();
 app.disable("x-powered-by");
+app.enable("etag");
 app.set("trust proxy", process.env.TRUST_PROXY === "1" ? 1 : false);
 
 // Ensure MongoDB connection is ready (caches connection across serverless requests)
@@ -43,7 +44,7 @@ app.use(async (req, res, next) => {
     next(error);
   }
 });
-app.use(compression({ threshold:1024, filter:(req,res)=>!req.path.startsWith("/api/admin") && compression.filter(req,res) }));
+app.use(compression({ level: 6, threshold: 1024, filter: (req, res) => !req.path.startsWith("/api/admin") && compression.filter(req, res) }));
 app.use("/api/admin", (req,res,next)=>{
   res.set("Cache-Control","no-store");
   if(!["GET","HEAD","OPTIONS"].includes(req.method))res.on("finish",()=>{if(res.statusCode<400)invalidatePublicReads();});

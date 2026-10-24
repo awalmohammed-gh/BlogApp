@@ -4,12 +4,10 @@ import api from "./axios";
 // Authentication and all administrator requests always bypass it.
 const entries = new Map();
 const inFlight = new Map();
-const TTL = 15000;
+const TTL = 60000;
 export function clearPublicCache() { entries.clear(); }
 window.addEventListener("newsfront:content",clearPublicCache);
 export async function publicGet(url, { params = {}, signal, fresh = false, ttl = TTL } = {}) {
-  // Article content must revalidate visibility on navigation; only deduplicate its in-flight GETs.
-  if (url.startsWith("/articles") && url !== "/articles/desks") ttl = 0;
   const query = new URLSearchParams(Object.entries(params).filter(([,value]) => value !== undefined && value !== null).sort(([a],[b]) => a.localeCompare(b))).toString();
   const key = `${url}?${query}`;
   if (signal?.aborted) throw new DOMException("Aborted", "AbortError");

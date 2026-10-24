@@ -110,16 +110,33 @@ export const getCategories = async (req, res, next) => {
   }
 };
 
+let activeCategoriesCache = null;
+let activeCategoriesExpires = 0;
+export const invalidateCategoryCache = () => {
+  activeCategoriesCache = null;
+  activeCategoriesExpires = 0;
+};
+
 /**
  * GET /api/admin/categories/active
  * Fast list of active categories for article drafting (accessible by Super Admin, Editor, Author)
  */
 export const getActiveCategories = async (req, res, next) => {
   try {
+    if (activeCategoriesCache && activeCategoriesExpires > Date.now()) {
+      return res.status(200).json({
+        success: true,
+        data: activeCategoriesCache
+      });
+    }
+
     const activeCategories = await Category.find({ status: "active" })
       .select("_id name slug description color displayOrder")
       .sort({ displayOrder: 1, name: 1 })
       .lean();
+
+    activeCategoriesCache = activeCategories;
+    activeCategoriesExpires = Date.now() + 60000;
 
     res.status(200).json({
       success: true,
@@ -147,7 +164,8 @@ export const getCategoryById = async (req, res, next) => {
 
     const category = await Category.findById(id)
       .populate("createdBy", "name email")
-      .populate("updatedBy", "name email");
+      .populate("updatedBy", "name email")
+      .lean();
 
     if (!category) {
       return res.status(404).json({

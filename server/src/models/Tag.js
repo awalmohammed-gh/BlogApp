@@ -61,6 +61,10 @@ tagSchema.index(
   }
 );
 
+// Compound indexes for active tags
+tagSchema.index({ slug: 1, status: 1 });
+tagSchema.index({ status: 1, deletedAt: 1 });
+
 export const Tag = mongoose.model("Tag", tagSchema);
 
 export default Tag;

@@ -103,19 +103,18 @@ export default defineConfig({
               }
             }
           },
-          // 3. Blog Public GET APIs (Network-First with offline cache fallback)
+          // 3. Blog Public GET APIs (Stale-While-Revalidate for instantaneous feeds & offline support)
           {
             urlPattern: ({ url, request }) =>
               request.method === 'GET' &&
               (url.pathname.startsWith('/api/articles') ||
                url.pathname.startsWith('/api/site') ||
                url.pathname.startsWith('/api/posts')),
-            handler: 'NetworkFirst',
+            handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'api-articles-cache',
-              networkTimeoutSeconds: 3,
               expiration: {
-                maxEntries: 60,
+                maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
               },
               cacheableResponse: {

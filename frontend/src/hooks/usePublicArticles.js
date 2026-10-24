@@ -7,7 +7,7 @@ export const formatArticle = (article, general) => ({
   ...article, category:article.category?.name || "General News", categorySlug:article.category?.slug || "",
   description:article.excerpt || "", content:article.content || "", image:article.featuredImage?.url || "/heroBg.jpg",
   isPublished:true, isBreaking:Boolean(article.isBreakingNews), date:article.publishedAt ? formatPublicDate(article.publishedAt,general) : "",
-  author:article.byline || article.author?.name || "Nsemra News Desk", authorAvatar:article.byline ? "" : article.author?.avatar,
+  author:article.byline || article.author?.name || "Nsemfoa News Desk", authorAvatar:article.byline ? "" : article.author?.avatar,
   tags:(article.tags || []).map((tag)=>typeof tag === "object" ? tag.name : tag)
 });
 

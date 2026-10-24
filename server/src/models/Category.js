@@ -71,8 +71,10 @@ categorySchema.index(
   }
 );
 
-// Compound index for querying active taxonomies by displayOrder
+// Compound index for querying active taxonomies by displayOrder and slug lookup
 categorySchema.index({ status: 1, displayOrder: 1 });
+categorySchema.index({ slug: 1, status: 1 });
+categorySchema.index({ status: 1, deletedAt: 1, displayOrder: 1 });
 
 export const Category = mongoose.model("Category", categorySchema);
 

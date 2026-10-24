@@ -48,7 +48,7 @@ const router = createBrowserRouter(
       <Route path="/admin/login" element={<Login />} />
       <Route path="/admin/accept-invite" element={<AcceptInvite />} />
 
-      {/* Nsemra News Admin Dashboard & CMS Routes */}
+      {/* Nsemfoa News Admin Dashboard & CMS Routes */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<DashboardOverview />} />
         <Route path="articles" element={<Articles />} />

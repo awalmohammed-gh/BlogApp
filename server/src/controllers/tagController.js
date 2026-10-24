@@ -109,16 +109,33 @@ export const getTags = async (req, res, next) => {
   }
 };
 
+let activeTagsCache = null;
+let activeTagsExpires = 0;
+export const invalidateTagCache = () => {
+  activeTagsCache = null;
+  activeTagsExpires = 0;
+};
+
 /**
  * GET /api/admin/tags/active
  * Fast list of active tags for article tagging (accessible by Super Admin, Editor, Author)
  */
 export const getActiveTags = async (req, res, next) => {
   try {
+    if (activeTagsCache && activeTagsExpires > Date.now()) {
+      return res.status(200).json({
+        success: true,
+        data: activeTagsCache
+      });
+    }
+
     const activeTags = await Tag.find({ status: "active" })
       .select("_id name slug description")
       .sort({ name: 1 })
       .lean();
+
+    activeTagsCache = activeTags;
+    activeTagsExpires = Date.now() + 60000;
 
     res.status(200).json({
       success: true,
@@ -146,7 +163,8 @@ export const getTagById = async (req, res, next) => {
 
     const tag = await Tag.findById(id)
       .populate("createdBy", "name email")
-      .populate("updatedBy", "name email");
+      .populate("updatedBy", "name email")
+      .lean();
 
     if (!tag) {
       return res.status(404).json({

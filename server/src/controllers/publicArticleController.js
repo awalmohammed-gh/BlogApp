@@ -72,7 +72,7 @@ export const getPublicArticles = async (req, res, next) => {
       } else {
         const catDoc = await Category.findOne({
           $or: [{ slug: category.toLowerCase() }, { name: { $regex: new RegExp(`^${escapeRegex(category)}$`, "i") } }]
-        }).select("_id");
+        }).select("_id").lean();
         if (catDoc) {
           filter.category = catDoc._id;
         } else {
@@ -92,7 +92,7 @@ export const getPublicArticles = async (req, res, next) => {
       } else {
         const tagDoc = await Tag.findOne({
           $or: [{ slug: tag.toLowerCase() }, { name: { $regex: new RegExp(`^${escapeRegex(tag)}$`, "i") } }]
-        }).select("_id");
+        }).select("_id").lean();
         if (tagDoc) {
           filter.tags = tagDoc._id;
         } else {

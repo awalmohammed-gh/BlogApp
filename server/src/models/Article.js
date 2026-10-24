@@ -178,13 +178,20 @@ const articleSchema = new mongoose.Schema(
   }
 );
 
-// High-performance compound indexes for Nsemra News queries
+// High-performance compound & single-field indexes for Nsemfoa News queries
 articleSchema.index({ status: 1, publishedAt: -1, _id: -1 });
+articleSchema.index({ status: 1, deletedAt: 1, publishedAt: -1, _id: -1 });
 articleSchema.index({ status: 1, scheduledAt: 1, scheduleRetryAt: 1, scheduleLeaseUntil: 1 });
 articleSchema.index({ category: 1, status: 1, publishedAt: -1, _id: -1 });
+articleSchema.index({ category: 1, status: 1, deletedAt: 1, publishedAt: -1, _id: -1 });
 articleSchema.index({ isFeatured: 1, status: 1, publishedAt: -1, _id: -1 });
+articleSchema.index({ isFeatured: 1, status: 1, deletedAt: 1, publishedAt: -1, _id: -1 });
 articleSchema.index({ isBreakingNews: 1, status: 1, publishedAt: -1, _id: -1 });
+articleSchema.index({ isBreakingNews: 1, status: 1, deletedAt: 1, publishedAt: -1, _id: -1 });
 articleSchema.index({ author: 1, status: 1, createdAt: -1 });
+articleSchema.index({ author: 1, status: 1, deletedAt: 1, createdAt: -1 });
+articleSchema.index({ slug: 1, status: 1, deletedAt: 1 });
+articleSchema.index({ createdAt: -1 });
 articleSchema.index({ title:"text", subTitle:"text", excerpt:"text" }, { name:"article_public_legacy_text" });
 articleSchema.pre("validate", function () { if(!this.publishedRevision && (this.isModified("content") || this.publicReadingMinutes == null))this.publicReadingMinutes = readingMinutes(this.content); });
 

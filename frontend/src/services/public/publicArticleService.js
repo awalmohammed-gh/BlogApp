@@ -6,26 +6,23 @@ export const publicArticleService = {
    * Fetch published articles with search, category/tag filtering, and pagination
    * @param {{ search?: string, category?: string, tag?: string, page?: number, limit?: number, sortBy?: string, sortOrder?: string }} params
    */
-  async getArticles(params = {}) {
-    const response = await api.get("/articles", { params });
-    return response.data;
+  async getArticles(params = {}, options = {}) {
+    return publicGet("/articles", { ...options, params });
   },
 
   /**
    * Fetch featured published articles
    * @param {number} [limit=6]
    */
-  async getFeaturedArticles(limit = 6) {
-    const response = await api.get("/articles/featured", { params: { limit } });
-    return response.data;
+  async getFeaturedArticles(limit = 6, options = {}) {
+    return publicGet("/articles/featured", { ...options, params: { limit } });
   },
 
   /**
    * Fetch breaking news ticker articles
    */
-  async getBreakingNews() {
-    const response = await api.get("/articles/breaking");
-    return response.data;
+  async getBreakingNews(options = {}) {
+    return publicGet("/articles/breaking", options);
   },
 
   /**
@@ -33,9 +30,8 @@ export const publicArticleService = {
    * @param {string} slug
    * @param {{ page?: number, limit?: number }} params
    */
-  async getArticlesByCategory(slug, params = {}) {
-    const response = await api.get(`/articles/categories/${slug}`, { params });
-    return response.data;
+  async getArticlesByCategory(slug, params = {}, options = {}) {
+    return publicGet(`/articles/categories/${encodeURIComponent(slug)}`, { ...options, params });
   },
 
   /**
@@ -43,7 +39,7 @@ export const publicArticleService = {
    * @param {string} slugOrId
    */
   async getArticleBySlug(slugOrId, options = {}) {
-    return publicGet(`/articles/${encodeURIComponent(slugOrId)}`, {...options, params:{related:false}});
+    return publicGet(`/articles/${encodeURIComponent(slugOrId)}`, { ...options, params: { related: false } });
   }
 };
 

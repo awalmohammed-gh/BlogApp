@@ -1,20 +1,26 @@
 import Article from "../models/Article.js";
+import { invalidateCategoryCache } from "../controllers/categoryController.js";
+import { invalidateTagCache } from "../controllers/tagController.js";
 
 const entries = new Map();
 let generation = 0;
-export const invalidatePublicReads = () => { generation++; entries.clear(); };
-const ttl = () => Number(process.env.PUBLIC_CACHE_TTL_MS ?? (process.env.NODE_ENV === "test" ? 0 : 10000));
+export const invalidatePublicReads = () => {
+  generation++;
+  entries.clear();
+  try { invalidateCategoryCache(); } catch {}
+  try { invalidateTagCache(); } catch {}
+};
+const ttl = () => Number(process.env.PUBLIC_CACHE_TTL_MS ?? (process.env.NODE_ENV === "test" ? 0 : 60000));
 const articleRows = (body) => {
   const data = body.data;
   const rows = Array.isArray(data) ? data : [data?.article, ...(data?.articles || []), ...(data?.relatedStories || [])];
   return rows.filter((row)=>row?._id && row.publishedAt).map((row)=>({ id:String(row._id), updatedAt:row.updatedAt ? new Date(row.updatedAt).getTime() : null }));
 };
 
-// This middleware is mounted exclusively on public article reads. A batched
-// visibility/version check on hits prevents another worker's unpublish or edit
-// from exposing stale article content. Discovery of new stories is bounded by TTL.
+// This middleware is mounted on public read endpoints. It provides in-memory caching,
+// HTTP Cache-Control with stale-while-revalidate, and visibility checks.
 export async function publicReadCache(req,res,next) {
-  res.set("Cache-Control", "public, max-age=0, must-revalidate");
+  res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
   if (req.method !== "GET" || ttl() <= 0) return next();
   const key = req.originalUrl;
   const cached = entries.get(key);

@@ -112,7 +112,7 @@ const RecentArticles = () => {
     <div className="space-y-24">
       {/* ===== Top stories ===== */}
       <motion.section {...reveal} aria-labelledby="top-stories">
-        <SectionHeading id="top-stories" eyebrow="Today on Nsemra News" title="Top Stories" to="/blog" linkLabel="All stories" />
+        <SectionHeading id="top-stories" eyebrow="Today on Nsemfoa News" title="Top Stories" to="/blog" linkLabel="All stories" />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <Link
@@ -122,6 +122,8 @@ const RecentArticles = () => {
             <img
               onError={hideBrokenImage}
               {...responsiveImageProps(lead.image, {width:960})}
+              width={960}
+              height={540}
               alt={lead.title}
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
@@ -147,7 +149,7 @@ const RecentArticles = () => {
                   className="group flex-1 flex gap-4 p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-200 hover:shadow-lg hover:shadow-slate-200/60 transition-all"
                 >
                   <div className="w-28 sm:w-36 shrink-0 rounded-xl overflow-hidden bg-slate-100">
-                    <img onError={hideBrokenImage} {...responsiveImageProps(story.image, {width:640})} alt={story.title} className="w-full h-full min-h-24 object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img onError={hideBrokenImage} {...responsiveImageProps(story.image, {width:640})} width={320} height={200} alt={story.title} className="w-full h-full min-h-24 object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
                   <div className="min-w-0 flex flex-col justify-center gap-1.5 py-1">
                     <span className="text-[11px] font-semibold uppercase tracking-wider text-blue-600">{story.category}</span>
@@ -184,7 +186,7 @@ const RecentArticles = () => {
                 to={`/${desk.slug}`}
                 className="group relative overflow-hidden rounded-2xl aspect-4/3 bg-slate-900"
               >
-                <img onError={hideBrokenImage} src={desk.image} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500" />
+                <img onError={hideBrokenImage} src={desk.image} alt="" loading="lazy" decoding="async" width={400} height={300} className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500" />
                 <div className="absolute inset-0 bg-linear-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-4 flex items-end justify-between gap-2">
                   <div className="min-w-0">
@@ -216,7 +218,7 @@ const RecentArticles = () => {
                   className="group rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-sky-300/40 hover:bg-white/10 transition-all"
                 >
                   <div className="aspect-16/10 overflow-hidden">
-                    <img onError={hideBrokenImage} {...responsiveImageProps(story.image, {width:640})} alt={story.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img onError={hideBrokenImage} {...responsiveImageProps(story.image, {width:640})} width={640} height={400} alt={story.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
                   <div className="p-5 space-y-2">
                     <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-sky-300">

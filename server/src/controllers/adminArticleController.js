@@ -210,7 +210,8 @@ export const getArticleById = async (req, res, next) => {
       .populate("author", "name email avatar role bio")
       .populate("featuredImage.media")
       .populate("createdBy", "name email")
-      .populate("updatedBy", "name email");
+      .populate("updatedBy", "name email")
+      .lean();
 
     if (!article) {
       return res.status(404).json({
