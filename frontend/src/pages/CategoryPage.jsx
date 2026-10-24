@@ -48,23 +48,16 @@ const CategoryPage = () => {
 
 
 
-  // Reset the view whenever the desk changes
-  const [prevDesk, setPrevDesk] = useState(desk.slug);
-  if (prevDesk !== desk.slug) {
-    setPrevDesk(desk.slug);
+  // Reset the view whenever the category changes
+  useEffect(() => {
     setSearchQuery("");
     setSortBy("newest");
     setVisible(1);
-  }
-
-  useEffect(() => {
-    const siteName = settings?.general.siteName || "Nsemra News";
-    setPageMeta({ title: `${desk.name} | ${siteName}`, description: desk.tagline, siteName, image: "", twitterSite: settings?.seo.twitterHandle });
-  }, [desk.name, desk.tagline, settings?.general.siteName, settings?.seo.twitterHandle]);
+  }, [category]);
 
   const allDesks=usePublicDesks();
   const counts=Object.fromEntries(DESKS.map((d)=>[d.slug,allDesks.filter((item)=>!d.includes||d.includes.includes(item.slug)).reduce((sum,item)=>sum+item.count,0)]));
-  const {articles:deskStories,pagination,loading,error,retry}=usePublicArticles({page:visible,limit:pageSize,categories:desk.includes?.join(","),search:searchQuery.trim(),sortBy:sortBy==="title"?"title":sortBy==="quick"?"publicReadingMinutes":"publishedAt",sortOrder:["oldest","title","quick"].includes(sortBy)?"asc":"desc"},{debounce:250});
+  const {articles:deskStories,pagination,loading,error,retry}=usePublicArticles({page:visible,limit:pageSize,category:category || desk.slug,categories:desk.includes ? desk.includes.join(",") : "",search:searchQuery.trim(),sortBy:sortBy==="title"?"title":sortBy==="quick"?"publicReadingMinutes":"publishedAt",sortOrder:["oldest","title","quick"].includes(sortBy)?"asc":"desc"},{debounce:250});
   const results=deskStories;
 
   const isBrowsing = !searchQuery.trim() && sortBy === "newest";

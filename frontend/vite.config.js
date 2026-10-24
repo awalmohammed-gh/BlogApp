@@ -75,6 +75,11 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api\//, /^\/admin\//],
         runtimeCaching: [
           // 1. Google Fonts Cache-First
           {
@@ -103,16 +108,17 @@ export default defineConfig({
               }
             }
           },
-          // 3. Blog Public GET APIs (Stale-While-Revalidate for instantaneous feeds & offline support)
+          // 3. Blog Public GET APIs (NetworkFirst with 5s timeout & safe cache fallback)
           {
             urlPattern: ({ url, request }) =>
               request.method === 'GET' &&
               (url.pathname.startsWith('/api/articles') ||
                url.pathname.startsWith('/api/site') ||
                url.pathname.startsWith('/api/posts')),
-            handler: 'StaleWhileRevalidate',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'api-articles-cache',
+              networkTimeoutSeconds: 5,
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
@@ -131,6 +137,9 @@ export default defineConfig({
             handler: 'NetworkOnly'
           }
         ]
+      },
+      devOptions: {
+        enabled: true
       }
     })
   ],

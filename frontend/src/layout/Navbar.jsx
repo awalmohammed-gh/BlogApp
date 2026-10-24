@@ -312,7 +312,7 @@ const Navbar = () => {
                   {searchResults.map((story) => (
                     <NavLink
                       key={story._id}
-                      to={`/blog-details/${story._id}`}
+                      to={`/blog-details/${story.slug || story._id}`}
                       onClick={() => {
                         setSearchOpen(false);
                         setSearchQuery("");

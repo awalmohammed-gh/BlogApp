@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight, ChevronRight, Clock, Eye, Link2, Check, Printer, Share2, Tag } from "lucide-react";
 import { FaXTwitter, FaFacebookF, FaLinkedinIn, FaWhatsapp } from "react-icons/fa6";
 import SEO from "../components/common/SEO";
+import { setPageMeta } from "../utils/setPageMeta";
 import { useSiteSettings } from "../context/SiteSettingsContext";
 import { formatPublicDate } from "../utils/formatPublicDate";
 import ReadingProgress from "../components/common/ReadingProgress";

@@ -98,7 +98,7 @@ Sitemap: ${base}/sitemap.xml
   if (process.env.SERVE_FRONTEND !== "true") return;
 
   // PWA Service Worker & Manifest headers (never cache SW so clients receive instant updates)
-  app.get(["/sw.js", "/registerSW.js", "/workbox-*.js"], (req, res, next) => {
+  app.get(["/sw.js", "/service-worker.js", "/registerSW.js", "/workbox-*.js"], (req, res, next) => {
     res.set({
       "Content-Type": "application/javascript",
       "Cache-Control": "no-cache, no-store, must-revalidate",

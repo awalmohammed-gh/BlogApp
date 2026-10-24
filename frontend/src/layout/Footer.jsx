@@ -71,7 +71,7 @@ const Footer = () => {
               {general?.contactEmail ? (
                 <a href={`mailto:${general.contactEmail}`} className="hover:text-white">{general.contactEmail}</a>
               ) : (
-                <a href="/contact" className="hover:text-white">Contact the newsroom</a>
+                <Link to="/contact" className="hover:text-white">Contact the newsroom</Link>
               )}
             </div>
             <div className="flex items-center gap-2.5">
