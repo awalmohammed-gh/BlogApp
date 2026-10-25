@@ -1,4 +1,5 @@
 import BrandLogo from "../../common/BrandLogo";
+import QuickActionsMenu from "../../common/QuickActionsMenu";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -217,13 +218,15 @@ export const AdminSidebar = () => {
     <div className="h-full min-h-0 flex flex-col bg-[#0B1B3A] text-slate-200 select-none border-r border-slate-800/80">
       {/* Brand Header */}
       <div className="min-h-16 pt-[env(safe-area-inset-top)] flex items-center justify-between px-4 border-b border-slate-800/80 shrink-0">
-        <Link
-          to="/admin"
-          onClick={closeMobileSidebar}
-          className="flex items-center gap-3 overflow-hidden"
-        >
-          <BrandLogo compact={compact} />
-        </Link>
+        <QuickActionsMenu>
+          <Link
+            to="/admin"
+            onClick={closeMobileSidebar}
+            className="flex items-center gap-3 overflow-hidden"
+          >
+            <BrandLogo compact={compact} />
+          </Link>
+        </QuickActionsMenu>
 
         {/* Mobile close button */}
         <button

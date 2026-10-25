@@ -20,6 +20,8 @@ import { useAdmin } from "../../../context/admin/AdminContext";
 import StaffAvatar from "../common/StaffAvatar";
 import { useAuth } from "../../../context/admin/AuthContext";
 import { useNotifications } from "../../../context/admin/NotificationContext";
+import BrandLogo from "../../common/BrandLogo";
+import QuickActionsMenu from "../../common/QuickActionsMenu";
 
 export const AdminHeader = () => {
   const { admin, logout } = useAuth();
@@ -95,6 +97,11 @@ export const AdminHeader = () => {
         >
           <Menu size={20} />
         </button>
+
+        {/* Mobile Brand Logo with QuickActionsMenu */}
+        <QuickActionsMenu className="lg:hidden">
+          <BrandLogo compact />
+        </QuickActionsMenu>
 
         {/* Desktop collapse toggle */}
         <button

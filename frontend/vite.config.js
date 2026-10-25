@@ -52,12 +52,19 @@ export default defineConfig({
         ],
         shortcuts: [
           {
-            name: 'Admin Panel',
-            short_name: 'Admin',
-            url: '/admin',
+            name: 'Front Website (Home)',
+            short_name: 'Home',
+            description: 'Read latest news and front page stories',
+            url: '/',
             icons: [
               {
-                src: '/icons/shortcut-admin.png',
+                src: '/icons/shortcut-home-96x96.png',
+                sizes: '96x96',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/shortcut-home.png',
                 sizes: '192x192',
                 type: 'image/png',
                 purpose: 'any'
@@ -67,8 +74,15 @@ export default defineConfig({
           {
             name: 'Projects',
             short_name: 'Projects',
+            description: 'Explore investigative series and special projects',
             url: '/?section=projects',
             icons: [
+              {
+                src: '/icons/shortcut-projects-96x96.png',
+                sizes: '96x96',
+                type: 'image/png',
+                purpose: 'any'
+              },
               {
                 src: '/icons/shortcut-projects.png',
                 sizes: '192x192',
@@ -80,8 +94,15 @@ export default defineConfig({
           {
             name: 'Services',
             short_name: 'Services',
+            description: 'Newsroom services, syndication, and editorial desk',
             url: '/?section=services',
             icons: [
+              {
+                src: '/icons/shortcut-services-96x96.png',
+                sizes: '96x96',
+                type: 'image/png',
+                purpose: 'any'
+              },
               {
                 src: '/icons/shortcut-services.png',
                 sizes: '192x192',
@@ -91,12 +112,19 @@ export default defineConfig({
             ]
           },
           {
-            name: 'Contact Me',
-            short_name: 'Contact',
-            url: '/?section=contact',
+            name: 'Admin Dashboard',
+            short_name: 'Admin',
+            description: 'Access the Nsemfoa newsroom CMS and editorial management',
+            url: '/admin',
             icons: [
               {
-                src: '/icons/shortcut-contact.png',
+                src: '/icons/shortcut-admin-96x96.png',
+                sizes: '96x96',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/shortcut-admin.png',
                 sizes: '192x192',
                 type: 'image/png',
                 purpose: 'any'

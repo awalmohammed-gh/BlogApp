@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { usePublicArticles, usePublicDesks } from "../hooks/usePublicArticles";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 import { InstallPWAButton } from "../components/pwa";
+import QuickActionsMenu from "../components/common/QuickActionsMenu";
 
 
 const Navbar = () => {
@@ -163,10 +164,12 @@ const Navbar = () => {
       >
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 xl:px-10 flex shrink-0 items-center justify-between gap-2">
           
-          {/* Logo / Brand */}
-          <NavLink to="/" className="flex min-w-0 items-center gap-3 group">
-            <BrandLogo />
-          </NavLink>
+          {/* Logo / Brand with QuickActionsMenu */}
+          <QuickActionsMenu>
+            <NavLink to="/" className="flex min-w-0 items-center gap-3 group">
+              <BrandLogo />
+            </NavLink>
+          </QuickActionsMenu>
 
           {/* Desktop Nav Items */}
           <nav className="hidden xl:flex items-center gap-1 text-[13px] font-medium text-white/90">

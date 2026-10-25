@@ -33,7 +33,14 @@ import { mountPublicFrontend } from "./middleware/publicFrontend.js";
 const app = express();
 app.disable("x-powered-by");
 app.enable("etag");
-app.set("trust proxy", process.env.TRUST_PROXY === "1" ? 1 : false);
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    service: "Nsemfoa News Backend"
+  });
+});
 
 // Ensure MongoDB connection is ready (caches connection across serverless requests)
 app.use(async (req, res, next) => {
@@ -101,15 +108,6 @@ app.use((req, res, next) => {
     }
   }
   next();
-});
-
-// Health check endpoint
-app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    status: "healthy",
-    timestamp: new Date().toISOString(),
-    service: "Nsemfoa News Backend"
-  });
 });
 
 // Mount Admin APIs
