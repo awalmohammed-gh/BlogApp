@@ -11,7 +11,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.svg', 'apple-touch-icon-180x180.png', 'pwa-*.png'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon-180x180.png', 'pwa-*.png', 'icons/*.png'],
       manifest: {
         name: 'Nsemfoa News - Stories That Matter',
         short_name: 'Nsemfoa News',
@@ -20,30 +20,31 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait-primary',
-        start_url: '/',
         id: '/',
+        start_url: '/',
         scope: '/',
+        prefer_related_applications: false,
         icons: [
           {
-            src: '/pwa-192x192.png',
+            src: '/icons/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/pwa-192x192-maskable.png',
+            src: '/icons/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'maskable'
           },
           {
-            src: '/pwa-512x512.png',
+            src: '/icons/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/pwa-512x512-maskable.png',
+            src: '/icons/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
@@ -51,25 +52,56 @@ export default defineConfig({
         ],
         shortcuts: [
           {
-            name: 'Admin Dashboard',
+            name: 'Admin Panel',
             short_name: 'Admin',
-            description: 'Access the Nsemfoa Newsroom CMS and editorial dashboard',
             url: '/admin',
-            icons: [{ src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' }]
+            icons: [
+              {
+                src: '/icons/shortcut-admin.png',
+                sizes: '192x192',
+                type: 'image/png',
+                purpose: 'any'
+              }
+            ]
           },
           {
-            name: 'Create Story',
-            short_name: 'New Post',
-            description: 'Draft and publish a new story in the newsroom',
-            url: '/admin/articles/new',
-            icons: [{ src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' }]
+            name: 'Projects',
+            short_name: 'Projects',
+            url: '/?section=projects',
+            icons: [
+              {
+                src: '/icons/shortcut-projects.png',
+                sizes: '192x192',
+                type: 'image/png',
+                purpose: 'any'
+              }
+            ]
           },
           {
-            name: 'Front Page',
-            short_name: 'Home',
-            description: 'Read latest breaking news and headlines',
-            url: '/',
-            icons: [{ src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' }]
+            name: 'Services',
+            short_name: 'Services',
+            url: '/?section=services',
+            icons: [
+              {
+                src: '/icons/shortcut-services.png',
+                sizes: '192x192',
+                type: 'image/png',
+                purpose: 'any'
+              }
+            ]
+          },
+          {
+            name: 'Contact Me',
+            short_name: 'Contact',
+            url: '/?section=contact',
+            icons: [
+              {
+                src: '/icons/shortcut-contact.png',
+                sizes: '192x192',
+                type: 'image/png',
+                purpose: 'any'
+              }
+            ]
           }
         ]
       },
