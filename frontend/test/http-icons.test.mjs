@@ -33,12 +33,12 @@ server.listen(0, async () => {
     "/manifest.webmanifest",
     "/icons/icon-192x192.png",
     "/icons/icon-512x512.png",
+    "/icons/icon-maskable-192x192.png",
+    "/icons/icon-maskable-512x512.png",
     "/icons/shortcut-home.png",
     "/icons/shortcut-home-96x96.png",
     "/icons/shortcut-projects.png",
     "/icons/shortcut-projects-96x96.png",
-    "/icons/shortcut-services.png",
-    "/icons/shortcut-services-96x96.png",
     "/icons/shortcut-admin.png",
     "/icons/shortcut-admin-96x96.png"
   ];
@@ -56,5 +56,11 @@ server.listen(0, async () => {
     }
   }
 
-  server.close();
+  server.close(() => {
+    if (!passed) {
+      process.exit(1);
+    } else {
+      console.log("\nALL HTTP 200 CHECKS PASSED!");
+    }
+  });
 });

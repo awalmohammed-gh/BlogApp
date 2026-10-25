@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { 
   Home, 
   Layers, 
-  Briefcase, 
   MessageSquare, 
   ShieldCheck, 
   Download, 
@@ -11,8 +10,7 @@ import {
   Smartphone, 
   Share2, 
   PlusSquare,
-  Sparkles,
-  ExternalLink
+  Sparkles
 } from "lucide-react";
 import { usePWAInstall } from "../pwa/InstallPWAButton";
 
@@ -200,12 +198,12 @@ export default function QuickActionsMenu({ children, className = "" }) {
       accent: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
     },
     {
-      id: "services",
-      label: "Services",
-      desc: "Newsroom syndication & editorial solutions",
-      icon: Briefcase,
-      url: "/?section=services",
-      accent: "text-amber-400 bg-amber-500/10 border-amber-500/20"
+      id: "admin",
+      label: "Admin Dashboard",
+      desc: "Newsroom CMS & editorial management",
+      icon: ShieldCheck,
+      url: "/admin",
+      accent: "text-red-400 bg-red-500/10 border-red-500/20"
     },
     {
       id: "contact",
@@ -214,14 +212,6 @@ export default function QuickActionsMenu({ children, className = "" }) {
       icon: MessageSquare,
       url: "/?section=contact",
       accent: "text-pink-400 bg-pink-500/10 border-pink-500/20"
-    },
-    {
-      id: "admin",
-      label: "Admin Dashboard",
-      desc: "Newsroom CMS & editorial management",
-      icon: ShieldCheck,
-      url: "/admin",
-      accent: "text-sky-400 bg-sky-500/10 border-sky-500/20"
     }
   ];
 

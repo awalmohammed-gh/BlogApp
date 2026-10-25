@@ -8,12 +8,12 @@ const __dirname = path.dirname(__filename);
 const required = [
   { file: "icon-192x192.png", w: 192, h: 192 },
   { file: "icon-512x512.png", w: 512, h: 512 },
+  { file: "icon-maskable-192x192.png", w: 192, h: 192 },
+  { file: "icon-maskable-512x512.png", w: 512, h: 512 },
   { file: "shortcut-home.png", w: 192, h: 192 },
   { file: "shortcut-home-96x96.png", w: 96, h: 96 },
   { file: "shortcut-projects.png", w: 192, h: 192 },
   { file: "shortcut-projects-96x96.png", w: 96, h: 96 },
-  { file: "shortcut-services.png", w: 192, h: 192 },
-  { file: "shortcut-services-96x96.png", w: 96, h: 96 },
   { file: "shortcut-admin.png", w: 192, h: 192 },
   { file: "shortcut-admin-96x96.png", w: 96, h: 96 }
 ];
