@@ -39,7 +39,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..800;1,6..72,400..800&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="app-launch-splash" style="position:fixed;inset:0;background:#07132B;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ffffff;font-family:'Poppins',system-ui,sans-serif;z-index:9998;padding:1.5rem;text-align:center;">
+        <div style="position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
+          <div style="position:absolute;width:11rem;height:11rem;border-radius:9999px;border:1px solid rgba(59,130,246,0.3);animation:nsemfoa-pulse 1.8s infinite ease-out;"></div>
+          <div style="position:relative;z-index:2;width:7rem;height:7rem;border-radius:1.5rem;background:linear-gradient(180deg,rgba(30,58,138,0.7),rgba(15,23,42,0.9));border:1px solid rgba(96,165,250,0.4);box-shadow:0 20px 25px -5px rgba(29,78,216,0.3);display:flex;align-items:center;justify-content:center;padding:0.75rem;">
+            <img src="/icons/icon-192x192.png" alt="Nsemfoa News" style="width:100%;height:100%;object-fit:contain;" />
+          </div>
+        </div>
+        <h1 style="font-size:1.5rem;font-weight:900;margin:0;letter-spacing:-0.025em;font-family:'Newsreader',Georgia,serif;color:#ffffff;">
+          Nsemfoa : Stories That Matters
+        </h1>
+        <p style="margin-top:0.5rem;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(191,219,254,0.9);font-weight:600;">
+          Worldwide News & Editorial Network
+        </p>
+        <div style="margin-top:1.5rem;padding:0.5rem 1rem;border-radius:9999px;background:rgba(30,58,138,0.4);border:1px solid rgba(59,130,246,0.3);font-size:0.7rem;color:#67e8f9;display:flex;align-items:center;gap:0.5rem;">
+          <span style="display:inline-block;width:0.5rem;height:0.5rem;border-radius:9999px;background:#10b981;"></span>
+          <span>Scanning Global Channels...</span>
+        </div>
+      </div>
+      <style>
+        @keyframes nsemfoa-pulse {
+          0% { transform: scale(0.8); opacity: 0.8; }
+          100% { transform: scale(1.4); opacity: 0; }
+        }
+      </style>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -10,7 +10,8 @@ import {
   Smartphone, 
   Share2, 
   PlusSquare,
-  Sparkles
+  Sparkles,
+  Radio
 } from "lucide-react";
 import { usePWAInstall } from "../pwa/InstallPWAButton";
 
@@ -252,21 +253,30 @@ export default function QuickActionsMenu({ children, className = "" }) {
             }
             className="w-full max-w-xs sm:max-w-sm bg-[#0B1B3A] text-slate-100 rounded-2xl shadow-2xl border border-slate-700/80 p-4 animate-in zoom-in-95 duration-150 overflow-hidden"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <h3 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5 font-serif">
-                  Quick Actions
-                  <span className="text-[10px] font-sans font-medium px-1.5 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700/50">
-                    One UI / Touch
-                  </span>
-                </h3>
+            {/* Header with Official Logo & Nsemfoa : Stories That Matters */}
+            <div className="flex items-start justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl p-1 bg-gradient-to-b from-blue-900/60 to-slate-900/90 border border-blue-400/30 flex items-center justify-center shrink-0 shadow-sm">
+                  <img
+                    src="/icons/icon-192x192.png"
+                    alt="Nsemfoa News"
+                    className="w-full h-full object-contain filter drop-shadow-sm"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-xs sm:text-sm font-black tracking-tight text-white font-serif truncate">
+                    Nsemfoa : Stories That Matters
+                  </h3>
+                  <div className="flex items-center gap-1.5 text-[10px] text-cyan-300 font-medium mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Global Channels Synchronized</span>
+                  </div>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors shrink-0 ml-1"
                 aria-label="Close Quick Actions menu"
               >
                 <X className="w-4 h-4" />
@@ -324,9 +334,23 @@ export default function QuickActionsMenu({ children, className = "" }) {
               )}
             </div>
 
-            {/* Footer tip */}
-            <div className="mt-3 pt-2 text-center text-[10px] text-slate-500 border-t border-slate-800/60">
-              Long-press or right-click any brand icon to trigger
+            {/* Footer with Broadcast Replay & Quick Tip */}
+            <div className="mt-3 pt-2.5 border-t border-slate-800/80 space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  window.dispatchEvent(new CustomEvent("nsemfoa:show-splash"));
+                }}
+                className="w-full py-2 px-3 rounded-xl bg-blue-950/70 hover:bg-blue-900/80 border border-blue-500/30 text-blue-200 text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98] group"
+              >
+                <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse group-hover:scale-110 transition-transform" />
+                <span>Replay Global Broadcast Intro</span>
+              </button>
+
+              <div className="text-center text-[10px] text-slate-500">
+                Long-press or right-click any brand icon to trigger
+              </div>
             </div>
           </div>
         </div>
