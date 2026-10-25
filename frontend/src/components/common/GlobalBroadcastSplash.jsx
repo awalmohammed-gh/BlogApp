@@ -22,7 +22,35 @@ const CHANNELS = [
 ];
 
 export default function GlobalBroadcastSplash() {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const path = (window.location.pathname || "").toLowerCase();
+      // When clicking or viewing news details (or admin CMS), NEVER show splash
+      const isNewsDetailsOrAdmin =
+        path.includes("/blog-details") ||
+        path.includes("/post/") ||
+        path.includes("/article/") ||
+        path.startsWith("/admin");
+
+      if (isNewsDetailsOrAdmin) {
+        return false;
+      }
+
+      // If user is already active in the system during this session, do not show again
+      const hasEntered = sessionStorage.getItem("nsemfoa_splash_shown") === "true";
+      if (hasEntered) {
+        return false;
+      }
+
+      // Mark session as entered
+      sessionStorage.setItem("nsemfoa_splash_shown", "true");
+      return true;
+    } catch (_) {
+      return false;
+    }
+  });
+
   const [isFading, setIsFading] = useState(false);
   const [channelIndex, setChannelIndex] = useState(0);
   const [frequency, setFrequency] = useState("98.4");
@@ -32,6 +60,11 @@ export default function GlobalBroadcastSplash() {
   const unmountTimerRef = useRef(null);
 
   const dismiss = () => {
+    try {
+      sessionStorage.setItem("nsemfoa_splash_shown", "true");
+    } catch (_) {
+      // Ignore sessionStorage errors
+    }
     setIsFading(true);
     if (unmountTimerRef.current) clearTimeout(unmountTimerRef.current);
     unmountTimerRef.current = setTimeout(() => {
@@ -40,6 +73,26 @@ export default function GlobalBroadcastSplash() {
   };
 
   useEffect(() => {
+    // Listener for explicit replay request (from Quick Actions Menu)
+    const handleTrigger = () => {
+      setIsVisible(true);
+      setIsFading(false);
+      setProgress(0);
+      setChannelIndex(0);
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+      dismissTimerRef.current = setTimeout(() => {
+        dismiss();
+      }, 2600);
+    };
+    window.addEventListener("nsemfoa:show-splash", handleTrigger);
+
+    // If splash is not active, don't run any timers or intervals
+    if (!isVisible) {
+      return () => {
+        window.removeEventListener("nsemfoa:show-splash", handleTrigger);
+      };
+    }
+
     // 1. Cycle through global channels
     const channelInterval = setInterval(() => {
       setChannelIndex((prev) => {
@@ -70,19 +123,6 @@ export default function GlobalBroadcastSplash() {
     };
     window.addEventListener("keydown", handleKeyDown);
 
-    // Allow re-triggering from custom event if desired (e.g. clicking logo)
-    const handleTrigger = () => {
-      setIsVisible(true);
-      setIsFading(false);
-      setProgress(0);
-      setChannelIndex(0);
-      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
-      dismissTimerRef.current = setTimeout(() => {
-        dismiss();
-      }, 2600);
-    };
-    window.addEventListener("nsemfoa:show-splash", handleTrigger);
-
     return () => {
       clearInterval(channelInterval);
       clearInterval(progressInterval);
@@ -91,7 +131,7 @@ export default function GlobalBroadcastSplash() {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("nsemfoa:show-splash", handleTrigger);
     };
-  }, []);
+  }, [isVisible]);
 
   if (!isVisible) return null;
 

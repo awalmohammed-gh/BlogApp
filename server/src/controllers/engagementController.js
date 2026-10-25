@@ -10,6 +10,8 @@ import { articleLookup, fail, paginate, escapeRegex } from "../utils/http.js";
 import * as schemas from "../validations/engagementValidation.js";
 import { pageQuery, idParams } from "../utils/http.js";
 
+import { countUrls, containsAbusiveOrSpamContent } from "../utils/commentAbuseFilter.js";
+
 const publishedArticle = async (slug) => {
   const article = await Article.findOne({ ...articleLookup(slug), status: "published", publishedAt: { $lte: new Date() }, deletedAt: null });
   if (!article) throw fail(404, "Published article not found.");
@@ -32,9 +34,79 @@ export const submitComment = async (req, res) => {
   const article = await publishedArticle(slug);
   if (!(await getSettings()).values.publishing.enableComments || article.commentsEnabled === false) throw fail(403, "Comments are currently disabled.");
   if (body.parentCommentId && !await ArticleComment.exists({ _id: body.parentCommentId, articleId: article._id, status: "approved" })) throw fail(400, "Reply must refer to an approved comment on this article.");
-  const comment = await ArticleComment.create({ articleId: article._id, commenterName: body.name, commenterEmail: body.email, content: body.content, parentCommentId: body.parentCommentId || null, status: "pending" });
-  await notify({ type: "comment_pending", title: "Comment awaiting moderation", message: `A reader commented on ${article.title}`.slice(0, 500), entityType: "comment", entityId: comment._id, actionUrl: "/admin/comments", eventKeyPrefix: `comment:${comment._id}:pending` });
-  res.status(201).json({ success: true, message: "Your comment has been submitted for moderation." });
+
+  // Anti-Abuse Check 1: Minimum content length
+  const cleanContent = body.content.trim();
+  if (cleanContent.length < 3) {
+    throw fail(400, "Comment is too short. Please write at least 3 characters.");
+  }
+
+  // Anti-Abuse Check 2: Link farm / excessive links restriction (max 2 links)
+  if (countUrls(cleanContent) > 2) {
+    throw fail(400, "Comments cannot contain more than 2 links to prevent spam.");
+  }
+
+  // Anti-Abuse Check 3: Profanity, toxic hate speech, and scam phrases
+  const abuseCheck = containsAbusiveOrSpamContent(cleanContent);
+  if (abuseCheck.isAbusive) {
+    throw fail(400, abuseCheck.reason);
+  }
+
+  // Anti-Abuse Check 4: Rate limit cooldown (minimum 15s between comments from same email on this article)
+  const normalizedEmail = body.email.toLowerCase();
+  const recentComment = await ArticleComment.findOne({
+    articleId: article._id,
+    commenterEmail: normalizedEmail,
+    createdAt: { $gte: new Date(Date.now() - 15 * 1000) }
+  });
+  if (recentComment) {
+    throw fail(429, "You are commenting too fast. Please wait a moment before posting again.");
+  }
+
+  // Anti-Abuse Check 5: Duplicate comment detection (same content from same email in last 30 minutes)
+  const duplicateComment = await ArticleComment.findOne({
+    articleId: article._id,
+    commenterEmail: normalizedEmail,
+    content: cleanContent,
+    createdAt: { $gte: new Date(Date.now() - 30 * 60 * 1000) }
+  });
+  if (duplicateComment) {
+    throw fail(400, "Duplicate comment detected. You have already posted this exact comment.");
+  }
+
+  // Clean comment approved automatically so it appears immediately on the UI
+  const comment = await ArticleComment.create({
+    articleId: article._id,
+    commenterName: body.name.trim(),
+    commenterEmail: normalizedEmail,
+    content: cleanContent,
+    parentCommentId: body.parentCommentId || null,
+    status: "approved"
+  });
+
+  await notify({
+    type: "comment_received",
+    title: "New reader comment published",
+    message: `${comment.commenterName} commented on ${article.title}`.slice(0, 500),
+    entityType: "comment",
+    entityId: comment._id,
+    actionUrl: "/admin/comments",
+    eventKeyPrefix: `comment:${comment._id}:approved`
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Your comment has been published.",
+    data: {
+      _id: comment._id,
+      articleId: comment.articleId,
+      parentCommentId: comment.parentCommentId,
+      commenterName: comment.commenterName,
+      content: comment.content,
+      createdAt: comment.createdAt,
+      status: comment.status
+    }
+  });
 };
 export const listAdminComments = async (req, res) => {
   const query = schemas.commentQuery.parse(req.query);
