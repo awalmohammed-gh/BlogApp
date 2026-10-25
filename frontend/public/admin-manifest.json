@@ -1,6 +1,6 @@
 {
-  "name": "Admin Dashboard",
-  "short_name": "Admin",
+  "name": "Nsemfoa Admin",
+  "short_name": "Nsemfoa Admin",
   "description": "Nsemfoa Newsroom CMS, editorial workflow, and administrative management.",
   "id": "/admin",
   "start_url": "/admin",

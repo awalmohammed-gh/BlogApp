@@ -38,11 +38,12 @@ const Notifications = lazy(() => import("../pages/admin/Notifications"));
 const Settings = lazy(() => import("../pages/admin/Settings"));
 const Profile = lazy(() => import("../pages/admin/Profile"));
 
-import { ManifestSwitcher } from "../components/pwa";
+import { ManifestSwitcher, AdminInstallPromptBanner } from "../components/pwa";
 
 const AdminSession = () => (
   <AuthProvider>
     <ManifestSwitcher />
+    <AdminInstallPromptBanner />
     <Suspense fallback={<PageSkeleton />}>
       <Outlet />
     </Suspense>

@@ -81,7 +81,7 @@ export function usePWAInstall() {
     return null;
   };
 
-  const canInstall = !isStandalone && !isInstalled && (Boolean(deferredPrompt) || isIOS);
+  const canInstall = !isStandalone && !isInstalled;
 
   return {
     canInstall,
@@ -120,11 +120,16 @@ export default function InstallPWAButton({
 
   if (!canInstall) return null;
 
+  const [showGuideModal, setShowGuideModal] = useState(false);
+
   const handleClick = async () => {
     if (hasNativePrompt) {
-      await triggerInstall();
-    } else if (isIOS) {
-      setShowIOSModal(true);
+      const outcome = await triggerInstall();
+      if (outcome !== "accepted") {
+        setShowGuideModal(true);
+      }
+    } else {
+      setShowGuideModal(true);
     }
   };
 
@@ -170,114 +175,85 @@ export default function InstallPWAButton({
         {!compact && <span>{displayLabel}</span>}
       </button>
 
-      {/* iOS Safari Installation Guide Modal */}
-      {showIOSModal && (
+      {/* Universal Installation Guide Modal */}
+      {showGuideModal && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in"
         >
-          <div className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative border border-slate-200 dark:border-slate-800">
+          <div className="bg-slate-900 text-slate-100 rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl relative border border-slate-700">
             <button
-              onClick={() => setShowIOSModal(false)}
-              className="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-lg cursor-pointer"
+              onClick={() => setShowGuideModal(false)}
+              className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl cursor-pointer"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-3 mb-4">
-              <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-xs ${
-                  isAdmin ? "bg-rose-600" : "bg-blue-600"
-                }`}
-              >
-                {isAdmin ? <ShieldCheck className="w-5 h-5" /> : <Smartphone className="w-5 h-5" />}
-              </div>
+            <div className="flex items-center gap-3.5 mb-5">
+              {isAdmin ? (
+                <img
+                  src="/admin-logo.png"
+                  alt="Nsemfoa Admin"
+                  className="w-12 h-12 object-contain rounded-2xl bg-slate-950 p-1 border border-red-500/30 shadow-md shrink-0"
+                />
+              ) : (
+                <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-white shrink-0 bg-blue-600 shadow-md">
+                  <Smartphone className="w-6 h-6" />
+                </div>
+              )}
               <div>
-                <h3 className="font-bold text-base leading-tight">
-                  {isAdmin ? "Install Admin App" : "Install Nsemfoa News"}
+                <h3 className="font-extrabold text-base sm:text-lg text-white leading-tight">
+                  {isAdmin ? "Install Nsemfoa Admin" : "Install Nsemfoa News"}
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {isAdmin ? "Add standalone CMS to iPhone / iPad" : "Add to your iPhone / iPad Home Screen"}
+                <p className="text-xs text-slate-400">
+                  {isAdmin ? "Standalone Newsroom CMS App" : "Add to your device home screen"}
                 </p>
               </div>
             </div>
 
-            <ol className="text-xs space-y-3 mb-5 text-slate-600 dark:text-slate-300">
-              <li className="flex items-start gap-2.5">
-                <span
-                  className={`flex items-center justify-center w-5 h-5 rounded-full font-bold shrink-0 text-[11px] ${
-                    isAdmin
-                      ? "bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300"
-                      : "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
-                  }`}
-                >
-                  1
-                </span>
-                <span>
-                  Tap the{" "}
-                  <strong
-                    className={`inline-flex items-center gap-1 font-semibold ${
-                      isAdmin ? "text-rose-600 dark:text-rose-400" : "text-blue-600 dark:text-blue-400"
-                    }`}
-                  >
-                    Share <Share2 className="w-3 h-3 inline" />
-                  </strong>{" "}
-                  button in Safari.
-                </span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <span
-                  className={`flex items-center justify-center w-5 h-5 rounded-full font-bold shrink-0 text-[11px] ${
-                    isAdmin
-                      ? "bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300"
-                      : "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
-                  }`}
-                >
-                  2
-                </span>
-                <span>
-                  Scroll down and choose{" "}
-                  <strong className="text-slate-900 dark:text-white inline-flex items-center gap-1 font-semibold">
-                    Add to Home Screen <PlusSquare className="w-3 h-3 inline" />
-                  </strong>
-                  .
-                </span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <span
-                  className={`flex items-center justify-center w-5 h-5 rounded-full font-bold shrink-0 text-[11px] ${
-                    isAdmin
-                      ? "bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300"
-                      : "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
-                  }`}
-                >
-                  3
-                </span>
-                <span>
-                  Tap{" "}
-                  <strong
-                    className={`font-semibold ${
-                      isAdmin ? "text-rose-600 dark:text-rose-400" : "text-blue-600 dark:text-blue-400"
-                    }`}
-                  >
-                    Add
-                  </strong>{" "}
-                  in the top-right corner to launch {isAdmin ? "Admin CMS" : "the app"} from your Home Screen!
-                </span>
-              </li>
-            </ol>
+            <div className="text-xs space-y-3 mb-5 text-slate-300">
+              <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
+                <p className="font-semibold text-white mb-1">🖥️ On Desktop (Chrome / Edge):</p>
+                <p className="text-slate-400">
+                  Click the <strong>Install icon (🖥️)</strong> at the right end of the browser address bar, or click Menu (⋮) → <strong>Install {isAdmin ? "Nsemfoa Admin" : "App"}</strong>.
+                </p>
+              </div>
 
-            <button
-              type="button"
-              onClick={() => setShowIOSModal(false)}
-              className={`w-full py-2.5 text-white rounded-xl font-medium text-xs shadow-xs transition-colors cursor-pointer ${
-                isAdmin ? "bg-rose-600 hover:bg-rose-700" : "bg-blue-600 hover:bg-blue-700"
-              }`}
-            >
-              Got it
-            </button>
+              <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
+                <p className="font-semibold text-white mb-1">📱 On iPhone / iPad (Safari):</p>
+                <p className="text-slate-400">
+                  Tap <strong>Share</strong> (box with arrow), then select <strong>Add to Home Screen</strong>.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {hasNativePrompt && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await triggerInstall();
+                    setShowGuideModal(false);
+                  }}
+                  className={`flex-1 py-2.5 rounded-xl font-bold text-xs text-white shadow-xs cursor-pointer ${
+                    isAdmin ? "bg-red-600 hover:bg-red-500" : "bg-blue-600 hover:bg-blue-500"
+                  }`}
+                >
+                  Install Now
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowGuideModal(false)}
+                className={`py-2.5 px-4 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 text-xs font-semibold cursor-pointer ${
+                  hasNativePrompt ? "" : "w-full bg-slate-800"
+                }`}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

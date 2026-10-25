@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/admin/AuthContext";
 import adminAuthService from "../../services/admin/authService";
+import { InstallAdminPWAButton } from "../../components/pwa";
 import toast from "../../utils/toast";
 
 export const Login = () => {
@@ -383,6 +384,17 @@ export const Login = () => {
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4">
+        {/* Top utility bar */}
+        <div className="flex items-center justify-between mb-4">
+          <a
+            href="/"
+            className="text-xs text-slate-400 hover:text-white transition-colors"
+          >
+            ← Public Portal
+          </a>
+          <InstallAdminPWAButton />
+        </div>
+
         {/* Brand Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center gap-3 mb-4">
@@ -834,14 +846,15 @@ export const Login = () => {
           </div>
         </div>
 
-        {/* Public Website Backlink */}
-        <div className="text-center mt-6">
+        {/* Public Website Backlink & Secondary Install Trigger */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 text-xs text-slate-400">
           <a
             href="/"
-            className="text-xs text-slate-400 hover:text-white transition-colors"
+            className="hover:text-white transition-colors"
           >
             ← Return to public Nsemfoa News portal
           </a>
+          <InstallAdminPWAButton />
         </div>
       </div>
     </div>
