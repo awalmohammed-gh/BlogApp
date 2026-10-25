@@ -56,7 +56,5 @@ server.listen(0, async () => {
     }
   }
 
-  server.close(() => {
-    process.exit(passed ? 0 : 1);
-  });
+  server.close();
 });

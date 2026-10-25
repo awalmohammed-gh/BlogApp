@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Download, X, Smartphone, ArrowRight } from "lucide-react";
 import { usePWAInstall } from "./InstallPWAButton";
 
@@ -6,21 +6,16 @@ const DISMISSED_KEY = "nsemfoa_pwa_banner_dismissed_at";
 
 export default function InstallPromptBanner() {
   const { canInstall, triggerInstall, isIOS } = usePWAInstall();
-  const [dismissed, setDismissed] = useState(true);
-  const [showIOSModal, setShowIOSModal] = useState(false);
-
-  useEffect(() => {
-    // Only show if not previously dismissed in the last 24 hours
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === "undefined") return true;
     const lastDismissed = localStorage.getItem(DISMISSED_KEY);
     if (lastDismissed) {
       const hoursAgo = (Date.now() - parseInt(lastDismissed, 10)) / (1000 * 60 * 60);
-      if (hoursAgo < 24) {
-        setDismissed(true);
-        return;
-      }
+      return hoursAgo < 24;
     }
-    setDismissed(false);
-  }, []);
+    return false;
+  });
+  const [showIOSModal, setShowIOSModal] = useState(false);
 
   if (!canInstall || dismissed) return null;
 

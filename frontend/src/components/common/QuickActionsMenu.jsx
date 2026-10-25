@@ -34,7 +34,7 @@ export default function QuickActionsMenu({ children, className = "" }) {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { canInstall, isInstalled, isStandalone, isIOS, hasNativePrompt, triggerInstall } = usePWAInstall();
+  const { isInstalled, isStandalone, isIOS, hasNativePrompt, triggerInstall } = usePWAInstall();
 
   // Close on Escape or click outside
   useEffect(() => {

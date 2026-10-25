@@ -13,7 +13,7 @@ export const RevisionComparisonModal = ({
   const [revisions, setRevisions] = useState([]);
   const [leftRevId, setLeftRevId] = useState("");
   const [rightRevId, setRightRevId] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!isOpen || !articleId) return;

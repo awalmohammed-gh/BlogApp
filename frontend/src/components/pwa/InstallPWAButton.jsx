@@ -5,9 +5,24 @@ import { Download, Share2, PlusSquare, X, Smartphone } from "lucide-react";
  * Hook to manage PWA install prompt lifecycle & environment detection
  */
 export function usePWAInstall() {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [isStandalone, setIsStandalone] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(() => {
+    return typeof window !== "undefined" ? window.__pwaDeferredPrompt || null : null;
+  });
+  const [isStandalone, setIsStandalone] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true ||
+      document.referrer.includes("android-app://")
+    );
+  });
+  const [isIOS] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const ua = window.navigator.userAgent.toLowerCase();
+    const isIosDevice = /iphone|ipad|ipod/.test(ua);
+    const isSafari = /safari/.test(ua) && !/chrome|crios|fxios|edgios/.test(ua);
+    return isIosDevice && isSafari;
+  });
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
@@ -25,13 +40,7 @@ export function usePWAInstall() {
     const mediaQuery = window.matchMedia("(display-mode: standalone)");
     mediaQuery.addEventListener("change", checkStandalone);
 
-    // 2. iOS Safari detection
-    const ua = window.navigator.userAgent.toLowerCase();
-    const isIosDevice = /iphone|ipad|ipod/.test(ua);
-    const isSafari = /safari/.test(ua) && !/chrome|crios|fxios|edgios/.test(ua);
-    setIsIOS(isIosDevice && isSafari);
-
-    // 3. Chromium beforeinstallprompt handling
+    // 2. Chromium beforeinstallprompt handling
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -49,10 +58,6 @@ export function usePWAInstall() {
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
-
-    if (window.__pwaDeferredPrompt) {
-      setDeferredPrompt(window.__pwaDeferredPrompt);
-    }
 
     return () => {
       mediaQuery.removeEventListener("change", checkStandalone);

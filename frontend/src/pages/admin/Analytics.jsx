@@ -27,7 +27,7 @@ import CategoryDistributionChart from "../../components/admin/charts/CategoryDis
 export const Analytics = () => {
   const { admin } = useAuth();
   const [timeframe, setTimeframe] = useState("30d");
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   // Analytics states

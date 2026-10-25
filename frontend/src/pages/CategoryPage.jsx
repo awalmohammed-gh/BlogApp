@@ -1,5 +1,5 @@
 import { responsiveImageProps } from "../utils/imageKit";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, NavLink, useParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { Search, X, Grid3X3, List, Clock, ArrowRight, ArrowUpRight, ChevronRight, Newspaper } from "lucide-react";
@@ -48,12 +48,13 @@ const CategoryPage = () => {
 
 
 
-  // Reset the view whenever the category changes
-  useEffect(() => {
+  const [prevCategory, setPrevCategory] = useState(category);
+  if (prevCategory !== category) {
+    setPrevCategory(category);
     setSearchQuery("");
     setSortBy("newest");
     setVisible(1);
-  }, [category]);
+  }
 
   const allDesks=usePublicDesks();
   const counts=Object.fromEntries(DESKS.map((d)=>[d.slug,allDesks.filter((item)=>!d.includes||d.includes.includes(item.slug)).reduce((sum,item)=>sum+item.count,0)]));

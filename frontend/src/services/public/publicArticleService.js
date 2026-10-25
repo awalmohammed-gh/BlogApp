@@ -1,4 +1,3 @@
-import api from "../../api/axios";
 import { publicGet } from "../../api/publicCache";
 
 export const publicArticleService = {

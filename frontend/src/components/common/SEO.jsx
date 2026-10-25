@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
 import { setPageMeta } from "../../utils/setPageMeta";
@@ -43,44 +43,47 @@ export const SEO = ({
   const metaImage = image || defaultImage;
 
   // Build Google Rich Snippet (Schema.org / BlogPosting or NewsArticle)
-  const jsonLd =
-    structuredData ||
-    (article
-      ? {
-          "@context": "https://schema.org",
-          "@type": "BlogPosting",
-          "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": canonicalUrl
-          },
-          "headline": article.title || title,
-          "description": metaDesc,
-          "image": metaImage ? [metaImage] : [],
-          "datePublished": article.publishedAt
-            ? new Date(article.publishedAt).toISOString()
-            : undefined,
-          "dateModified": article.updatedAt
-            ? new Date(article.updatedAt).toISOString()
-            : article.publishedAt
-            ? new Date(article.publishedAt).toISOString()
-            : undefined,
-          "author": {
-            "@type": "Person",
-            "name": article.author || siteName
-          },
-          "publisher": {
-            "@type": "Organization",
-            "name": siteName,
-            "logo": {
-              "@type": "ImageObject",
-              "url":
-                typeof window !== "undefined"
-                  ? `${window.location.origin}/app-logo.png`
-                  : "/app-logo.png"
+  const jsonLd = useMemo(() => {
+    return (
+      structuredData ||
+      (article
+        ? {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": canonicalUrl
+            },
+            "headline": article.title || title,
+            "description": metaDesc,
+            "image": metaImage ? [metaImage] : [],
+            "datePublished": article.publishedAt
+              ? new Date(article.publishedAt).toISOString()
+              : undefined,
+            "dateModified": article.updatedAt
+              ? new Date(article.updatedAt).toISOString()
+              : article.publishedAt
+              ? new Date(article.publishedAt).toISOString()
+              : undefined,
+            "author": {
+              "@type": "Person",
+              "name": article.author || siteName
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": siteName,
+              "logo": {
+                "@type": "ImageObject",
+                "url":
+                  typeof window !== "undefined"
+                    ? `${window.location.origin}/app-logo.png`
+                    : "/app-logo.png"
+              }
             }
           }
-        }
-      : null);
+        : null)
+    );
+  }, [structuredData, article, canonicalUrl, title, metaDesc, metaImage, siteName]);
 
   useEffect(() => {
     setPageMeta({
