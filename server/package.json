@@ -11,6 +11,7 @@
     "admin:sync": "node src/scripts/syncSuperAdmin.js",
     "media:reconcile": "node src/scripts/reconcileMediaAssets.js",
     "test:integration": "node --test test/integration.test.js",
+    "test:admin-auth": "node --test test/singleAdminAuth.test.js",
     "test:browser": "node --test test/browser.test.js",
     "db:integration-indexes": "node src/scripts/ensureIntegrationIndexes.js",
     "db:performance-indexes": "node src/scripts/ensurePerformanceIndexes.js",

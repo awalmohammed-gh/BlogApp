@@ -110,7 +110,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Mount Admin APIs
+// Mount Admin & Authentication APIs
+app.use("/api/auth", adminAuthRoutes);
 app.use("/api/internal", schedulerRoutes);
 app.use("/api/admin", adminEngagementRouter);
 app.use("/api/admin/auth", adminAuthRoutes);

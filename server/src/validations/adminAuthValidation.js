@@ -13,7 +13,7 @@ export const adminLoginSchema = z.object({
     .max(128, "Password must not exceed 128 characters")
 });
 
-export const initialAdminBootstrapSchema = z.object({
+export const adminSetupSchema = z.object({
   name: z
     .string({ required_error: "Admin name is required" })
     .trim()
@@ -27,8 +27,32 @@ export const initialAdminBootstrapSchema = z.object({
     .max(120, "Email must not exceed 120 characters"),
   password: z
     .string({ required_error: "Password is required" })
-    .min(8, "Password must be at least 8 characters long")
+    .min(6, "Password must be at least 6 characters long")
     .max(128, "Password must not exceed 128 characters")
 });
 
-export default { adminLoginSchema, initialAdminBootstrapSchema };
+export const verifyOtpSchema = z.object({
+  email: z
+    .string({ required_error: "Email is required" })
+    .trim()
+    .email("Please enter a valid email address"),
+  otp: z
+    .string({ required_error: "OTP code is required" })
+    .trim()
+    .regex(/^\d{6}$/, "OTP must be a 6-digit code")
+});
+
+export const resendOtpSchema = z.object({
+  email: z
+    .string({ required_error: "Email is required" })
+    .trim()
+    .email("Please enter a valid email address")
+});
+
+export default {
+  adminLoginSchema,
+  adminSetupSchema,
+  verifyOtpSchema,
+  resendOtpSchema
+};
+

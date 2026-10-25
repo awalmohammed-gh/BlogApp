@@ -45,6 +45,20 @@ const adminSchema = new mongoose.Schema(
       default: "active",
       index: true
     },
+    isVerified: {
+      type: Boolean,
+      default: false,
+      index: true
+    },
+    otpCodeHash: {
+      type: String,
+      default: null,
+      select: false
+    },
+    otpExpiresAt: {
+      type: Date,
+      default: null
+    },
     avatar: {
       type: String,
       default: ""
@@ -88,6 +102,7 @@ const adminSchema = new mongoose.Schema(
     toJSON: {
       transform: (doc, ret) => {
         delete ret.passwordHash;
+        delete ret.otpCodeHash;
         delete ret.__v;
         return ret;
       }
@@ -103,9 +118,22 @@ adminSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.passwordHash);
 };
 
+// Compare candidate 6-digit OTP code with stored hash
+adminSchema.methods.compareOtp = async function (candidateOtp) {
+  if (!this.otpCodeHash) {
+    return false;
+  }
+  return bcrypt.compare(String(candidateOtp).trim(), this.otpCodeHash);
+};
+
 // Static helper to hash passwords consistently
 adminSchema.statics.hashPassword = async function (plainPassword) {
-  return bcrypt.hash(plainPassword, env.BCRYPT_SALT_ROUNDS);
+  return bcrypt.hash(plainPassword, env.BCRYPT_SALT_ROUNDS || 12);
+};
+
+// Static helper to hash 6-digit OTP codes
+adminSchema.statics.hashOtp = async function (otpCode) {
+  return bcrypt.hash(String(otpCode).trim(), 10);
 };
 
 // Sanitize helper to return safe representation
@@ -116,6 +144,7 @@ adminSchema.methods.toSanitizedJSON = function () {
     email: this.email,
     role: this.role,
     status: this.status,
+    isVerified: Boolean(this.isVerified),
     avatar: this.avatar,
     avatarMedia: this.avatarMedia ? this.avatarMedia.toString() : null,
     bio: this.bio || "",

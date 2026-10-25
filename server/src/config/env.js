@@ -43,9 +43,7 @@ export const env = {
   isProduction,
   IMAGE_KIT_PUBLIC_KEY: process.env.IMAGE_KIT_PUBLIC_KEY || "",
   IMAGE_KIT_PRIVATE_KEY: process.env.IMAGE_KIT_PRIVATE_KEY || "",
-  IMAGE_KIT_URL_ENDPOINT: process.env.URL_ENDPOINT || process.env.IMAGE_KIT_URL_ENDPOINT || "",
-  ADMIN_EMAIL: process.env.ADMIN_EMAIL || process.env.BOOTSTRAP_ADMIN_EMAIL || "",
-  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || process.env.BOOTSTRAP_ADMIN_PASSWORD || ""
+  IMAGE_KIT_URL_ENDPOINT: process.env.URL_ENDPOINT || process.env.IMAGE_KIT_URL_ENDPOINT || ""
 };
 
 export default env;

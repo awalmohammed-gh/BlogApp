@@ -86,6 +86,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
+   * Directly activate authenticated administrator session (e.g. following OTP verification)
+   */
+  const setVerifiedSession = (adminData) => {
+    sessionEpoch.current++;
+    setSessionError("");
+    setAdmin(adminData);
+    setIsAuthenticated(true);
+    setIsLoading(false);
+  };
+
+  /**
    * Update local admin profile state when modified
    */
   const updateAdminState = (updatedFields) => {
@@ -139,6 +150,7 @@ export const AuthProvider = ({ children }) => {
     sessionError,
     login,
     logout,
+    setVerifiedSession,
     checkSession,
     updateAdminState,
     hasPermission: checkPermission,
