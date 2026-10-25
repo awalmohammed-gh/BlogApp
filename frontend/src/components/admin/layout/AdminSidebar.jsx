@@ -30,6 +30,7 @@ import { useNotifications } from "../../../context/admin/NotificationContext";
 import { useAuth } from "../../../context/admin/AuthContext";
 import { useEffect } from "react";
 import { useBodyScrollLock } from "../../../hooks/useBodyScrollLock";
+import { InstallPWAButton } from "../../pwa";
 
 export const AdminSidebar = () => {
   const { unreadCount } = useNotifications();
@@ -350,6 +351,9 @@ export const AdminSidebar = () => {
           )}
         </NavLink>
 
+
+        {/* Dual-PWA: Install Standalone Admin App Button */}
+        <InstallPWAButton variant="admin-sidebar" compact={compact} />
 
         {/* View Public Website */}
         <Link

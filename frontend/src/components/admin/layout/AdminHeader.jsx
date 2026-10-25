@@ -22,6 +22,7 @@ import { useAuth } from "../../../context/admin/AuthContext";
 import { useNotifications } from "../../../context/admin/NotificationContext";
 import BrandLogo from "../../common/BrandLogo";
 import QuickActionsMenu from "../../common/QuickActionsMenu";
+import { InstallAdminPWAButton } from "../../pwa";
 
 export const AdminHeader = () => {
   const { admin, logout } = useAuth();
@@ -150,6 +151,9 @@ export const AdminHeader = () => {
             Ctrl+K
           </kbd>
         </button>
+
+        {/* Dual-PWA: Prominent Install Admin App Button */}
+        <InstallAdminPWAButton />
 
         {/* Create Article Quick Button */}
         <Link

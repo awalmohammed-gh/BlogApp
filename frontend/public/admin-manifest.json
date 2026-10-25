@@ -1,0 +1,102 @@
+{
+  "name": "Admin Dashboard",
+  "short_name": "Admin",
+  "description": "Nsemfoa Newsroom CMS, editorial workflow, and administrative management.",
+  "id": "/admin",
+  "start_url": "/admin",
+  "scope": "/admin",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "background_color": "#0F172A",
+  "theme_color": "#991B1B",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/admin-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/admin-maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/admin-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/admin-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Article",
+      "short_name": "New Story",
+      "description": "Compose and publish a new story",
+      "url": "/admin/articles/new",
+      "icons": [
+        {
+          "src": "/icons/shortcut-admin-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png",
+          "purpose": "any"
+        },
+        {
+          "src": "/icons/shortcut-admin.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "any"
+        }
+      ]
+    },
+    {
+      "name": "Articles Directory",
+      "short_name": "Articles",
+      "description": "View and manage all newsroom articles",
+      "url": "/admin/articles",
+      "icons": [
+        {
+          "src": "/icons/shortcut-projects-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png",
+          "purpose": "any"
+        },
+        {
+          "src": "/icons/shortcut-projects.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "any"
+        }
+      ]
+    },
+    {
+      "name": "Editorial Desk",
+      "short_name": "Editorial",
+      "description": "Review article drafts and submissions",
+      "url": "/admin/editorial",
+      "icons": [
+        {
+          "src": "/icons/shortcut-admin-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png",
+          "purpose": "any"
+        },
+        {
+          "src": "/icons/shortcut-admin.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "any"
+        }
+      ]
+    }
+  ]
+}

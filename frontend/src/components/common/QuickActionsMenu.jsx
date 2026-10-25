@@ -157,6 +157,13 @@ export default function QuickActionsMenu({ children, className = "" }) {
     }
 
     if (item.url) {
+      // Dual-PWA secret navigation: Always use window.location.href for /admin so the browser
+      // cleanly loads /admin with /admin-manifest.json and fires a fresh beforeinstallprompt event specifically for the Admin App!
+      if (item.url.startsWith("/admin")) {
+        window.location.href = item.url;
+        return;
+      }
+
       const isHome = location.pathname === "/";
       if (item.url === "/") {
         if (isHome) {
@@ -215,6 +222,9 @@ export default function QuickActionsMenu({ children, className = "" }) {
       accent: "text-pink-400 bg-pink-500/10 border-pink-500/20"
     }
   ];
+
+  // Context detection: Are we on the Admin or Public side?
+  const isAdminRoute = location.pathname.startsWith("/admin");
 
   // Show "Install App" if not installed
   const showInstall = !isStandalone && !isInstalled;
@@ -309,24 +319,34 @@ export default function QuickActionsMenu({ children, className = "" }) {
                 );
               })}
 
-              {/* Install PWA Option */}
+              {/* Install PWA Option (Context-Aware for Public vs Admin App) */}
               {showInstall && (
                 <div className="pt-2 border-t border-slate-800/80">
                   <button
                     type="button"
                     onClick={() => handleAction({ action: "install" })}
-                    className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border border-blue-500/30 hover:border-blue-400 hover:bg-blue-600/30 transition-all text-left group"
+                    className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all text-left group ${
+                      isAdminRoute
+                        ? "bg-gradient-to-r from-red-600/25 to-rose-700/25 border border-red-500/40 hover:border-red-400 hover:bg-red-600/35"
+                        : "bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border border-blue-500/30 hover:border-blue-400 hover:bg-blue-600/30"
+                    }`}
                   >
-                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-blue-600 text-white shadow-xs">
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-white shadow-xs ${
+                      isAdminRoute ? "bg-red-600" : "bg-blue-600"
+                    }`}>
                       <Download className="w-4 h-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-bold text-blue-200 group-hover:text-white transition-colors truncate flex items-center gap-1.5">
-                        Install Nsemfoa News
+                      <div className={`text-xs font-bold transition-colors truncate flex items-center gap-1.5 ${
+                        isAdminRoute ? "text-red-200 group-hover:text-white" : "text-blue-200 group-hover:text-white"
+                      }`}>
+                        {isAdminRoute ? "Install Admin App" : "Install Nsemfoa News"}
                         <Sparkles className="w-3 h-3 text-amber-400" />
                       </div>
-                      <div className="text-[11px] text-blue-300/80 truncate">
-                        Add to Home Screen as app
+                      <div className={`text-[11px] truncate ${
+                        isAdminRoute ? "text-red-300/80" : "text-blue-300/80"
+                      }`}>
+                        {isAdminRoute ? "Standalone Newsroom CMS App" : "Add to Home Screen as app"}
                       </div>
                     </div>
                   </button>
@@ -373,12 +393,18 @@ export default function QuickActionsMenu({ children, className = "" }) {
             </button>
 
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-xs">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-xs ${
+                isAdminRoute ? "bg-red-600" : "bg-blue-600"
+              }`}>
                 <Smartphone className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-bold text-base leading-tight text-white">Install Nsemfoa News</h3>
-                <p className="text-xs text-slate-400">Add to your iPhone / iPad Home Screen</p>
+                <h3 className="font-bold text-base leading-tight text-white">
+                  {isAdminRoute ? "Install Admin App" : "Install Nsemfoa News"}
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {isAdminRoute ? "Add Standalone CMS to iPhone / iPad" : "Add to your iPhone / iPad Home Screen"}
+                </p>
               </div>
             </div>
 

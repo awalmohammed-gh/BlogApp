@@ -15,7 +15,12 @@ const required = [
   { file: "shortcut-projects.png", w: 192, h: 192 },
   { file: "shortcut-projects-96x96.png", w: 96, h: 96 },
   { file: "shortcut-admin.png", w: 192, h: 192 },
-  { file: "shortcut-admin-96x96.png", w: 96, h: 96 }
+  { file: "shortcut-admin-96x96.png", w: 96, h: 96 },
+  { file: "shortcut-admin-192x192.png", w: 192, h: 192 },
+  { file: "admin-192x192.png", w: 192, h: 192 },
+  { file: "admin-512x512.png", w: 512, h: 512 },
+  { file: "admin-maskable-192x192.png", w: 192, h: 192 },
+  { file: "admin-maskable-512x512.png", w: 512, h: 512 }
 ];
 
 let allValid = true;

@@ -9,7 +9,7 @@ import { BlogProvider } from "../context/BlogProvider"
 import PageSkeleton from "../components/common/PageSkeleton"
 import ScrollToTop from '../components/common/ScrollToTop'
 import { setPageMeta } from "../utils/setPageMeta"
-import { OfflineBanner, InstallPromptBanner, ReloadPrompt } from "../components/pwa"
+import { OfflineBanner, InstallPromptBanner, ReloadPrompt, ManifestSwitcher } from "../components/pwa"
 
 const SystemLayout = () => {
   const { settings } = useSiteSettings();
@@ -27,6 +27,7 @@ const SystemLayout = () => {
   return (
     <BlogProvider>
       <div className="min-h-screen flex flex-col bg-white text-gray-900">
+        <ManifestSwitcher />
         <ScrollToTop />
         <OfflineBanner />
         <InstallPromptBanner />

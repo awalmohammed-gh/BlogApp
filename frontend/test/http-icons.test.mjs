@@ -30,11 +30,16 @@ server.listen(0, async () => {
   const port = server.address().port;
   const urls = [
     "/manifest.json",
+    "/admin-manifest.json",
     "/manifest.webmanifest",
     "/icons/icon-192x192.png",
     "/icons/icon-512x512.png",
     "/icons/icon-maskable-192x192.png",
     "/icons/icon-maskable-512x512.png",
+    "/icons/admin-192x192.png",
+    "/icons/admin-512x512.png",
+    "/icons/admin-maskable-192x192.png",
+    "/icons/admin-maskable-512x512.png",
     "/icons/shortcut-home.png",
     "/icons/shortcut-home-96x96.png",
     "/icons/shortcut-projects.png",

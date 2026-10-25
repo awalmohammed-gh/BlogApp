@@ -38,7 +38,16 @@ const Notifications = lazy(() => import("../pages/admin/Notifications"));
 const Settings = lazy(() => import("../pages/admin/Settings"));
 const Profile = lazy(() => import("../pages/admin/Profile"));
 
-const AdminSession = () => <AuthProvider><Suspense fallback={<PageSkeleton />}><Outlet /></Suspense></AuthProvider>;
+import { ManifestSwitcher } from "../components/pwa";
+
+const AdminSession = () => (
+  <AuthProvider>
+    <ManifestSwitcher />
+    <Suspense fallback={<PageSkeleton />}>
+      <Outlet />
+    </Suspense>
+  </AuthProvider>
+);
 
 const router = createBrowserRouter(
   createRoutesFromElements(

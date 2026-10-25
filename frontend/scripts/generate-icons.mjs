@@ -197,7 +197,8 @@ async function generateAppIcons() {
     { file: "shortcut-projects.png", size: 192, svg: shortcutProjectsSvg },
     { file: "shortcut-projects-96x96.png", size: 96, svg: shortcutProjectsSvg },
     { file: "shortcut-admin.png", size: 192, svg: shortcutAdminSvg },
-    { file: "shortcut-admin-96x96.png", size: 96, svg: shortcutAdminSvg }
+    { file: "shortcut-admin-96x96.png", size: 96, svg: shortcutAdminSvg },
+    { file: "shortcut-admin-192x192.png", size: 192, svg: shortcutAdminSvg }
   ];
 
   for (const s of shortcuts) {
@@ -208,6 +209,85 @@ async function generateAppIcons() {
       .toFile(dest);
     console.log(`✓ ${s.file} (${s.size}x${s.size}px)`);
   }
+
+  // 7. Dedicated Dual-PWA Standalone Admin App Icons (512x512 and 192x192 + maskable)
+  const adminAppSvg512 = `
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="adminPwaBg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="40%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#7F1D1D"/>
+    </linearGradient>
+    <linearGradient id="adminShieldGrad" x1="128" y1="100" x2="384" y2="390" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#EF4444"/>
+      <stop offset="50%" stop-color="#DC2626"/>
+      <stop offset="100%" stop-color="#991B1B"/>
+    </linearGradient>
+    <linearGradient id="adminGold" x1="210" y1="180" x2="300" y2="320" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FEF08A"/>
+      <stop offset="50%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+    <filter id="adminGlow" x="70" y="50" width="372" height="400" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="16" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="512" height="512" rx="112" fill="url(#adminPwaBg)"/>
+  <rect x="4" y="4" width="504" height="504" rx="108" stroke="rgba(248,113,113,0.3)" stroke-width="4"/>
+
+  <!-- Radial subtle highlight -->
+  <circle cx="256" cy="180" r="160" fill="rgba(220,38,38,0.18)"/>
+
+  <!-- Main Shield -->
+  <g filter="url(#adminGlow)">
+    <path d="M256 84L388 138V264C388 348 331 398 256 420C181 398 124 348 124 264V138L256 84Z" fill="url(#adminShieldGrad)" stroke="#FFFFFF" stroke-width="10" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Shield Inner Border -->
+  <path d="M256 108L366 153V264C366 332 319 373 256 392C193 373 146 332 146 264V153L256 108Z" stroke="rgba(254,240,138,0.45)" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- Golden Keyhole / Vault Core -->
+  <circle cx="256" cy="216" r="38" fill="url(#adminGold)" stroke="#FFFFFF" stroke-width="4"/>
+  <path d="M246 242H266L272 310H240L246 242Z" fill="url(#adminGold)" stroke="#FFFFFF" stroke-width="4"/>
+  <circle cx="256" cy="216" r="14" fill="#0F172A"/>
+
+  <!-- Bottom ADMIN Banner Pill -->
+  <rect x="146" y="348" width="220" height="48" rx="24" fill="#0B132B" stroke="url(#adminGold)" stroke-width="3"/>
+  <text x="256" y="380" text-anchor="middle" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="900" letter-spacing="4">ADMIN</text>
+</svg>
+`;
+
+  // Standard Admin App Icons
+  await sharp(Buffer.from(adminAppSvg512))
+    .resize(512, 512)
+    .png({ compressionLevel: 9 })
+    .toFile(path.join(iconsDir, "admin-512x512.png"));
+  console.log("✓ icons/admin-512x512.png");
+
+  await sharp(Buffer.from(adminAppSvg512))
+    .resize(192, 192)
+    .png({ compressionLevel: 9 })
+    .toFile(path.join(iconsDir, "admin-192x192.png"));
+  console.log("✓ icons/admin-192x192.png");
+
+  // Maskable Admin App Icons (80% safe zone)
+  await sharp(Buffer.from(adminAppSvg512))
+    .resize(410, 410)
+    .extend({ top: 51, bottom: 51, left: 51, right: 51, background: "#0F172A" })
+    .png({ compressionLevel: 9 })
+    .toFile(path.join(iconsDir, "admin-maskable-512x512.png"));
+  console.log("✓ icons/admin-maskable-512x512.png");
+
+  await sharp(Buffer.from(adminAppSvg512))
+    .resize(154, 154)
+    .extend({ top: 19, bottom: 19, left: 19, right: 19, background: "#0F172A" })
+    .png({ compressionLevel: 9 })
+    .toFile(path.join(iconsDir, "admin-maskable-192x192.png"));
+  console.log("✓ icons/admin-maskable-192x192.png");
 }
 
 generateAppIcons()

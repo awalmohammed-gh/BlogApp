@@ -18,3 +18,22 @@ createRoot(document.getElementById('root')).render(
   </StrictMode>,
 )
 
+// Dual-PWA Service Worker Registration with root scope { scope: '/' }
+// Covers both public routes (/) and admin CMS (/admin)
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js', { scope: '/' })
+      .then((registration) => {
+        // Periodic check for worker updates
+        setInterval(() => {
+          registration.update().catch(() => {});
+        }, 60 * 60 * 1000);
+      })
+      .catch((error) => {
+        console.warn('[SW] Service Worker registration failed:', error);
+      });
+  });
+}
+
+

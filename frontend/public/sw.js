@@ -1,16 +1,20 @@
-// Nsemfoa News - Service Worker v3.1 (Production Hardened)
-const CACHE_NAME = "nsemfoa-news-v3.1";
+// Nsemfoa News - Service Worker v3.2 (Dual-PWA Production Hardened)
+const CACHE_NAME = "nsemfoa-news-v3.2";
 const APP_SHELL_URL = "/index.html";
+
+// Workbox precache manifest injection point
+const wbManifest = (typeof self !== "undefined" && self.__WB_MANIFEST) || [];
 
 const PRECACHE_ASSETS = [
   "/",
   "/index.html",
-  "/manifest.json",
-  "/manifest.webmanifest",
   "/favicon.ico",
   "/favicon.svg",
   "/app-logo.png",
   "/icons/icon-192x192.png",
+  "/icons/icon-512x512.png",
+  "/icons/admin-192x192.png",
+  "/icons/admin-512x512.png",
   "/icons/shortcut-home.png",
   "/icons/shortcut-home-96x96.png",
   "/icons/shortcut-projects.png",
@@ -70,6 +74,22 @@ self.addEventListener("fetch", (event) => {
     url.pathname.startsWith("/api/internal") ||
     url.pathname.includes("/auth/")
   ) {
+    return;
+  }
+
+  // D. Dual-PWA Manifests: NEVER serve cached manifests; always fetch fresh from network
+  if (
+    url.pathname === "/manifest.json" ||
+    url.pathname === "/admin-manifest.json" ||
+    url.pathname === "/manifest.webmanifest" ||
+    url.pathname.endsWith("manifest.json")
+  ) {
+    event.respondWith(
+      fetch(request, { cache: "no-store" }).catch(() => {
+        // If offline, attempt direct cache match
+        return caches.match(request);
+      })
+    );
     return;
   }
 

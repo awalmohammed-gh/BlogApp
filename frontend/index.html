@@ -10,8 +10,21 @@
     <link rel="shortcut icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
     
-    <!-- PWA Web App Manifest & App Capabilities -->
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- Dual PWA Web App Manifests & App Capabilities -->
+    <link rel="manifest" id="app-manifest" href="/manifest.json" />
+    <script>
+      (function() {
+        try {
+          var p = window.location.pathname || '';
+          if (p.indexOf('/admin') === 0) {
+            var m = document.getElementById('app-manifest');
+            if (m) m.href = '/admin-manifest.json';
+            var title = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+            if (title) title.content = 'Admin';
+          }
+        } catch (_) {}
+      })();
+    </script>
     <meta name="theme-color" content="#0B1B3A" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0B1B3A" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
