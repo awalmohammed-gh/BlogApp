@@ -434,11 +434,15 @@ export const Login = () => {
 
           {viewState === "login" && (
             <>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold uppercase tracking-wider mb-3">
+                <ShieldCheck size={12} />
+                <span>Admin Portal</span>
+              </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Welcome Back
+                Admin Sign In
               </h1>
               <p className="mt-2 text-sm text-slate-400">
-                Sign in to manage the Nsemfoa News newsroom.
+                This login is strictly for Nsemfoa News administrators.
               </p>
             </>
           )}
@@ -835,14 +839,10 @@ export const Login = () => {
             </form>
           )}
 
-          {/* Security Notice Footer */}
-          <div className="mt-6 pt-5 border-t border-slate-800/80 flex items-center justify-center gap-2 text-[11px] text-slate-500">
-            <ShieldCheck size={14} className="text-emerald-500 shrink-0" />
-            <span>
-              {isInitialized
-                ? "Protected by Single-Admin Security & HTTP-only JWT session"
-                : "Protected by 6-Digit Brevo SMTP OTP Verification"}
-            </span>
+          {/* Admin Notice Footer */}
+          <div className="mt-6 pt-5 border-t border-slate-800/80 flex items-center justify-center gap-2 text-[11px] text-slate-400">
+            <ShieldCheck size={14} className="text-red-400 shrink-0" />
+            <span>This login is strictly for authorized administrators.</span>
           </div>
         </div>
 
