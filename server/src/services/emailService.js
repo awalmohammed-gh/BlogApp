@@ -32,7 +32,8 @@ export const sendEmail = async ({ to, subject, text, html }) => {
       return { status: "email_failed", error: "The email provider did not accept this message." };
     }
     return { status: "email_sent", messageId: result.messageId };
-  } catch {
+  } catch (err) {
+    console.error(`[Email Error] Nodemailer / Brevo SMTP failed: ${err?.message || err}`);
     return { status: "email_failed", error: "Email submission failed. Check the server email configuration and retry." };
   } finally { transport.close(); }
 };
